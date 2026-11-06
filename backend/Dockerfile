@@ -3,7 +3,7 @@
 FROM node:22-slim
 
 # git: every task runs in a git worktree. Agents run shell commands, so add what your projects need (python3, build-essential...).
-RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates ffmpeg && rm -rf /var/lib/apt/lists/*
 
 # Optional preview screenshots (adds ~400 MB): docker build --build-arg PREVIEWS=1 .
 ARG PREVIEWS=0

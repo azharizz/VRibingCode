@@ -112,3 +112,9 @@ Real voices may rank differently.
 Boards `GET/PUT /boards?scene=`, notes `/notes`, files `/projects/:id/tree` and `/file`, `GET /tasks/:id/diff`,
 `POST /agents/:id/chat`, `/suggestions`, and clickable previews `/preview/sessions`. All need `LOFT_TOKEN` when set.
 Clickable previews need Playwright: build with `--build-arg PREVIEWS=1`.
+
+## 360 video
+
+`POST /cinema {url}` downloads a public video, converts it to H.264 with ffmpeg, and serves it at `/cinema/<id>/video.mp4`. It needs `ffmpeg` (in the Docker image) and disk space: 1.5 GB limit per download, last 3 videos kept in `data/cinema`. Those video URLs skip the token, because a video player cannot send one. The long random id is the permission.
+
+Only real video files work. YouTube and similar sites stream protected data with no file, so they stay on the flat Browser board.

@@ -492,6 +492,8 @@ public class LoftDesk : MonoBehaviour
             case "selectNext":
                 SelectNext();
                 return Ok(selectedAgentId == null ? "No animals to select." : $"Selected {AgentName(selectedAgentId)}.");
+            case "watch":
+                return LoftPanels.WatchCurrent() ? Ok("Getting the video ready.") : Fail("Open a page with a video first. Sites like YouTube can't be watched in VR here.");
             case "browse":
                 if (S("url") == null) return Fail("What should I open?");
                 LoftPanels.OpenWeb(S("url"));

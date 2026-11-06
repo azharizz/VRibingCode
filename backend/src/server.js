@@ -27,6 +27,7 @@
 //   POST /party {on}              -> party mode on/off for every connected headset
 //   GET /projects · POST /projects {name,path,dev?,setup?,url?,kind?,init?} (register a repo)
 //   POST /projects/new {name, template: empty|static} · DELETE /projects/:id (unregister)
+//   POST /cinema {url} -> prepare a video for VR · GET /cinema/:id -> progress · GET /cinema/:id/video.mp4
 //   GET /previews/<task>-desktop.png|-mobile.png -> screenshots of a task in review
 // Goals/tasks take projectId. Every task runs in its own git worktree; approve =
 // squash-merge into the project's main branch (agents never push).
@@ -47,6 +48,7 @@ import { createVoice } from "./voice.js";
 import { blankLoft, loadLoft, saveLoft, validateLoft } from "./loftStore.js";
 import { createOrchestrator, HttpError } from "./orchestrator.js";
 import { readFile, taskDiff, tree } from "./files.js";
+import { createCinema } from "./cinema.js";
 import { createPreviewSessions } from "./preview-sessions.js";
 import { createPreviews } from "./previews.js";
 import { createProjects } from "./projects.js";
@@ -89,6 +91,7 @@ await projects.load();
 const previews = createPreviews({ dir: PREVIEW_DIR });
 const stateFile = jsonFile(path.join(DATA, "state.json"), null); // team, tasks, chat memory, suggestions survive restarts
 const sessions = createPreviewSessions({ browser: () => previews.browser() });
+const cinema = createCinema({ dir: path.join(DATA, "cinema") });
 for (const sig of ["SIGINT", "SIGTERM"]) {
   process.on(sig, () => {
     try {
@@ -184,6 +187,9 @@ async function route(req, res) {
 
   if (m === "OPTIONS") return send(res, 204, {});
   if (m === "GET" && p === "/health") return send(res, 200, { ok: true, workspace: WORKSPACE });
+  // The video player can't send a token: the long random id in the path is the permission.
+  const clip = m === "GET" && p.match(/^\/cinema\/([0-9a-f]{32})\/video\.mp4$/);
+  if (clip) return cinema.stream(clip[1], req, res, CORS);
   if (!authorized(req)) return send(res, 401, { ok: false, error: "missing or wrong LOFT_TOKEN" });
 
   if (m === "POST" && p === "/voice") {
@@ -263,6 +269,8 @@ async function route(req, res) {
     else throw new HttpError(400, "send taskId or url");
     return send(res, 201, { ok: true, ...(await sessions.open({ ...target, width: b.width, height: b.height })) });
   }
+  if (m === "POST" && p === "/cinema") return send(res, 202, await cinema.prepare((await readBody(req)).url));
+  if (m === "GET" && (g = p.match(/^\/cinema\/([0-9a-f]{32})$/))) return send(res, 200, cinema.status(g[1]));
   if (m === "GET" && p === "/preview/sessions") return send(res, 200, { sessions: sessions.list() });
   if (m === "GET" && (g = p.match(/^\/preview\/sessions\/(\w+)$/))) return send(res, 200, await sessions.info(g[1]));
   if (m === "GET" && (g = p.match(/^\/preview\/sessions\/(\w+)\/frame$/))) {

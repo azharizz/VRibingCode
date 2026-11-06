@@ -165,7 +165,23 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
 
   async function info(id) {
     const { page } = need(id);
-    return { url: page.url(), title: await page.title().catch(() => "") };
+    // Real files only: a blob: stream (YouTube and most big sites) has no address to fetch.
+    const videos = await page
+      .evaluate(() => {
+        const list = [];
+        for (const v of document.querySelectorAll("video")) {
+          list.push(v.currentSrc || v.src);
+          for (const s of v.querySelectorAll("source")) list.push(s.src);
+        }
+        return list;
+      })
+      .catch(() => []);
+    const direct = /\.(mp4|m4v|webm|mov|ogv)(\?|$)/i.test(page.url()) ? [page.url()] : [];
+    return {
+      url: page.url(),
+      title: await page.title().catch(() => ""),
+      videos: [...new Set([...direct, ...videos])].filter((v) => /^https?:/i.test(v)).slice(0, 5),
+    };
   }
 
   async function input(id, e = {}) {

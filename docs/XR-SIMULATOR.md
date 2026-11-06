@@ -23,6 +23,8 @@ Also found here: nothing moved the camera with the headset, so the view was froz
 
 Keys only reach the Simulator after clicking inside its view. W A S D walking and arrow-key looking are verified.
 
-Not verified yet: trigger, A, B, teleport, board drag and resize through the VR path. Mouse clicks do not act as the trigger.
+Also verified: the trigger (T) clicks web pages, and B (N) leaves 360 video.
+
+Not verified yet: A sending a card, teleport, board drag and resize, pressing the Watch button with the trigger (the voice path uses the same code), and video sound (played, but nobody has listened yet). Mouse clicks do not act as the trigger.
 
 Careful: "Enable hand tracking" turns on the webcam. Leave it off unless you want that.

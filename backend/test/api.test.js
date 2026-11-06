@@ -185,3 +185,11 @@ test("browser: words become addresses, and public pages cannot reach this machin
   assert.equal(await isPrivate(new URL("https://example.com"), { lookup: async () => [{ address: "93.184.216.34" }] }), false);
   assert.equal(await isPrivate(new URL("https://evil.test"), { lookup: async () => [{ address: "127.0.0.1" }] }), true);
 });
+
+test("cinema refuses private addresses, and video files need the long random id", async () => {
+  for (const url of ["http://127.0.0.1:4101/state", "http://192.168.1.5/a.mp4", "file:///etc/passwd", "http://169.254.169.254/x"])
+    assert.ok([400, 403].includes((await call("POST", "/cinema", { url })).status), url);
+  assert.equal((await call("GET", "/cinema/nope")).status, 404);
+  assert.equal((await call("GET", `/cinema/${"a".repeat(32)}`)).status, 404);
+  assert.equal((await call("GET", `/cinema/${"a".repeat(32)}/video.mp4`)).status, 404);
+});

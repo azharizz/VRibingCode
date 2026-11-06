@@ -28,7 +28,7 @@ public class LoftPanels : MonoBehaviour
 
     string scene, signature = "", reviewId, shownProject;
     float tick, saveAt = -1f, lastFrame, lastInfo;
-    bool loading, layoutLoaded;
+    bool loading, layoutLoaded, preparing;
     float retryLoadAt = -1f;
     int nextId = 1;
 
@@ -486,6 +486,8 @@ public class LoftPanels : MonoBehaviour
             var board = b;
             client.Then(client.PreviewInfo(board.previewId), res =>
             {
+                var video = (res?["videos"] as JArray)?.FirstOrDefault()?.ToString();
+                if (board != null && video != board.videoUrl) { board.videoUrl = video; board.Refresh(); }
                 var url = (string)res?["url"];
                 if (board == null || string.IsNullOrEmpty(url) || url == board.previewUrl) return;
                 board.previewUrl = url;
@@ -493,6 +495,46 @@ public class LoftPanels : MonoBehaviour
                 if (board.address != null) board.address.text = url;
             });
         }
+    }
+
+    // ---- watch in VR ----
+    public static bool WatchCurrent()
+    {
+        var b = Instance?.boards.FirstOrDefault(x => x.type == "preview" && !string.IsNullOrEmpty(x.videoUrl));
+        if (b == null) return false;
+        Watch(b);
+        return true;
+    }
+
+    public static void Watch(LoftBoard b)
+    {
+        var p = Instance; if (p == null || string.IsNullOrEmpty(b.videoUrl) || p.preparing) return;
+        p.preparing = true;
+        p.client.Then(p.client.PrepareVideo(b.videoUrl), res => p.StartCoroutine(p.WaitForVideo(b, res)));
+    }
+
+    IEnumerator WaitForVideo(LoftBoard b, JObject job)
+    {
+        void Say(string s) { if (b != null && b.watchLabel != null) b.watchLabel.text = s; }
+        var id = (string)job?["id"];
+        while (job != null && (string)job["status"] != "ready" && (string)job["status"] != "error")
+        {
+            Say($"Preparing {Mathf.RoundToInt(((float?)job["progress"] ?? 0f) * 100f)}%");
+            yield return new WaitForSecondsRealtime(1f);
+            JObject next = null; bool done = false;
+            client.Then(client.VideoStatus(id), r => { next = r; done = true; });
+            while (!done) yield return null;
+            job = next;
+        }
+        preparing = false;
+        if ((string)job?["status"] != "ready")
+        {
+            Say("Could not prepare it");
+            desk?.Note("Video failed: " + ((string)job?["error"] ?? "the backend did not answer"));
+            yield break;
+        }
+        Say("Watch in VR");
+        LoftInteraction.Current?.cinema.Enter(client.serverUrl.TrimEnd('/') + (string)job["video"]);
     }
 
     public static void PreviewClick(LoftBoard b, Vector2 uv)

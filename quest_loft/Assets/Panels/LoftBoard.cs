@@ -24,7 +24,8 @@ namespace VirtualLoft.Panels
         public string previewId, previewUrl, previewError, startUrl;
         public int frameBytes;                 // size of the frame on screen: skip decoding an unchanged one
         public RawImage frame;                 // live preview image
-        public TMP_Text address;
+        public TMP_Text address, watchLabel;
+        public string videoUrl;                // a real video file on this page: can open in 360
         public Texture2D previewTex;           // owned here: survives Refresh, freed by LoftPanels
         public Action<Vector3> onPointerUp = _ => { };
 

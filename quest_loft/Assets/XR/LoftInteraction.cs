@@ -38,6 +38,8 @@ namespace VirtualLoft.XR
         readonly XrInput xr = new XrInput();
         readonly DesktopInput desktop = new DesktopInput();
         LoftInput input;
+        public int pointMask = ~0;              // the cinema narrows this: nothing invisible can be hit
+        public LoftCinema cinema;
         public static LoftInteraction Current { get; private set; }
         public bool TryRay(out Ray r) { r = default; if (input == null || !input.hasRay) return false; r = new Ray(input.rayOrigin, input.rayDir); return true; }
         GameObject cursor, ringHover, ringSel;
@@ -50,7 +52,23 @@ namespace VirtualLoft.XR
         string talkAgentId;
         int reqId;
 
-        void Awake() { Current = this; Wire(); EnsureBuilt(); if (GetComponent<LoftHead>() == null) gameObject.AddComponent<LoftHead>(); }
+        void Awake()
+        {
+            Current = this; Wire(); EnsureBuilt();
+            if (GetComponent<LoftHead>() == null) gameObject.AddComponent<LoftHead>();
+            cinema = GetComponent<LoftCinema>();
+            if (cinema == null) cinema = gameObject.AddComponent<LoftCinema>();
+            cinema.world = world; cinema.desk = desk; cinema.interaction = this;
+        }
+
+        // What stays usable while the world is hidden.
+        public void KeepVisible(System.Action<Transform> show)
+        {
+            if (card != null) show(card.Root);
+            if (wrist != null) show(wrist.Root);
+            if (cursor != null) show(cursor.transform);
+            if (laser != null) show(laser.transform);
+        }
 
         void Wire()
         {
@@ -115,7 +133,7 @@ namespace VirtualLoft.XR
             wrist.Track(world.cam, input.hasLeftHand, input.leftPos, input.leftRot, xrOn);
             if (input.cancelDown) Cancel();
 
-            move.Tick(input, world, comfort, dt);
+            if (cinema == null || !cinema.Active) move.Tick(input, world, comfort, dt);
             Point(dt);
             Talk();
             ShowNextSuggestion();
@@ -126,6 +144,7 @@ namespace VirtualLoft.XR
         public void Cancel()
         {
             if (entry != null && entry.Active) { entry.Cancel(); return; }
+            if (cinema != null && cinema.Active && !card.Visible) { cinema.Exit(); return; }
             if (move.Aiming) { move.AbortAim(); return; }
             if (voice.Recording) { voice.Cancel(); Talking = false; talkConsumed = true; card.Hide(); return; }
             if (card.Visible) { reqId++; card.PressCancel(); return; } // also drops an in-flight request
@@ -139,7 +158,7 @@ namespace VirtualLoft.XR
             RaycastHit hit = default;
             bool hitSomething = false;
             if (input.hasRay && !BlockedByGui())
-                hitSomething = Physics.Raycast(input.rayOrigin, input.rayDir, out hit, 30f, ~0, QueryTriggerInteraction.Ignore);
+                hitSomething = Physics.Raycast(input.rayOrigin, input.rayDir, out hit, 30f, pointMask, QueryTriggerInteraction.Ignore);
 
             LoftButton newBtn = null; string newAgent = null; Renderer newPad = null;
             if (hitSomething)

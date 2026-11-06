@@ -21,6 +21,9 @@ public partial class LoftClient
     public Task<JObject> GetFile(string project, string path) => Send(HttpMethod.Get, $"/projects/{E(project)}/file?path={E(path)}", null, true);
     public Task<JObject> GetDiff(string taskId) => Send(HttpMethod.Get, $"/tasks/{E(taskId)}/diff", null, true);
 
+    public Task<JObject> PrepareVideo(string url) => Send(HttpMethod.Post, "/cinema", new JObject { ["url"] = url }, true);
+    public Task<JObject> VideoStatus(string id) => Send(HttpMethod.Get, $"/cinema/{E(id)}", null, true);
+
     public Task<JObject> OpenPreview(string taskId) => Send(HttpMethod.Post, "/preview/sessions", new JObject { ["taskId"] = taskId, ["width"] = 1360, ["height"] = 800 }, true);
     public Task<JObject> OpenWeb(string url) => Send(HttpMethod.Post, "/preview/sessions", new JObject { ["url"] = url, ["width"] = 1360, ["height"] = 800 }, true);
     public Task<JObject> PreviewInfo(string id) => Send(HttpMethod.Get, $"/preview/sessions/{E(id)}", null, true);

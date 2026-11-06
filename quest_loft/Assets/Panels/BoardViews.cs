@@ -369,6 +369,13 @@ namespace VirtualLoft.Panels
                 b.frame.texture = b.previewTex;
                 b.frame.color = new Color(1, 1, 1, b.previewTex != null ? 1f : 0f); // shows once the first frame lands
                 b.ClickAt(x + 6f, py + 6f, iw - 12f, ph - 12f, uv => LoftPanels.PreviewClick(b, uv));
+                if (!string.IsNullOrEmpty(b.videoUrl))
+                {
+                    float bw = 760f, bh = 170f, bx = x + iw - bw - 34f, by = py + ph - bh - 34f;
+                    PanelKit.Box(c, bx, by, bw, bh, PT.Info, -1f, "Watch");
+                    b.watchLabel = PanelKit.Text(c, "Watch in VR", bx, by, bw, bh, PT.H2, PT.Ink, true, TextAlignmentOptions.Center);
+                    b.Click(bx, by, bw, bh, () => LoftPanels.Watch(b));
+                }
                 return;
             }
             bool failed = !string.IsNullOrEmpty(b.previewError);
