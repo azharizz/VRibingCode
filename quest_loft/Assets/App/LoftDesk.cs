@@ -277,8 +277,8 @@ public class LoftDesk : MonoBehaviour
             bool auto = autoCreateDraft;
             autoCreateDraft = false;
             if (formDraft == null) { if (auto) Note("Could not write that role. Try again."); return; }
-            // Voice-created agents only skip the review when the role cannot change files.
-            if (auto && !FormTools().Any(writeTools.Contains)) SpawnFromForm();
+            // Voice already confirmed this on the card; anything an agent changes still waits for review.
+            if (auto) SpawnFromForm();
             else Note($"Role ready: {(string)formDraft["title"]} — open the menu > KEYBOARD to review, then CREATE");
         });
     }
@@ -492,6 +492,10 @@ public class LoftDesk : MonoBehaviour
             case "selectNext":
                 SelectNext();
                 return Ok(selectedAgentId == null ? "No animals to select." : $"Selected {AgentName(selectedAgentId)}.");
+            case "browse":
+                if (S("url") == null) return Fail("What should I open?");
+                LoftPanels.OpenWeb(S("url"));
+                return Ok($"Opening {S("url")}.");
             case "chat":
             {
                 string id = S("agentId") ?? selectedAgentId;
@@ -536,6 +540,14 @@ public class LoftDesk : MonoBehaviour
         {
             _ = client.Spawn(model, roleId, null, name, skin);
             return Ok($"Adding {name ?? roleId} ({skin}).");
+        }
+        if (intent["role"] is JObject written && !string.IsNullOrWhiteSpace((string)written["title"]))
+        {
+            // The backend already wrote this role and the CEO confirmed it on the card: create it now.
+            var role = new JObject { ["title"] = written["title"], ["instructions"] = written["instructions"], ["tools"] = written["tools"] };
+            string title = (string)written["title"];
+            client.Then(client.Spawn(model, null, role, name, skin), res => Note(res == null ? $"Could not add {title}. Try again." : $"{title} joined the team."));
+            return Ok($"Adding {name ?? title}.");
         }
         if (desc != null || roleId != null)
         {

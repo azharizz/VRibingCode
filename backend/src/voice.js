@@ -8,8 +8,8 @@ import { WRITE_TOOLS } from "./tools.js";
 
 export const SCENES = ["beach", "scenery", "city", "galaxy", "party", "loft", "meadow", "night"];
 const RISKY = new Set(["approve", "reject", "remove"]);
-const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "none"]); // needsConfirm false
-export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "selectNext", "chat", "board", "none"];
+const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "browse", "none"]); // needsConfirm false
+export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "browse", "selectNext", "chat", "board", "none"];
 export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "files", "diff"];
 
 // Spoken code words -> characters ("slash health" -> "/health", "index dot js" -> "index.js").
@@ -127,6 +127,11 @@ export function normalizeIntent(raw, ctx) {
       if (!text) return none("What do you want to say?");
       return a ? { action, agentId: a.id, text } : none("Who are you talking to? Point at an agent or say its name.");
     }
+    case "browse": {
+      const url = clip(o.url ?? o.query, 500);
+      if (!url) return none("What should I open?");
+      return { action: "browse", url };
+    }
     case "board": {
       const op = norm(o.op);
       const type = norm(o.type ?? o.boardType);
@@ -157,6 +162,7 @@ export function summarize(i, ctx) {
     project: () => `Switch to project ${ctx.projects.find((p) => p.id === i.projectId)?.name ?? i.projectId}`,
     selectNext: () => "Select the next agent",
     chat: () => `Say to ${name(i.agentId)}: ${q(i.text)}`,
+    browse: () => `Open ${i.url}`,
     board: () => (i.type === "all" ? "Close all boards" : `${i.op === "open" ? "Open" : "Close"} the ${i.type} board`),
     none: () => i.reply,
   };
@@ -184,6 +190,7 @@ export function buildPrompt(ctx, text, scene) {
     `- remove {agentId} · stop {agentId?} (no agentId = stop everyone) · approve · reject {feedback?} (about the review queue)\n` +
     `- chat {agentId,text}: the CEO just talks to an agent (greeting, question, small talk, "how is it going"). Not an instruction to do work. Keep their words.\n` +
     `- board {op:"open"|"close",type}: show or hide a panel in the room. type is one of ${BOARD_TYPES.join(", ")} (close also takes "all"). Hints: tasks/kanban=kanban, "what's waiting"=review, activity=log, website/screen=preview, notes, folders=files, changes=diff.\n` +
+    `- browse {url}: open a website, video or web search in the room's browser ("open google.com", "search for VR videos", "buka youtube"). url is the address, or the search words. This is the CEO browsing, not work for an agent.\n` +
     `- scene {sceneId} · party {on:true|false} · project {projectId} · selectNext (next agent)\n` +
     `- none {reply}: not a command or unclear; reply briefly in the CEO's language\n` +
     `Rules: keep task titles/goals as the CEO's own words, in English if mixed. Fix spoken code words: "slash health" means "/health", "dot js" means ".js". ` +

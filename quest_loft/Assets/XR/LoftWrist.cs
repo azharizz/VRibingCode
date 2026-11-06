@@ -24,6 +24,7 @@ namespace VirtualLoft.XR
         public Page page = Page.Main;
         public bool IsOpen { get; private set; }
         public bool pinned;                      // opened by X/M: stays until toggled/B
+        public bool suppressed;                  // the CEO is talking: stay closed
 
         public const float W = 0.42f;
         const float Bh = 0.052f, Gap = 0.008f, Txt = 0.022f;
@@ -73,7 +74,7 @@ namespace VirtualLoft.XR
             Vector3 anchor = hasHand && xrDevice
                 ? handPos + Vector3.up * 0.2f
                 : head.position + head.forward * 0.8f - head.right * 0.22f - head.up * 0.05f;
-            if (xrDevice && hasHand && !pinned)
+            if (xrDevice && hasHand && !pinned && !suppressed)
             {
                 var to = anchor - head.position;
                 float angle = Vector3.Angle(head.forward, to);

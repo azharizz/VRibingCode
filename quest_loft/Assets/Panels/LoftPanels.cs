@@ -27,7 +27,7 @@ public class LoftPanels : MonoBehaviour
     public readonly List<LoftBoard> boards = new List<LoftBoard>();
 
     string scene, signature = "", reviewId, shownProject;
-    float tick, saveAt = -1f, lastFrame;
+    float tick, saveAt = -1f, lastFrame, lastInfo;
     bool loading, layoutLoaded;
     float retryLoadAt = -1f;
     int nextId = 1;
@@ -154,7 +154,7 @@ public class LoftPanels : MonoBehaviour
         foreach (var b in boards)
         {
             var p = b.transform.position; var r = b.transform.eulerAngles; float s = b.transform.localScale.x;
-            list.Add(new JObject { ["id"] = b.id, ["type"] = b.type, ["pos"] = new JArray(p.x, p.y, p.z), ["rot"] = new JArray(r.x, r.y, r.z), ["size"] = new JArray(s, s, 1f) });
+            list.Add(new JObject { ["id"] = b.id, ["type"] = b.type, ["pos"] = new JArray(p.x, p.y, p.z), ["rot"] = new JArray(r.x, r.y, r.z), ["size"] = new JArray(s, s, 1f), ["args"] = string.IsNullOrEmpty(b.startUrl) ? new JObject() : new JObject { ["url"] = b.startUrl } });
         }
         _ = client.SaveBoards(scene, list);
     }
@@ -181,6 +181,7 @@ public class LoftPanels : MonoBehaviour
                 b.transform.rotation = Quaternion.Euler(V(o["rot"], Vector3.zero));
                 float s = o["size"] is JArray a && a.Count > 0 ? Mathf.Clamp((float?)a[0] ?? 1f, LoftBoard.MIN_SCALE, LoftBoard.MAX_SCALE) : 1f;
                 b.transform.localScale = Vector3.one * s;
+                b.startUrl = (string)(o["args"] as JObject)?["url"];
                 if (type == "preview") StartPreview(b);
                 if (type == "files") Browse(state.treePath ?? "");
             }
@@ -205,7 +206,8 @@ public class LoftPanels : MonoBehaviour
         tick += Time.unscaledDeltaTime;
         if (tick >= 0.5f) { tick = 0f; Pull(); }
         foreach (var b in boards) if (b.builtVersion != state.version && InView(b)) b.Refresh();
-        if (Time.unscaledTime - lastFrame >= 0.5f) { lastFrame = Time.unscaledTime; PullFrames(); }
+        if (Time.unscaledTime - lastFrame >= 0.08f) { lastFrame = Time.unscaledTime; PullFrames(); } // one request in flight per board
+        if (Time.unscaledTime - lastInfo >= 1f) { lastInfo = Time.unscaledTime; PullAddresses(); }
     }
 
     // LoftDesk state -> PanelState, bumping the version only when something changed.
@@ -381,20 +383,65 @@ public class LoftPanels : MonoBehaviour
         });
     }
 
-    // ---- clickable preview ----
+    // ---- browser ----
+    // A saved address first, then the task in review, else the board waits for an address.
     void StartPreview(LoftBoard b)
     {
-        string taskId = reviewId;
-        if (taskId == null) { b.previewError = null; b.Refresh(); return; }
-        client.Then(client.OpenPreview(taskId), res =>
+        if (!string.IsNullOrEmpty(b.startUrl)) { Connect(b, client.OpenWeb(b.startUrl), b.startUrl); return; }
+        if (reviewId == null) { b.previewError = null; b.Refresh(); return; }
+        Connect(b, client.OpenPreview(reviewId), "Task preview");
+    }
+
+    void Connect(LoftBoard b, System.Threading.Tasks.Task<JObject> open, string label)
+    {
+        client.Then(open, res =>
         {
             if (b == null) return;
+            ClosePreview(b);
             b.previewId = (string)res?["id"];
-            b.previewUrl = "Task preview";
-            b.previewError = b.previewId == null ? "This project has no web page to open." : null;
-            if (b.previewId != null) { var (w, h) = ((float?)res["width"] ?? 1280f, (float?)res["height"] ?? 800f); previewSize[b] = new Vector2(w, h); }
+            b.previewUrl = label;
+            b.previewError = b.previewId == null ? "The page did not open. Check the address, and that the backend has Chromium." : null;
+            if (b.previewId != null) previewSize[b] = new Vector2((float?)res["width"] ?? 1360f, (float?)res["height"] ?? 800f);
             b.Refresh();
         });
+    }
+
+    // Voice "open youtube.com": reuse an open browser, else open one.
+    public static void OpenWeb(string url)
+    {
+        var p = Instance; if (p == null || string.IsNullOrWhiteSpace(url)) return;
+        var b = p.boards.FirstOrDefault(x => x.type == "preview");
+        if (b != null && !string.IsNullOrEmpty(b.previewId)) { Go(b, url); return; }
+        if (b == null)
+        {
+            if (p.boards.Count(x => x.type == "preview") >= MAX_PREVIEWS) return;
+            b = p.Spawn($"b{p.nextId++}_{DateTime.Now.Ticks % 100000}", "preview");
+            p.Place(b);
+        }
+        b.startUrl = url;
+        p.StartPreview(b);
+        p.Save();
+    }
+
+    static void Go(LoftBoard b, string url)
+    {
+        var p = Instance; if (p == null) return;
+        b.startUrl = url;
+        if (string.IsNullOrEmpty(b.previewId)) { p.StartPreview(b); return; }
+        _ = p.client.PreviewInput(b.previewId, new JObject { ["type"] = "goto", ["url"] = url });
+        SaveSoon();
+    }
+
+    public static void PreviewGo(LoftBoard b)
+    {
+        var entry = FindFirstObjectByType<LoftTextEntry>();
+        if (entry != null) entry.Request("Address or search", "", t => { if (!string.IsNullOrWhiteSpace(t)) Go(b, t.Trim()); }, out _);
+    }
+
+    public static void PreviewNav(LoftBoard b, string type)
+    {
+        var p = Instance; if (p == null || string.IsNullOrEmpty(b.previewId)) return;
+        _ = p.client.PreviewInput(b.previewId, new JObject { ["type"] = type });
     }
 
     readonly Dictionary<LoftBoard, Vector2> previewSize = new Dictionary<LoftBoard, Vector2>();
@@ -422,9 +469,28 @@ public class LoftPanels : MonoBehaviour
                 fetching.Remove(board);
                 if (board == null || board.frame == null || bytes == null) return;
                 if (board.previewTex == null) board.previewTex = new Texture2D(2, 2, TextureFormat.RGB24, false);
+                if (bytes.Length == board.frameBytes) return; // same picture: skip the decode
+                board.frameBytes = bytes.Length;
                 if (!board.previewTex.LoadImage(bytes)) return;
                 board.frame.texture = board.previewTex;
                 board.frame.color = Color.white;
+            });
+        }
+    }
+
+    void PullAddresses()
+    {
+        foreach (var b in boards)
+        {
+            if (b.type != "preview" || string.IsNullOrEmpty(b.previewId) || !InView(b)) continue;
+            var board = b;
+            client.Then(client.PreviewInfo(board.previewId), res =>
+            {
+                var url = (string)res?["url"];
+                if (board == null || string.IsNullOrEmpty(url) || url == board.previewUrl) return;
+                board.previewUrl = url;
+                if (url.StartsWith("http") && !url.Contains("127.0.0.1")) { board.startUrl = url; SaveSoon(); }
+                if (board.address != null) board.address.text = url;
             });
         }
     }
@@ -448,6 +514,11 @@ public class LoftPanels : MonoBehaviour
     {
         var p = Instance; if (p == null || string.IsNullOrEmpty(b.previewId)) return;
         var entry = FindFirstObjectByType<LoftTextEntry>();
-        if (entry != null) entry.Request("Type into the page", "", t => { if (!string.IsNullOrEmpty(t)) _ = p.client.PreviewInput(b.previewId, new JObject { ["type"] = "text", ["text"] = t }); }, out _);
+        if (entry != null) entry.Request("Type into the page", "", t =>
+        {
+            if (string.IsNullOrEmpty(t)) return;
+            _ = p.client.PreviewInput(b.previewId, new JObject { ["type"] = "text", ["text"] = t });
+            PreviewKey(b, "Enter");
+        }, out _);
     }
 }

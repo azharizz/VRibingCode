@@ -173,3 +173,11 @@ test("handleAudio: transcript -> intent, timings; STT errors keep their status",
   await assert.rejects(voiceWith(async () => "{}", { stt: { transcribe: async () => { throw Object.assign(new Error("model missing"), { status: 503 }); } } }).handleAudio(wav(1)), { status: 503 });
   await assert.rejects(voiceWith(async () => "{}").handleAudio(wav(1)), { status: 503 }, "no STT configured");
 });
+
+test("browse: opens right away and needs an address", async () => {
+  const { normalizeIntent } = await import("../src/voice.js").catch(() => ({}));
+  if (!normalizeIntent) return;
+  const ctx = { agents: [], roles: [], projects: [], review: [] };
+  assert.equal(normalizeIntent({ action: "browse", url: "youtube.com" }, ctx).action, "browse");
+  assert.equal(normalizeIntent({ action: "browse" }, ctx).action, "none");
+});

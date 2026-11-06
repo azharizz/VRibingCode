@@ -264,6 +264,7 @@ async function route(req, res) {
     return send(res, 201, { ok: true, ...(await sessions.open({ ...target, width: b.width, height: b.height })) });
   }
   if (m === "GET" && p === "/preview/sessions") return send(res, 200, { sessions: sessions.list() });
+  if (m === "GET" && (g = p.match(/^\/preview\/sessions\/(\w+)$/))) return send(res, 200, await sessions.info(g[1]));
   if (m === "GET" && (g = p.match(/^\/preview\/sessions\/(\w+)\/frame$/))) {
     const jpg = await sessions.frame(g[1]);
     res.writeHead(200, { "Content-Type": "image/jpeg", "Cache-Control": "no-store", ...CORS });

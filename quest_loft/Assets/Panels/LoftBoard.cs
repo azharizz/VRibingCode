@@ -21,8 +21,10 @@ namespace VirtualLoft.Panels
         public PanelState state;
         public int builtVersion = -1;
         public int page, sel, scroll;          // per-board view state (review queue, file, scroll line)
-        public string previewId, previewUrl, previewError;
+        public string previewId, previewUrl, previewError, startUrl;
+        public int frameBytes;                 // size of the frame on screen: skip decoding an unchanged one
         public RawImage frame;                 // live preview image
+        public TMP_Text address;
         public Texture2D previewTex;           // owned here: survives Refresh, freed by LoftPanels
         public Action<Vector3> onPointerUp = _ => { };
 
@@ -49,7 +51,7 @@ namespace VirtualLoft.Panels
                 case "notes": return (1900f, 1420f, "Notes", PT.Done);
                 case "files": return (2400f, 1500f, "Files", PT.Todo);
                 case "diff": return (2500f, 1560f, "Changes", PT.Add);
-                default: return (2300f, 1600f, "Live preview", PT.Info);
+                default: return (2300f, 1600f, "Browser", PT.Info);
             }
         }
 

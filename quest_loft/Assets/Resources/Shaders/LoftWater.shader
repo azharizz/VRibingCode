@@ -25,6 +25,7 @@ Shader "Loft/World/Water"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile_fog
             #include "UnityCG.cginc"
 
@@ -32,16 +33,21 @@ Shader "Loft/World/Water"
             float4 _SunDir;
             float _Amp, _Speed, _Glint, _Foam, _Exposure;
 
-            struct v2f { float4 pos : SV_POSITION; float3 wp : TEXCOORD0; float hgt : TEXCOORD1; UNITY_FOG_COORDS(2) };
+            struct vin { float4 vertex : POSITION; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct v2f { float4 pos : SV_POSITION; float3 wp : TEXCOORD0; float hgt : TEXCOORD1; UNITY_FOG_COORDS(2) UNITY_VERTEX_OUTPUT_STEREO };
 
             float wave(float2 p, float2 dir, float freq, float spd, float t)
             {
                 return sin(dot(p, dir) * freq + t * spd);
             }
 
-            v2f vert(float4 v : POSITION)
+            v2f vert(vin i)
             {
                 v2f o;
+                UNITY_SETUP_INSTANCE_ID(i);
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                float4 v = i.vertex;
                 float3 wp = mul(unity_ObjectToWorld, v).xyz;
                 float t = _Time.y * _Speed;
                 float d = length(wp.xz - _WorldSpaceCameraPos.xz);

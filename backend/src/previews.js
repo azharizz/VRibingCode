@@ -70,7 +70,7 @@ export function createPreviews({ dir, browserLauncher = null }) {
 
   async function getBrowser() {
     if (!browser) {
-      const launch = browserLauncher ?? (async () => (await import("playwright")).chromium.launch());
+      const launch = browserLauncher ?? (async () => (await import("playwright")).chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] }));
       browser = await launch();
     }
     return browser;

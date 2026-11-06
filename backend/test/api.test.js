@@ -172,3 +172,16 @@ test("preview sessions refuse metadata, file URLs and unknown tasks", async () =
   assert.equal((await call("POST", "/preview/sessions", { taskId: "t404" })).status, 404);
   assert.equal((await (await call("GET", "/preview/sessions")).json()).sessions.length, 0);
 });
+
+test("browser: words become addresses, and public pages cannot reach this machine", async () => {
+  const { toUrl, isPrivate } = await import("../src/preview-sessions.js");
+  assert.equal(toUrl("google.com"), "https://google.com");
+  assert.equal(toUrl("https://example.com/a"), "https://example.com/a");
+  assert.equal(toUrl("localhost:3000"), "http://localhost:3000");
+  assert.match(toUrl("vr videos"), /^https:\/\/duckduckgo\.com\/\?q=vr%20videos$/);
+  const noDns = async () => [];
+  for (const u of ["http://127.0.0.1:4101/agents", "http://localhost:4101", "http://192.168.1.5", "http://10.0.0.1", "http://[::1]:4101", "http://[::ffff:7f00:1]/"])
+    assert.equal(await isPrivate(new URL(u), { lookup: noDns }), true, u);
+  assert.equal(await isPrivate(new URL("https://example.com"), { lookup: async () => [{ address: "93.184.216.34" }] }), false);
+  assert.equal(await isPrivate(new URL("https://evil.test"), { lookup: async () => [{ address: "127.0.0.1" }] }), true);
+});

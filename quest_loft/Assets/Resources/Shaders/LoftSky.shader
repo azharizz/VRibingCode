@@ -30,17 +30,23 @@ Shader "Loft/World/Sky"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #include "UnityCG.cginc"
 
             fixed4 _Zenith, _Mid, _Horizon, _Below, _SunColor, _Neb1, _Neb2;
             float4 _SunDir;
             float _SunSize, _Glow, _Stars, _Neb, _Exposure, _Rot;
 
-            struct v2f { float4 pos : SV_POSITION; float3 dir : TEXCOORD0; };
+            struct vin { float4 vertex : POSITION; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct v2f { float4 pos : SV_POSITION; float3 dir : TEXCOORD0; UNITY_VERTEX_OUTPUT_STEREO };
 
-            v2f vert(float4 v : POSITION)
+            v2f vert(vin i)
             {
                 v2f o;
+                UNITY_SETUP_INSTANCE_ID(i);
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                float4 v = i.vertex;
                 o.pos = UnityObjectToClipPos(v);
                 o.dir = v.xyz;
                 return o;

@@ -118,7 +118,7 @@ public static class LoftVerify
         desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = withDiff });
         var rv = Board("review");
         Check(rv.Contains("2") && rv.Contains("+40") && rv.Contains("Hold to approve"), "REVIEW board shows change size and a hold-to-approve action");
-        Check(Board("preview").Any(t => t.Contains("Nothing to preview") || t.Contains("unavailable")), "PREVIEW board explains itself when no page is open");
+        Check(Board("preview").Any(t => t.Contains("Where to?")), "PREVIEW board explains itself when no page is open");
         Check(Board("diff").Any(t => t.Contains("No changes")) && Board("log").Count > 0 && Board("files").Count > 0 && Board("notes").Any(t => t.Contains("New note")), "every board type builds");
         Check(desk.ReviewTask()?.id == "t1", "approve/reject target = task in review");
 

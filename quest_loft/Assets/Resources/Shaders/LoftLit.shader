@@ -20,6 +20,7 @@ Shader "Loft/World/Lit"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_instancing
             #pragma multi_compile_fog
             #include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
@@ -27,12 +28,15 @@ Shader "Loft/World/Lit"
             fixed4 _Tint, _Emit;
             float _SwayAmp, _SwaySpeed;
 
-            struct appdata { float4 vertex : POSITION; float3 normal : NORMAL; fixed4 color : COLOR; };
-            struct v2f { float4 pos : SV_POSITION; fixed3 col : TEXCOORD0; UNITY_FOG_COORDS(1) };
+            struct appdata { float4 vertex : POSITION; float3 normal : NORMAL; fixed4 color : COLOR; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct v2f { float4 pos : SV_POSITION; fixed3 col : TEXCOORD0; UNITY_FOG_COORDS(1) UNITY_VERTEX_OUTPUT_STEREO };
 
             v2f vert(appdata v)
             {
                 v2f o;
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 float3 wp = mul(unity_ObjectToWorld, v.vertex).xyz;
                 float sw = 1.0 - v.color.a;
                 if (_SwayAmp > 0.0)

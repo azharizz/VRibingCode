@@ -50,7 +50,7 @@ namespace VirtualLoft.XR
         string talkAgentId;
         int reqId;
 
-        void Awake() { Current = this; Wire(); EnsureBuilt(); }
+        void Awake() { Current = this; Wire(); EnsureBuilt(); if (GetComponent<LoftHead>() == null) gameObject.AddComponent<LoftHead>(); }
 
         void Wire()
         {
@@ -107,7 +107,11 @@ namespace VirtualLoft.XR
             bool xrOn = XRSettings.isDeviceActive;
 
             if (input.snap != 0) { comfort?.SnapTurn(input.snap, world.cam.transform); input.Haptic(0.2f, 0.03f); }
-            if (input.wristDown && !entry.Active) { wrist.Toggle(); input.Haptic(0.2f, 0.03f); }
+            // One thing at a time: no menu over the talk card (the Simulator also presses A and X together).
+            bool busy = Talking || input.talkHeld || card.Visible;
+            wrist.suppressed = busy;
+            if (busy && wrist.IsOpen) wrist.SetOpen(false);
+            if (input.wristDown && !entry.Active && !busy) { wrist.Toggle(); input.Haptic(0.2f, 0.03f); }
             wrist.Track(world.cam, input.hasLeftHand, input.leftPos, input.leftRot, xrOn);
             if (input.cancelDown) Cancel();
 

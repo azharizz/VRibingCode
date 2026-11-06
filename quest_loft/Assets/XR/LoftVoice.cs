@@ -57,12 +57,7 @@ namespace VirtualLoft.XR
             UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.Microphone, cb);
 #else
             if (Application.HasUserAuthorization(UserAuthorization.Microphone)) { permission = MicPermission.Granted; return; }
-            if (permission == MicPermission.Asking)
-            {
-                // The prompt closed without a grant: that is a refusal.
-                if (!Application.isEditor) permission = MicPermission.Denied;
-                return;
-            }
+            if (permission == MicPermission.Asking) return; // the popup may still be open: never treat waiting as a refusal
             if (permission == MicPermission.Denied || !ask) return;
             permission = MicPermission.Asking;
             Application.RequestUserAuthorization(UserAuthorization.Microphone);
@@ -76,7 +71,7 @@ namespace VirtualLoft.XR
                 return Application.platform == RuntimePlatform.Android
                     ? "Microphone is blocked. Allow it in Quest Settings > Apps > Permissions, then hold A again."
                     : "Microphone is blocked. Allow Unity/Loft in System Settings > Privacy > Microphone.";
-            if (permission == MicPermission.Asking) return "Allow the microphone in the popup, then hold A again.";
+            if (permission == MicPermission.Asking) return "Allow the microphone in the popup, or in System Settings > Privacy > Microphone, then hold A again.";
             if (permission == MicPermission.Unknown) return "Microphone permission not asked yet. Hold A again.";
             if (!HasDevice) return "No microphone found.";
             return null;

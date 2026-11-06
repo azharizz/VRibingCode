@@ -1,9 +1,13 @@
-// VIRTUAL LOFT — a clickable page in VR: a live Playwright page the headset sees as JPEG
-// frames and drives with click/move/scroll/key/text. Capped (3), closed when idle.
+// VIRTUAL LOFT — a real browser in VR: a live Chromium page the headset sees as a stream of
+// JPEG frames (CDP screencast) and drives with click/scroll/key/text/goto/back/forward/reload.
+// Capped (3), closed when idle.
 //
 // SECURITY: this is a browser the network can steer. Only http(s) URLs; cloud metadata,
 // link-local and file: are blocked for the first URL AND every redirect/subrequest
 // (also by DNS name); a task's preview may only navigate within its own origin.
+// A public website must never reach this machine: the backend on loopback can run shell
+// commands. Private and loopback addresses are blocked, except the one local origin the
+// CEO opened on purpose.
 import crypto from "node:crypto";
 import dns from "node:dns/promises";
 import net from "node:net";
@@ -26,6 +30,40 @@ function badIp(ip) {
     return badIp([n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join("."));
   }
   return x.startsWith("fe80:") || x === "fd00:ec2::254" || x === "::";
+}
+
+function privateIp(ip) {
+  if (net.isIPv4(ip)) {
+    const [a, b] = ip.split(".").map(Number);
+    return a === 127 || a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 100 && b >= 64 && b <= 127);
+  }
+  const x = ip.toLowerCase();
+  const mapped = x.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return privateIp(mapped[1]);
+  const hex = x.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (hex) {
+    const n = (parseInt(hex[1], 16) << 16) | parseInt(hex[2], 16);
+    return privateIp([n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join("."));
+  }
+  return x === "::1" || /^f[cd]/.test(x);
+}
+
+export async function isPrivate(u, { lookup = dns.lookup } = {}) {
+  const host = u.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) return true;
+  if (net.isIP(host)) return privateIp(host);
+  const addrs = await lookup(host, { all: true }).catch(() => []);
+  return addrs.some((a) => privateIp(a.address));
+}
+
+// What a person types or says -> an address. "google.com" gets https://, plain words become a search.
+export function toUrl(text) {
+  const t = String(text ?? "").trim();
+  if (/^(javascript|data|file|ftp|blob|about|vbscript|chrome|view-source):/i.test(t)) return t; // checkUrl refuses these
+  if (/^[a-z][a-z0-9+.-]*:/i.test(t) && !/^[\w.-]+:\d+(\/|$)/.test(t)) return t;
+  if (!/\s/.test(t) && /^[\w-]+(\.[\w-]+)+(:\d+)?([/?#].*)?$/.test(t)) return `https://${t}`;
+  if (/^(localhost|\d+\.\d+\.\d+\.\d+)(:\d+)?([/?#].*)?$/.test(t)) return `http://${t}`;
+  return `https://duckduckgo.com/?q=${encodeURIComponent(t)}`;
 }
 
 // -> URL object, or throws HttpError. Resolves names so a DNS alias of the metadata IP is caught too.
@@ -78,7 +116,8 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
   // url: already-decided address (a task's own preview, or what the CEO typed). lockOrigin: task previews.
   async function open({ url, lockOrigin = false, width = 1280, height = 800, taskId = null }) {
     if (sessions.size >= MAX_SESSIONS) throw new HttpError(429, `too many live previews (max ${MAX_SESSIONS}); close one first`);
-    const first = await checkUrl(url, { lookup });
+    const first = await checkUrl(toUrl(url), { lookup });
+    const localOrigin = (await isPrivate(first, { lookup })) ? first.origin : null;
     const w = Math.round(num(width, "width", 320, 1920));
     const h = Math.round(num(height, "height", 240, 1200));
     const b = await browser();
@@ -90,6 +129,7 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
       if (/^(data|blob|about):/i.test(u)) return route.continue();
       try {
         const parsed = await checkUrl(u, { lookup });
+        if (parsed.origin !== localOrigin && (await isPrivate(parsed, { lookup }))) throw new Error("private address");
         if (lockOrigin && req.isNavigationRequest() && req.frame() === page.mainFrame() && parsed.origin !== origin) throw new Error("outside");
       } catch {
         return route.abort("blockedbyclient");
@@ -97,9 +137,16 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
       return route.continue();
     });
     const page = await context.newPage();
-    const s = { id: crypto.randomBytes(8).toString("hex"), context, page, width: w, height: h, taskId, timer: null };
+    const s = { id: crypto.randomBytes(8).toString("hex"), context, page, width: w, height: h, taskId, timer: null, latest: null, lockOrigin };
     sessions.set(s.id, s);
     touch(s);
+    // Chromium pushes a frame whenever the page changes: smooth, and idle pages cost nothing.
+    const cdp = await context.newCDPSession(page);
+    cdp.on("Page.screencastFrame", (f) => {
+      s.latest = Buffer.from(f.data, "base64");
+      cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
+    });
+    await cdp.send("Page.startScreencast", { format: "jpeg", quality: 60, maxWidth: w, maxHeight: h, everyNthFrame: 1 });
     try {
       await page.goto(first.toString(), { waitUntil: "load", timeout: 20_000 });
     } catch (e) {
@@ -113,7 +160,12 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
 
   async function frame(id) {
     const s = need(id);
-    return s.page.screenshot({ type: "jpeg", quality: 70 });
+    return s.latest ?? s.page.screenshot({ type: "jpeg", quality: 70 });
+  }
+
+  async function info(id) {
+    const { page } = need(id);
+    return { url: page.url(), title: await page.title().catch(() => "") };
   }
 
   async function input(id, e = {}) {
@@ -142,8 +194,23 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
         if (typeof e.text !== "string" || !e.text || e.text.length > 500) throw new HttpError(400, "text must be 1-500 characters");
         await page.keyboard.type(e.text);
         break;
+      case "goto": {
+        if (s.lockOrigin) throw new HttpError(403, "a task preview stays on its own page");
+        const u = await checkUrl(toUrl(e.url), { lookup });
+        page.goto(u.toString(), { waitUntil: "commit", timeout: 20_000 }).catch(() => {}); // the frames show progress
+        break;
+      }
+      case "back":
+        page.goBack({ waitUntil: "commit", timeout: 10_000 }).catch(() => {});
+        break;
+      case "forward":
+        page.goForward({ waitUntil: "commit", timeout: 10_000 }).catch(() => {});
+        break;
+      case "reload":
+        page.reload({ waitUntil: "commit", timeout: 20_000 }).catch(() => {});
+        break;
       default:
-        throw new HttpError(400, "type must be click|move|scroll|key|text");
+        throw new HttpError(400, "type must be click|move|scroll|key|text|goto|back|forward|reload");
     }
     return { ok: true };
   }
@@ -152,5 +219,5 @@ export function createPreviewSessions({ browser, idleMs = Number(process.env.PRE
   async function closeAll() {
     await Promise.all([...sessions.keys()].map(close));
   }
-  return { open, frame, input, close, closeAll, list };
+  return { open, frame, info, input, close, closeAll, list };
 }

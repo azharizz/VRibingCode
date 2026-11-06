@@ -319,46 +319,61 @@ namespace VirtualLoft.Panels
             }
         }
 
-        // ---- clickable live preview ----
+        // ---- browser ----
+        static void Square(RectTransform c, float x, float y, float s)
+        {
+            PanelKit.Box(c, x, y, s, s, PT.Card, PT.RSmall, "Nav");
+        }
+
         static void Preview(LoftBoard b, RectTransform c, float w, float h)
         {
-            float bar = 104f, x = PAD, y = 24f, iw = w - PAD * 2;
-            PanelKit.Box(c, x, y, 88f, 88f, PT.Card, -1f, "Reload");
-            PanelKit.IconRefresh(c, x + 44f, y + 44f, 40f, 7f, PT.Text);
-            b.Click(x, y, 88f, 88f, () => LoftPanels.PreviewKey(b, "F5"));
-            float ax = x + 106f, aw = iw - 106f - 480f;
-            PanelKit.Box(c, ax, y + 4f, aw, 80f, PT.Column, -1f, "Address");
-            PanelKit.Text(c, string.IsNullOrEmpty(b.previewUrl) ? "No page open" : b.previewUrl, ax + 36f, y + 4f, aw - 72f, 80f, PT.Meta, PT.Text2, false, TextAlignmentOptions.Left);
-            float rx = x + iw - 460f;
-            Btn(c, rx, y + 4f, 200f, 80f, "Type", PT.Card, PT.Text);
-            b.Click(rx, y + 4f, 200f, 80f, () => LoftPanels.PreviewType(b));
-            rx += 220f;
-            PanelKit.Box(c, rx, y + 4f, 110f, 80f, PT.Card, PT.RSmall, "ScrollUp");
-            PanelKit.Line(c, new Vector2(rx + 39f, y + 52f), new Vector2(rx + 55f, y + 34f), 7f, PT.Text);
-            PanelKit.Line(c, new Vector2(rx + 55f, y + 34f), new Vector2(rx + 71f, y + 52f), 7f, PT.Text);
-            b.Click(rx, y + 4f, 110f, 80f, () => LoftPanels.PreviewScroll(b, -500));
-            PanelKit.Box(c, rx + 130f, y + 4f, 110f, 80f, PT.Card, PT.RSmall, "ScrollDown");
-            PanelKit.Line(c, new Vector2(rx + 169f, y + 36f), new Vector2(rx + 185f, y + 54f), 7f, PT.Text);
-            PanelKit.Line(c, new Vector2(rx + 185f, y + 54f), new Vector2(rx + 201f, y + 36f), 7f, PT.Text);
-            b.Click(rx + 130f, y + 4f, 110f, 80f, () => LoftPanels.PreviewScroll(b, 500));
+            const float bar = 100f;
+            float x = PAD, y = 22f, iw = w - PAD * 2, cx = y + bar / 2f;
+            // back, forward, reload
+            Square(c, x, y, bar);
+            PanelKit.IconChevron(c, x + 50f, cx, 34f, 8f, PT.Text, -1);
+            b.Click(x, y, bar, bar, () => LoftPanels.PreviewNav(b, "back"));
+            Square(c, x + 114f, y, bar);
+            PanelKit.IconChevron(c, x + 164f, cx, 34f, 8f, PT.Text, 1);
+            b.Click(x + 114f, y, bar, bar, () => LoftPanels.PreviewNav(b, "forward"));
+            Square(c, x + 228f, y, bar);
+            PanelKit.IconRefresh(c, x + 278f, cx, 42f, 7f, PT.Text);
+            b.Click(x + 228f, y, bar, bar, () => LoftPanels.PreviewNav(b, "reload"));
+            // address bar: click it to go anywhere
+            float ax = x + 346f, aw = iw - 346f - 490f;
+            PanelKit.Box(c, ax, y, aw, bar, PT.Column, -1f, "Address");
+            b.address = PanelKit.Text(c, string.IsNullOrEmpty(b.previewUrl) ? "Type an address or search" : b.previewUrl, ax + 44f, y, aw - 88f, bar, PT.Meta, PT.Text2, false, TextAlignmentOptions.Left);
+            b.Click(ax, y, aw, bar, () => LoftPanels.PreviewGo(b));
+            float rx = x + iw - 476f;
+            Btn(c, rx, y, 220f, bar, "Type", PT.Card, PT.Text);
+            b.Click(rx, y, 220f, bar, () => LoftPanels.PreviewType(b));
+            rx += 236f;
+            Square(c, rx, y, bar);
+            PanelKit.Line(c, new Vector2(rx + 32f, cx + 10f), new Vector2(rx + 50f, cx - 10f), 8f, PT.Text);
+            PanelKit.Line(c, new Vector2(rx + 50f, cx - 10f), new Vector2(rx + 68f, cx + 10f), 8f, PT.Text);
+            b.Click(rx, y, bar, bar, () => LoftPanels.PreviewScroll(b, -500));
+            rx += 116f;
+            Square(c, rx, y, bar);
+            PanelKit.Line(c, new Vector2(rx + 32f, cx - 10f), new Vector2(rx + 50f, cx + 10f), 8f, PT.Text);
+            PanelKit.Line(c, new Vector2(rx + 50f, cx + 10f), new Vector2(rx + 68f, cx - 10f), 8f, PT.Text);
+            b.Click(rx, y, bar, bar, () => LoftPanels.PreviewScroll(b, 500));
 
-            float py = y + bar + 12f, ph = h - py - 40f;
+            float py = y + bar + 16f, ph = h - py - 40f;
             PanelKit.Box(c, x, py, iw, ph, PT.Column, PT.RSmall, "Page");
             if (!string.IsNullOrEmpty(b.previewId))
             {
+                PanelKit.Text(c, "Loading the page...", x, py + ph / 2f - 40f, iw, 80f, PT.Body, PT.Muted, false, TextAlignmentOptions.Center);
                 var rt = PanelKit.Rect(c, "Frame", x + 6f, py + 6f, iw - 12f, ph - 12f);
                 b.frame = rt.gameObject.AddComponent<RawImage>();
                 b.frame.raycastTarget = false;
                 b.frame.texture = b.previewTex;
                 b.frame.color = new Color(1, 1, 1, b.previewTex != null ? 1f : 0f); // shows once the first frame lands
                 b.ClickAt(x + 6f, py + 6f, iw - 12f, ph - 12f, uv => LoftPanels.PreviewClick(b, uv));
-                PanelKit.Text(c, "Loading the page...", x, py + ph / 2f - 40f, iw, 80f, PT.Body, PT.Muted, false, TextAlignmentOptions.Center);
-                b.frame.transform.SetAsLastSibling();
                 return;
             }
-            PanelKit.Text(c, string.IsNullOrEmpty(b.previewError) ? "Nothing to preview yet" : "Preview unavailable", x + 60f, py + ph / 2f - 110f, iw - 120f, 90f, PT.H1, PT.Text, true, TextAlignmentOptions.Center);
-            PanelKit.Text(c, string.IsNullOrEmpty(b.previewError) ? "Open this while a task is in review to click through the real page." : b.previewError,
-                x + 120f, py + ph / 2f - 10f, iw - 240f, 170f, PT.Body, PT.Text2, false, TextAlignmentOptions.Top, 2);
+            bool failed = !string.IsNullOrEmpty(b.previewError);
+            PanelKit.Text(c, failed ? "Could not open that" : "Where to?", x + 60f, py + ph / 2f - 150f, iw - 120f, 90f, PT.H1, PT.Text, true, TextAlignmentOptions.Center);
+            PanelKit.Text(c, failed ? b.previewError : "Hold A and say \"open youtube.com\", or click the address bar.", x + 120f, py + ph / 2f - 50f, iw - 240f, 170f, PT.Body, PT.Text2, false, TextAlignmentOptions.Top, 2);
         }
     }
 }
