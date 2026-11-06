@@ -64,7 +64,10 @@ public partial class LoftClient : MonoBehaviour
         task.ContinueWith(t => mainThread.Enqueue(() => onMain(t.Status == TaskStatus.RanToCompletion ? t.Result : null)));
     }
 
-    void Update()
+    void Update() => RunPending();
+
+    // Callbacks from finished requests (Update does this; tests call it directly).
+    public void RunPending()
     {
         while (mainThread.TryDequeue(out var act))
         {
@@ -293,8 +296,11 @@ public partial class LoftClient : MonoBehaviour
         return null;
     }
 
+    public string LastError { get; private set; } = "";  // the backend's own words, for the card
+
     void Fail(HttpMethod method, string path, string why, bool quiet)
     {
+        LastError = why.StartsWith("HTTP ") && why.Contains(": ") ? why.Substring(why.IndexOf(": ") + 2) : "The backend did not answer.";
         Debug.LogWarning($"[LoftClient] {method} {path} failed: {why}");
         if (!quiet) inbox.Enqueue(new JObject { ["type"] = "error", ["message"] = why });
     }

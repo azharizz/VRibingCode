@@ -33,10 +33,11 @@ public class LoftPanels : MonoBehaviour
     float retryLoadAt = -1f;
     int nextId = 1;
 
+    public void Adopt() { Instance = this; Wire(); } // tests run outside Play, where Awake doesn't
+
     void Awake()
     {
-        Instance = this;
-        Wire();
+        Adopt();
         state.project = "";
         if (client != null) client.OnEvent += OnServer;
     }
@@ -238,7 +239,7 @@ public class LoftPanels : MonoBehaviour
             {
                 id = t.id, title = FirstLine(t.title), brief = t.title, plain = (string)t.raw?["plain"], status = t.status, agentId = t.agentId, agentName = skin != null ? skin.displayName : t.agentId, role = skin != null ? skin.role : "",
                 last = t.last, result = t.result, projectId = t.projectId, stat = t.diffStat,
-                files = (diff?["files"] as JArray)?.Count ?? 0, added = ins, removed = del, progress = t.status == "running" ? Mathf.Repeat(Time.time / 40f, 0.9f) + 0.05f : 0f,
+                files = ((diff?["files"] as JArray)?.Count ?? 0) + ((diff?["ignored"] as JArray)?.Count ?? 0), added = ins, removed = del, progress = t.status == "running" ? Mathf.Repeat(Time.time / 40f, 0.9f) + 0.05f : 0f,
             };
             state.tasks.Add(row);
             sig.Append(t.id).Append(t.status).Append(t.result?.Length ?? 0).Append(t.diffStat).Append(row.plain?.Length ?? 0).Append('|');
@@ -261,7 +262,7 @@ public class LoftPanels : MonoBehaviour
             if (boards.Any(b => b.type == "files")) Browse(state.treePath ?? "");
         }
 
-        var review = state.tasks.FirstOrDefault(t => t.status == "review");
+        var review = state.tasks.FirstOrDefault(t => t.status == "review" && state.Here(t));
         if (review?.id != reviewId)
         {
             reviewId = review?.id;
@@ -336,7 +337,7 @@ public class LoftPanels : MonoBehaviour
     {
         var p = Instance; if (p == null) return;
         var entry = FindFirstObjectByType<LoftTextEntry>();
-        if (entry == null || !entry.Request("New note", "", t => { if (!string.IsNullOrWhiteSpace(t)) _ = p.client.AddNote(t.Trim()); }, out string why))
+        if (entry == null || !entry.Request("New note", "", t => { if (!string.IsNullOrWhiteSpace(t)) p.desk.Report(p.client.AddNote(t.Trim()), "That note was not saved."); }, out string why))
             p.desk?.Note("Can't open the keyboard here.");
     }
     public static void SwitchWorkspace(string id) => Instance?.desk.SetProject(id);
@@ -373,15 +374,25 @@ public class LoftPanels : MonoBehaviour
     }
 
     public static void DeleteNote(string id) { if (Instance != null) _ = Instance.client.DeleteNote(id); }
-    public static void Approve(string taskId) { if (Instance != null) { _ = Instance.client.Approve(taskId); LoftAudio.Play("sfx_approve"); } }
-    public static void SetAutoApprove(bool on) { if (Instance != null) _ = Instance.client.AutoApprove(on); }
-    public static void Reject(string taskId) { if (Instance != null) _ = Instance.client.Reject(taskId, null); }
+    public static void Approve(string taskId) { if (Instance != null) { Instance.desk.Report(Instance.client.Approve(taskId), "That could not be approved."); LoftAudio.Play("sfx_approve"); } }
+    public static void SetAutoApprove(bool on) { if (Instance != null) Instance.desk.Report(Instance.client.AutoApprove(on), "Auto-approve could not be changed."); }
+    public static void Reject(string taskId) { if (Instance != null) Instance.desk.Report(Instance.client.Reject(taskId, null), "That could not be sent back."); }
 
+    // The changes of the task on the Review board's current page.
+    public static void ShowChanges(string taskId)
+    {
+        if (Instance == null) return;
+        Instance.LoadDiff(taskId);
+        Open("diff");
+    }
+
+    string diffId;
     void LoadDiff(string taskId)
     {
+        diffId = taskId;
         client.Then(client.GetDiff(taskId), res =>
         {
-            if (taskId != reviewId || !(res?["files"] is JArray files)) return;
+            if (taskId != diffId || !(res?["files"] is JArray files)) return;
             state.diff.Clear();
             foreach (var f in files.OfType<JObject>())
             {
@@ -476,8 +487,12 @@ public class LoftPanels : MonoBehaviour
         p.Save();
     }
 
-    // Voice "preview our latest work": the task in review if there is one, else what is merged.
-    public static void OpenLatest()
+    // Voice "preview our latest work": the task in review here if there is one, else what is merged.
+    public static void OpenLatest() => Show(Instance?.reviewId);
+    public static void OpenSite() => Show(null);
+    public static void TryTask(string taskId) => Show(taskId);
+
+    static void Show(string taskId)
     {
         var p = Instance; if (p == null) return;
         var b = p.boards.FirstOrDefault(x => x.type == "preview");
@@ -487,7 +502,7 @@ public class LoftPanels : MonoBehaviour
             p.Place(b);
         }
         b.startUrl = null;
-        if (p.reviewId != null) p.Connect(b, p.client.OpenPreview(p.reviewId), "Task preview");
+        if (taskId != null) p.Connect(b, p.client.OpenPreview(taskId), "Task preview");
         else p.Connect(b, p.client.OpenLatest(p.desk?.projectId), "Latest work");
         p.Save();
     }

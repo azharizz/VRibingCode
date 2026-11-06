@@ -16,7 +16,7 @@ import { promisify } from "node:util";
 
 const execFileP = promisify(execFile);
 const execP = promisify(exec);
-const LOFT_GIT = ["-c", "user.name=Virtual Loft", "-c", "user.email=loft@localhost", "-c", "commit.gpgsign=false"];
+const LOFT_GIT = ["-c", "core.quotepath=false", "-c", "user.name=Virtual Loft", "-c", "user.email=loft@localhost", "-c", "commit.gpgsign=false"];
 
 export class ProjectError extends Error {
   constructor(status, message) {
@@ -37,6 +37,7 @@ export async function git(cwd, args, { ok = false } = {}) {
 
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32) || "project";
 const exists = (p) => fs.stat(p).then(() => true, () => false);
+const LEAVE = /^(node_modules|\.venv|venv|__pycache__)$/; // never scanned, never copied
 
 const STARTERS = {
   empty: { "README.md": "# {name}\n\nBuilt by the Virtual Loft team.\n" },
@@ -121,6 +122,8 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
     if (!dir) throw new ProjectError(400, "path is required");
     const abs = path.resolve(String(dir).replace(/^~(?=$|\/)/, process.env.HOME ?? "~"));
     const main = await ensureRepo(abs, init);
+    const real = await fs.realpath(abs);
+    for (const known of projects.values()) if ((await fs.realpath(known.path).catch(() => known.path)) === real) return known; // same folder, same workspace
     let id = slug(name || path.basename(abs));
     for (let n = 2; projects.has(id); n++) id = `${slug(name || path.basename(abs))}-${n}`;
     const hasPkg = await exists(path.join(abs, "package.json"));
@@ -174,16 +177,80 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
     return { branch, worktree };
   }
 
-  // Commit whatever the agent changed; report what differs from main.
-  async function finish(project, { worktree }, message) {
+  // Git can't carry an empty folder or a repo inside a repo: give it files it can.
+  async function tidy(worktree, dir = worktree) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    if (dir !== worktree && entries.length === 0) await fs.writeFile(path.join(dir, ".gitkeep"), "");
+    for (const e of entries) {
+      if (!e.isDirectory() || e.name === ".git" || LEAVE.test(e.name)) continue;
+      const sub = path.join(dir, e.name);
+      if (await exists(path.join(sub, ".git"))) {
+        const tracked = await git(worktree, ["ls-files", "-s", "--", path.relative(worktree, sub)], { ok: true });
+        if (tracked?.startsWith("160000")) continue; // a real submodule
+        await fs.rm(path.join(sub, ".git"), { recursive: true, force: true });
+      }
+      await tidy(worktree, sub);
+    }
+  }
+
+  async function save(worktree, message) {
+    await tidy(worktree);
     await git(worktree, ["add", "-A", "--", ".", ":!node_modules"]);
     // --no-renames: with rename detection --quiet calls a pure file move "no changes"
     if ((await git(worktree, ["diff", "--cached", "--quiet", "--no-renames"], { ok: true })) === null) {
       await git(worktree, ["commit", "-q", "-m", message]);
     }
+  }
+
+  // Stashes are shared by the whole repo: take back only what was stashed on this task's branch.
+  async function unstash(worktree, branch) {
+    for (let i = 0; i < 20; i++) {
+      const list = ((await git(worktree, ["stash", "list", "--format=%gs"], { ok: true })) ?? "").split("\n");
+      const n = list.findLastIndex((s) => s.startsWith(`WIP on ${branch}:`) || s.startsWith(`On ${branch}:`));
+      if (n < 0) return false;
+      if ((await git(worktree, ["stash", "pop", "-q", `stash@{${n}}`], { ok: true })) === null) {
+        await git(worktree, ["reset", "-q", "--hard"], { ok: true });
+        return true; // it stays in the stash, safe
+      }
+    }
+    return false;
+  }
+
+  // The agent may have left the task's branch: the work follows it back.
+  async function rejoin(worktree, branch) {
+    const head = await git(worktree, ["rev-parse", "HEAD"]);
+    const tip = await git(worktree, ["rev-parse", branch]);
+    if (head === tip) return;
+    if ((await git(worktree, ["merge-base", "--is-ancestor", tip, "HEAD"], { ok: true })) === null) await git(worktree, ["merge", "-q", "--no-edit", branch]);
+    await git(worktree, ["checkout", "-q", "-B", branch]);
+  }
+
+  // New files git ignores (build output): they are work too, but not for a commit.
+  async function ignoredIn(worktree) {
+    const out = (await git(worktree, ["ls-files", "--others", "--ignored", "--exclude-standard"], { ok: true })) ?? "";
+    return out.split("\n").filter((f) => f && !f.split("/").some((part) => LEAVE.test(part)) && !/(^|\/)(\.gitkeep|\.DS_Store)$/.test(f));
+  }
+
+  // On approve they land next to the merged work. A file already there is never replaced.
+  async function keepIgnored(project, worktree) {
+    if (!worktree) return;
+    for (const f of await ignoredIn(worktree)) {
+      const to = path.join(project.path, f);
+      if (await exists(to)) continue;
+      await fs.mkdir(path.dirname(to), { recursive: true });
+      await fs.copyFile(path.join(worktree, f), to);
+    }
+  }
+
+  // Commit whatever the agent changed; report what differs from main.
+  async function finish(project, { worktree, branch }, message) {
+    await save(worktree, message);
+    const stashed = branch ? await unstash(worktree, branch) : false;
+    await save(worktree, message);
+    if (branch) await rejoin(worktree, branch);
     const files = (await git(worktree, ["diff", "--name-only", `${project.main}...HEAD`])).split("\n").filter(Boolean);
     const stat = (await git(worktree, ["diff", "--shortstat", `${project.main}...HEAD`])) || "no file changes";
-    return { files, stat };
+    return { files, stat, ignored: (await ignoredIn(worktree)).slice(0, 200), stashed };
   }
 
   // Where the site starts: "" (top), "index/" (one folder down), or null when there is no page.
@@ -204,25 +271,39 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
 
   // Squash-merge the task branch into main in the project's own checkout.
   async function merge(project, { branch, worktree }, message) {
+    if (!(await git(project.path, ["diff", "--name-only", `${project.main}...${branch}`]))) {
+      // Nothing to merge is only true if nothing sits outside the branch either.
+      const left = worktree && (await exists(worktree));
+      if (left && (await git(worktree, ["status", "--porcelain"], { ok: true }))) {
+        throw new ProjectError(409, `${project.name}: this task has uncommitted work, so it was kept for review`);
+      }
+      if (left && (await git(worktree, ["rev-parse", "HEAD"], { ok: true })) !== (await git(worktree, ["rev-parse", branch], { ok: true }))) {
+        throw new ProjectError(409, `${project.name}: this task's work is on another branch, so it was kept for review`);
+      }
+      if (left) await keepIgnored(project, worktree);
+      await discard(project, { branch, worktree });
+      return { ok: true, sha: null, note: "nothing to merge" };
+    }
     const on = await git(project.path, ["symbolic-ref", "--short", "HEAD"], { ok: true });
     if (on !== project.main) throw new ProjectError(409, `${project.name}: check out '${project.main}' first (it is on '${on}')`);
     if (await git(project.path, ["status", "--porcelain", "--untracked-files=no"])) {
       throw new ProjectError(409, `${project.name}: you have uncommitted changes on ${project.main}; commit or stash them, then approve again`);
     }
-    if (!(await git(project.path, ["diff", "--name-only", `${project.main}...${branch}`]))) {
-      if (worktree && (await git(worktree, ["status", "--porcelain"], { ok: true }))) {
-        throw new ProjectError(409, `${project.name}: this task has uncommitted work, so it was kept for review`);
-      }
-      await discard(project, { branch, worktree });
-      return { ok: true, sha: null, note: "nothing to merge" };
-    }
     if ((await git(project.path, ["merge", "--squash", branch], { ok: true })) === null) {
       const conflicts = ((await git(project.path, ["diff", "--name-only", "--diff-filter=U"], { ok: true })) || "").split("\n").filter(Boolean);
       await git(project.path, ["reset", "-q", "--merge"], { ok: true });
-      return { ok: false, conflicts };
+      if (conflicts.length) return { ok: false, conflicts };
+      // Not a conflict an agent can fix: git refused to write over the CEO's own files.
+      const added = (await git(project.path, ["diff", "--name-only", "--no-renames", "--diff-filter=A", `${project.main}...${branch}`], { ok: true })) ?? "";
+      const clash = [];
+      for (const f of added.split("\n").filter(Boolean)) if (await exists(path.join(project.path, f))) clash.push(f);
+      throw new ProjectError(409, clash.length
+        ? `${clash.slice(0, 5).join(", ")} already on ${project.main} but not committed. Move or commit, then approve again`
+        : `${project.name}: git could not merge this task, it was kept for review`);
     }
     await git(project.path, ["commit", "-q", "-m", message]);
     const sha = await git(project.path, ["rev-parse", "--short", "HEAD"]);
+    await keepIgnored(project, worktree);
     await discard(project, { branch, worktree });
     return { ok: true, sha };
   }

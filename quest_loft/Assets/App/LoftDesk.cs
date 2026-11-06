@@ -369,7 +369,8 @@ public class LoftDesk : MonoBehaviour
 
     public TaskView ReviewTask()
     {
-        var waiting = tasks.Values.Where(t => t.status == "review" || t.status == "failed").ToList();
+        var waiting = tasks.Values.Where(t => (t.status == "review" || t.status == "failed")
+            && (string.IsNullOrEmpty(projectId) || string.IsNullOrEmpty(t.projectId) || t.projectId == projectId)).ToList();
         return waiting.LastOrDefault(t => t.agentId == selectedAgentId) ?? waiting.FirstOrDefault();
     }
 
@@ -377,14 +378,14 @@ public class LoftDesk : MonoBehaviour
     {
         var t = ReviewTask();
         if (t == null || t.status != "review") { Note("Nothing waiting for approval"); return; }
-        _ = client.Approve(t.id);
+        Report(client.Approve(t.id), "That could not be approved.");
     }
 
     public void Reject(string why)
     {
         var t = ReviewTask();
         if (t == null) { Note("Nothing to reject"); return; }
-        _ = client.Reject(t.id, why);
+        Report(client.Reject(t.id, why), "That could not be sent back.");
     }
 
     public void Stop(string agentId = null)
@@ -457,8 +458,18 @@ public class LoftDesk : MonoBehaviour
     {
         if (string.IsNullOrEmpty(id)) return;
         suggestions.RemoveAll(x => (string)x["id"] == id); // a spoken answer finds it requeued
-        _ = client.AnswerSuggestion(id, accept);
+        Report(client.AnswerSuggestion(id, accept), accept ? "That idea couldn't be accepted." : "That idea couldn't be dismissed.");
         Note(accept ? "Idea accepted, queued." : "Idea dismissed.");
+    }
+
+    // The answer to a request the CEO is waiting on: a refusal must show, never pass as done.
+    public void Report(System.Threading.Tasks.Task<JObject> call, string failed, string worked = null)
+    {
+        client.Then(call, res =>
+        {
+            if (res == null) { Note($"{failed} {client.LastError}"); interaction?.Tell($"{failed} {client.LastError}", true); }
+            else if (worked != null) interaction?.Tell(worked);
+        });
     }
 
     public string LastIntentMessage = "";
@@ -499,12 +510,12 @@ public class LoftDesk : MonoBehaviour
             }
             case "scene": return SetScene(S("sceneId"));
             case "approve":
-                if (S("taskId") != null && tasks.ContainsKey(S("taskId"))) { _ = client.Approve(S("taskId")); return Ok("Approved."); }
+                if (S("taskId") != null && tasks.ContainsKey(S("taskId"))) { Report(client.Approve(S("taskId")), "That could not be approved."); return Ok("Approved."); }
                 if (ReviewTask()?.status != "review") return Fail("Nothing is waiting for approval.");
                 Approve();
                 return Ok("Approved.");
             case "reject":
-                if (S("taskId") != null && tasks.ContainsKey(S("taskId"))) { _ = client.Reject(S("taskId"), S("feedback")); return Ok("Sent back with your feedback."); }
+                if (S("taskId") != null && tasks.ContainsKey(S("taskId"))) { Report(client.Reject(S("taskId"), S("feedback")), "That could not be sent back."); return Ok("Sent back with your feedback."); }
                 if (ReviewTask() == null) return Fail("Nothing to reject.");
                 Reject(S("feedback"));
                 return Ok("Sent back with your feedback.");
@@ -528,13 +539,13 @@ public class LoftDesk : MonoBehaviour
             case "autoApprove":
             {
                 bool on = (bool?)intent["on"] ?? true;
-                _ = client.AutoApprove(on);
+                Report(client.AutoApprove(on), "Auto-approve could not be changed.");
                 return Ok(on ? "Turning auto-approve on." : "Turning auto-approve off.");
             }
             case "note":
                 if (S("text") == null) return Fail("What should I note?");
-                _ = client.AddNote(S("text"));
-                return Ok("Noted.");
+                Report(client.AddNote(S("text")), "That note was not saved.", "Noted.");
+                return Ok("Saving your note.");
             case "menu":
                 interaction?.OpenMenu();
                 return Ok("Here is the menu.");

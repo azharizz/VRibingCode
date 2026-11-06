@@ -38,6 +38,7 @@ namespace VirtualLoft.Panels
         public List<PDiffFile> diff = new List<PDiffFile>();
         public int version;             // bump on change; boards rebuild when it moves
         public void Touch() => version++;
+        public bool Here(PTask t) => string.IsNullOrEmpty(workspaceId) || string.IsNullOrEmpty(t.projectId) || t.projectId == workspaceId;
     }
 
     public static class PanelSample

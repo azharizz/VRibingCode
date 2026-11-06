@@ -236,7 +236,7 @@ export function createVoice({ snapshot, ask, extract, stt = null, draft = null }
     const s = snapshot();
     if (agentId && !s.agents.some((a) => a.id === agentId)) throw new HttpError(404, `no agent '${agentId}'`);
     if (projectId && !s.projects.some((p) => p.id === projectId)) throw new HttpError(404, `no project '${projectId}'`);
-    return { agents: s.agents, projects: s.projects, roles: s.roles, review: s.tasks.filter((t) => t.status === "review"), pointed: agentId || null, projectId: projectId || null };
+    return { agents: s.agents, projects: s.projects, roles: s.roles, review: s.tasks.filter((t) => t.status === "review" && (!projectId || !t.projectId || t.projectId === projectId)), pointed: agentId || null, projectId: projectId || null };
   }
 
   // A spawn with no matching role gets an AI-written one, so the headset can spawn it in one POST /agents.

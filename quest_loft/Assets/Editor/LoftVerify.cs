@@ -480,6 +480,62 @@ public static class LoftVerify
         ideaCard.Hide();
         inter.inputOverride = null;
 
+        // 6g2b. Review and failures: the right task, the right workspace, and no silent "nothing happened".
+        var es = new FakeServer(); client.serverUrl = es.Url;
+        panels.Adopt();
+        Check(LoftIntent.Route(Resp("note", false, false)) == IntentRoute.Immediate && LoftIntent.Route(Resp("menu", false, false)) == IntentRoute.Immediate, "note and menu act at once, no confirm card");
+        JObject InWs(string id, string title, string ws, string result)
+        {
+            var t = Task(id, "builder-2", title, "review", "", result);
+            t["projectId"] = ws;
+            t["diff"] = new JObject { ["stat"] = "1 file changed, 1 insertion(+)", ["files"] = new JArray("a.html") };
+            return t;
+        }
+        desk.HandleEvent(new JObject { ["type"] = "snapshot", ["agents"] = new JArray(Agent("builder-2", "builder", "fox", "done")),
+            ["projects"] = new JArray(new JObject { ["id"] = "shop", ["name"] = "Shop" }, new JObject { ["id"] = "blog", ["name"] = "Blog" }, new JObject { ["id"] = "site", ["name"] = "Site" }),
+            ["tasks"] = new JArray(InWs("t1", "first", "shop", "Edited __init__.py today"), InWs("t2", "second", "shop", "Second report"), InWs("t3", "elsewhere", "blog", "Away report")) });
+        desk.SetProject("shop");
+        panels.Pull();
+        void Pump(System.Func<bool> done) { for (int i = 0; i < 100 && !done(); i++) { System.Threading.Thread.Sleep(20); client.RunPending(); } }
+        var rvb = VirtualLoft.Panels.LoftBoard.Create("rv", "review", panels.state);
+        var rvText = TextsUnder(rvb.gameObject);
+        Check(rvText.Any(t => t.Contains("__init__.py")), "file names with __ survive the markdown cleanup");
+        Check(rvText.Contains("1 of 2") && !rvText.Any(t => t.Contains("Away report")), "Review only shows the current workspace");
+        rvb.page = 1; rvb.Refresh();
+        Check(TextsUnder(rvb.gameObject).Any(t => t.Contains("Second report")), "page 2 shows the second task");
+        rvb.Tap("Try it");
+        Check((string)es.Wait("POST", "/preview/sessions")?.Json?["taskId"] == "t2", "Try it opens the task on this page");
+        rvb.Tap("See changes");
+        Check(es.Wait("GET", "/tasks/t2/diff") != null, "See changes shows the task on this page");
+        LoftUtil.Kill(rvb.gameObject);
+        desk.SetProject("site");
+        panels.Pull(); panels.state.projectSite = true;
+        var wsb = VirtualLoft.Panels.LoftBoard.Create("ws", "project", panels.state);
+        wsb.Tap("Open site");
+        var siteReq = es.Wait("POST", "/preview/sessions");
+        Check(siteReq?.Json?["taskId"] == null && (string)siteReq?.Json?["projectId"] == "site", "Open site shows this workspace, not another's task");
+        LoftUtil.Kill(wsb.gameObject);
+        LoftPanels.CloseAll();
+        es.Clear(); inter.card.Hide();
+        es.nextStatus = 409;
+        LoftPanels.Approve("t1");
+        Pump(() => inter.card.State == LoftCard.CardState.Error);
+        Check(inter.card.State == LoftCard.CardState.Error, "a refused approve shows on the card");
+        inter.card.Hide(); es.nextStatus = 500;
+        inter.HandleResponse(Resp("note", needsConfirm: false, risky: false, extra: new JObject { ["text"] = "x" }));
+        Pump(() => inter.card.State == LoftCard.CardState.Error);
+        Check(inter.card.State == LoftCard.CardState.Error, "a note that failed does not claim Noted");
+        inter.card.Hide();
+        inter.HandleResponse(Resp("note", needsConfirm: false, risky: false, extra: new JObject { ["text"] = "x" }));
+        Check(es.Wait("POST", "/notes") != null, "a note reaches the backend");
+        inter.card.Hide(); es.nextStatus = 500;
+        inter.ShowSuggestion(new JObject { ["id"] = "s1", ["agentId"] = "builder-2", ["title"] = "idea", ["reason"] = "why" });
+        inter.card.PressSend();
+        Pump(() => inter.card.State == LoftCard.CardState.Error);
+        Check(inter.card.State == LoftCard.CardState.Error, "an idea that failed does not claim accepted");
+        inter.card.Hide();
+        es.Dispose();
+
         // 6g3. Round 2 voice actions, speech and suggestions (fake backend).
         srv = new FakeServer(); client.serverUrl = srv.Url;
         desk.HandleEvent(new JObject { ["type"] = "snapshot", ["agents"] = new JArray(Agent("scout-1", "scout", "owl")), ["tasks"] = new JArray() });

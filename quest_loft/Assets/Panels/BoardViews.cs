@@ -98,13 +98,14 @@ namespace VirtualLoft.Panels
         // ---- review ----
         static void Review(LoftBoard b, RectTransform c, float w, float h)
         {
-            var q = b.state.tasks.Where(t => t.status == "review" || t.status == "conflict").ToList();
+            var all = b.state.tasks.Where(t => t.status == "review" || t.status == "conflict").ToList();
+            var q = all.Where(b.state.Here).ToList();
             var reading = b.readingId == null ? null : b.state.tasks.FirstOrDefault(r => r.id == b.readingId);
             if (reading != null) { ReadAll(b, c, reading, w, h); return; }
             float x = PAD, iw = w - PAD * 2, y = 34f;
             if (q.Count == 0)
             {
-                Empty(c, w, h, "Nothing to review", "When an agent finishes, the work shows up here.", PT.Done);
+                Empty(c, w, h, "Nothing to review", all.Count > 0 ? $"{all.Count} waiting in another workspace." : "When an agent finishes, the work shows up here.", PT.Done);
                 AutoRow(b, c, x, h - 120f, iw);
                 return;
             }
@@ -141,11 +142,11 @@ namespace VirtualLoft.Panels
             PanelKit.Text(c, "+" + t.added, x + 300f, y, 200f, 88f, PT.Body, PT.Add, true, TextAlignmentOptions.Left);
             PanelKit.Text(c, "-" + t.removed, x + 500f, y, 200f, 88f, PT.Body, PT.Del, true, TextAlignmentOptions.Left);
             Btn(c, x + iw - 440f, y, 440f, 88f, "See changes", PT.CardHi, PT.Text);
-            b.Click(x + iw - 440f, y, 440f, 88f, () => LoftPanels.Open("diff"));
+            b.Click(x + iw - 440f, y, 440f, 88f, () => LoftPanels.ShowChanges(open));
             y += 104f;
 
             Btn(c, x, y, iw, 186f, "Try it", PT.Info * new Color(0.6f, 0.6f, 0.6f, 1f), PT.Text);
-            b.Click(x, y, iw, 186f, LoftPanels.OpenLatest);
+            b.Click(x, y, iw, 186f, () => LoftPanels.TryTask(open));
             y += 204f;
 
             float bw = (iw - 20f) / 2f;
@@ -175,7 +176,7 @@ namespace VirtualLoft.Panels
             float bottom = h - 388f, boxH = bottom - y - 124f;
             PanelKit.Box(c, x, y, iw, boxH, PT.Column, PT.RCard, "Working");
             PanelKit.Text(c, "WORKING NOW", x + 34f, y + 22f, iw - 68f, 50f, PT.Meta, PT.Muted, true, TextAlignmentOptions.Left);
-            var mine = s.tasks.Where(t => s.workspaceId == null || t.projectId == s.workspaceId).ToList();
+            var mine = s.tasks.Where(s.Here).ToList();
             var busy = mine.Where(t => t.status == "running").ToList();
             if (busy.Count == 0) PanelKit.Text(c, "Nobody is working right now.", x + 34f, y + 84f, iw - 68f, 70f, PT.Body, PT.Text2, false, TextAlignmentOptions.Left);
             int rows = Mathf.Max(1, Mathf.FloorToInt((boxH - 90f) / 88f));
@@ -196,7 +197,7 @@ namespace VirtualLoft.Panels
             y = bottom;
 
             Btn(c, x, y, iw, 200f, s.projectSite ? "Open site" : "No site yet", s.projectSite ? PT.Done * new Color(0.62f, 0.62f, 0.62f, 1f) : PT.Card, s.projectSite ? PT.Text : PT.Muted);
-            if (s.projectSite) b.Click(x, y, iw, 200f, LoftPanels.OpenLatest);
+            if (s.projectSite) b.Click(x, y, iw, 200f, LoftPanels.OpenSite);
             y += 224f;
             float half = (iw - 20f) / 2f;
             Btn(c, x, y, half, 96f, "Browse files", PT.CardHi, PT.Text);
@@ -269,7 +270,7 @@ namespace VirtualLoft.Panels
         }
 
         // Agents answer in markdown; the board shows plain text.
-        static string Clean(string s) => Regex.Replace(s ?? "", @"\*\*|__|^#+\s*", "", RegexOptions.Multiline).Trim();
+        static string Clean(string s) => Regex.Replace(s ?? "", @"\*\*|^#+\s*", "", RegexOptions.Multiline).Trim();
 
         static string wrapped;
         static float wrappedWidth;

@@ -143,6 +143,22 @@ namespace VirtualLoft.Panels
         }
         bool InClose(Vector2 p) => p.y < TITLE && p.x > W - TITLE;
         bool InCorner(Vector2 p) => p.x > W - GRIP && p.y > H - GRIP;
+        // Tests: press what shows this label, as a click there would.
+        public bool Tap(string label)
+        {
+            foreach (var t in GetComponentsInChildren<TMPro.TMP_Text>(true))
+            {
+                if (t.text != label) continue;
+                var corners = new Vector3[4];
+                t.rectTransform.GetWorldCorners(corners);
+                var hot = HotAt(ToMm((corners[0] + corners[2]) / 2f));
+                if (hot?.act == null) return false;
+                hot.act();
+                return true;
+            }
+            return false;
+        }
+
         Hot HotAt(Vector2 p)
         {
             for (int i = hots.Count - 1; i >= 0; i--) if (hots[i].r.Contains(p)) return hots[i];

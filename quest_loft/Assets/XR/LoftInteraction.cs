@@ -525,7 +525,7 @@ namespace VirtualLoft.XR
             bool accept = SayAccept.Contains(w);
             if (!accept && !SayDismiss.Contains(w)) return false;
             desk.AnswerSuggestion((string)idea["id"], accept);
-            card.ShowResult(accept ? "Idea accepted, queued." : "Idea dismissed.", said);
+            card.ShowResult(accept ? "Accepting the idea." : "Dismissing the idea.", said);
             return true;
         }
 
@@ -536,6 +536,13 @@ namespace VirtualLoft.XR
             desk.RequeueSuggestion(shownSuggestion);
             shownSuggestion = null;
             card.Hide();
+        }
+
+        // News that must be seen, whatever is on the card. An idea waits its turn.
+        public void Tell(string message, bool problem = false)
+        {
+            DeferSuggestion();
+            if (problem) card.ShowError(message); else card.ShowResult(message);
         }
 
         bool reqPending => card.State == LoftCard.CardState.Thinking;

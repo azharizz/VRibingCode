@@ -248,7 +248,7 @@ export function createOrchestrator({
       if (agents.has(a.id)) {
         const state = t.status === "review" ? "done" : t.status === "failed" ? "failed" : "idle";
         setAgent(a, { state, taskId: null });
-        if (t.status === "review" && (autoApprove || t.diff?.files.length === 0)) autoMerge(t); // nothing changed: nothing to decide
+        if (t.status === "review" && (autoApprove || nothingDone(t))) autoMerge(t); // nothing to decide
         pump(a);
       }
     }
@@ -291,6 +291,8 @@ export function createOrchestrator({
     return getNotes().slice(-20).map((n) => `- ${[n.title, n.text].filter(Boolean).join(": ")}`.slice(0, 300)).join("\n");
   }
 
+  const nothingDone = (t) => t.diff?.files.length === 0 && !t.diff.ignored?.length && !t.diff.stashed;
+
   // One plain sentence for the Review board. Work with no changes closes by itself, so the agent says it aloud.
   const firstSentence = (s) => String(s ?? "").replace(/[*#`]+/g, "").trim().split(/(?<=[.!?])\s|\n/)[0].slice(0, 200);
   async function explain(a, t) {
@@ -298,7 +300,7 @@ export function createOrchestrator({
     const plain = String(said || firstSentence(t.result)).trim().slice(0, 240);
     if (!plain) return;
     setTask(t, { plain });
-    if (t.diff?.files.length === 0 && agents.has(a.id)) emit({ type: "say", agentId: a.id, text: plain });
+    if (nothingDone(t) && agents.has(a.id)) emit({ type: "say", agentId: a.id, text: plain });
   }
 
   // ---- suggestions: an agent may raise at most one after finished work; it never acts alone ----
