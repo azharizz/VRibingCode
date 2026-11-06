@@ -1,7 +1,7 @@
 // Projects, per-task worktrees and previews against REAL git + REAL Chromium (offline).
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, test } from "node:test";
@@ -23,6 +23,27 @@ test("new project: folder + git repo + starter, persisted", async () => {
   const again = createProjects({ dataDir: path.join(tmp, "data"), projectsDir: path.join(tmp, "projects"), defaultPath: null });
   assert.deepEqual((await again.load()).map((x) => x.id), ["landing-site"]);
   await assert.rejects(projects.add({ path: path.join(tmp, "nope") }), /does not exist/);
+});
+
+test("a folder inside another repo never touches the outer repo", async () => {
+  const outer = path.join(tmp, "outer");
+  await mkdir(path.join(outer, "workspace"), { recursive: true });
+  await git(outer, ["init", "-q", "-b", "main"]);
+  await git(outer, ["commit", "-q", "--allow-empty", "-m", "outer work"]);
+  const inner = path.join(outer, "workspace");
+  const mk = () => createProjects({ dataDir: path.join(tmp, "nested"), projectsDir: path.join(tmp, "np"), defaultPath: inner });
+
+  await assert.rejects(projects.add({ path: inner }), /not the root of a git repo/);
+  const [p] = await mk().load(); // default workspace gets a repo of its own
+  assert.equal((await git(inner, ["rev-parse", "--show-toplevel"])).trim(), await realpath(inner));
+  assert.match(await git(inner, ["log", "--oneline"]), /Start project/);
+  assert.doesNotMatch(await git(outer, ["branch", "--list", "loft/*"]), /loft/);
+
+  await rm(path.join(inner, ".git"), { recursive: true }); // an entry saved before this rule
+  const stale = createProjects({ dataDir: path.join(tmp, "nested"), projectsDir: path.join(tmp, "np") });
+  await stale.load();
+  await assert.rejects(stale.prepare(p, { taskId: "t1", agent: "Fox" }), /refusing to touch the outer repo/);
+  assert.doesNotMatch(await git(outer, ["branch", "--list", "loft/*"]), /loft/);
 });
 
 test("parallel tasks get separate worktrees; approve = one squash commit on main", async () => {

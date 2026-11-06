@@ -52,6 +52,12 @@ public class LoftClient : MonoBehaviour
     void OnEnable() => StartEvents();
     void OnDisable() => StopEvents();
 
+    // Same for any result type (voice replies).
+    public void ThenAny<T>(Task<T> task, Action<T> onMain)
+    {
+        task.ContinueWith(t => mainThread.Enqueue(() => onMain(t.Status == TaskStatus.RanToCompletion ? t.Result : default)));
+    }
+
     // Run onMain(result) on Unity's main thread once the request finishes (null on failure).
     public void Then(Task<JObject> task, Action<JObject> onMain)
     {
@@ -183,6 +189,66 @@ public class LoftClient : MonoBehaviour
         Send(HttpMethod.Post, $"/tasks/{Uri.EscapeDataString(taskId ?? "")}/reject", Body("feedback", feedback));
     public Task<JObject> Stop(string agentId = null) =>
         Send(HttpMethod.Post, "/stop", Body("agentId", agentId));
+
+    // ---- voice (POST /voice with a WAV, POST /voice/text for typed phrases) ----
+    // Never throws: either `json` (the contract's {transcript, summary, needsConfirm, risky, intent}) or `error`
+    // in words the CEO can act on.
+    public class VoiceReply { public JObject json; public string error; }
+    public static int voiceTimeoutSeconds = 60; // speech-to-text + intent can take a while
+
+    public Task<VoiceReply> Voice(byte[] wav, string agentId, string projectId, string scene) =>
+        PostVoice("/voice" + Query(agentId, projectId, scene), new ByteArrayContent(wav ?? new byte[0]) { Headers = { ContentType = new MediaTypeHeaderValue("audio/wav") } });
+
+    public Task<VoiceReply> VoiceText(string text, string agentId, string projectId, string scene)
+    {
+        var body = new JObject { ["text"] = text };
+        if (!string.IsNullOrEmpty(agentId)) body["agentId"] = agentId;
+        if (!string.IsNullOrEmpty(projectId)) body["projectId"] = projectId;
+        if (!string.IsNullOrEmpty(scene)) body["scene"] = scene;
+        return PostVoice("/voice/text", new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json"));
+    }
+
+    static string Query(string agentId, string projectId, string scene)
+    {
+        var parts = new System.Collections.Generic.List<string>();
+        if (!string.IsNullOrEmpty(agentId)) parts.Add("agentId=" + Uri.EscapeDataString(agentId));
+        if (!string.IsNullOrEmpty(projectId)) parts.Add("projectId=" + Uri.EscapeDataString(projectId));
+        if (!string.IsNullOrEmpty(scene)) parts.Add("scene=" + Uri.EscapeDataString(scene));
+        return parts.Count == 0 ? "" : "?" + string.Join("&", parts);
+    }
+
+    async Task<VoiceReply> PostVoice(string path, HttpContent content)
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(1, voiceTimeoutSeconds)));
+            using var req = Request(HttpMethod.Post, path);
+            req.Content = content;
+            using var res = await http.SendAsync(req, cts.Token).ConfigureAwait(false);
+            var text = await res.Content.ReadAsStringAsync().ConfigureAwait(false);
+            JObject json = null;
+            try { json = string.IsNullOrEmpty(text) ? null : JObject.Parse(text); } catch (JsonException) { }
+            if (res.IsSuccessStatusCode)
+                return json != null ? new VoiceReply { json = json } : new VoiceReply { error = "The backend answered with something I could not read." };
+            return new VoiceReply { error = VoiceHttpError((int)res.StatusCode, (string)json?["error"] ?? text) };
+        }
+        catch (OperationCanceledException) { return new VoiceReply { error = "The backend took too long to understand that. Try again." }; }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[LoftClient] POST {path} failed: {e.Message}");
+            return new VoiceReply { error = $"Can't reach the backend at {serverUrl}. Is it running, and is this the Mac's Wi-Fi address?" };
+        }
+    }
+
+    public static string VoiceHttpError(int status, string detail)
+    {
+        string d = string.IsNullOrWhiteSpace(detail) ? "" : " (" + detail.Trim() + ")";
+        if (status == 401 || status == 403) return "The backend refused the token. Check LOFT_TOKEN in loft-server.json.";
+        if (status == 404) return "This backend has no voice endpoint yet. Update and restart it.";
+        if (status == 413) return "That recording was too long. Say it in a shorter piece.";
+        if (status == 501 || status == 503) return "The backend can't transcribe speech right now" + d + ".";
+        return $"The backend had a problem (HTTP {status}){d}.";
+    }
 
     public async Task<bool> CheckHealthAsync() => await Send(HttpMethod.Get, "/health", null, quiet: true).ConfigureAwait(false) != null;
 

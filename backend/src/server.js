@@ -1,7 +1,7 @@
 // VIRTUAL LOFT — HTTP + Server-Sent Events bridge (Unity <-> agents).
 // Zero extra deps (node:http). Run from backend/:
 //
-//   node --env-file=.env src/server.js [--port 4101]
+//   node src/server.js [--port 4101]     (loads ../.env itself: AGENT_API_KEY/AGENT_BASE_URL/AGENT_MODEL)
 //
 // Env: HOST (default 127.0.0.1; use 0.0.0.0 so a Quest on Wi-Fi can reach it),
 //      LOFT_TOKEN (required when HOST is not loopback — agents run Bash!),
@@ -22,6 +22,8 @@
 //   POST /stop {agentId?}         -> stop one agent or everyone
 //   GET  /roles · POST /roles {title,instructions,tools} · DELETE /roles/:id
 //   POST /roles/draft {description} -> AI-written role for the CEO to review
+//   POST /voice?agentId=&projectId=&scene=  raw 16 kHz mono WAV (max 10 MB) -> {transcript,summary,needsConfirm,risky,intent}
+//   POST /voice/text {text,agentId?,projectId?,scene?}  same, no audio (STT_PROVIDER=local|openai, see src/stt.js)
 //   POST /party {on}              -> party mode on/off for every connected headset
 //   GET /projects · POST /projects {name,path,dev?,setup?,url?,kind?,init?} (register a repo)
 //   POST /projects/new {name, template: empty|static} · DELETE /projects/:id (unregister)
@@ -30,12 +32,17 @@
 // squash-merge into the project's main branch (agents never push).
 //   GET  /loft/:roomId[/boards], POST /loft -> board layout store
 
+import { loadedEnvFiles } from "./load-env.js"; // must stay first: fills process.env from the repo-root .env
 import crypto from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { llmConfig, llmProblems } from "./env.js";
 import { draftRole, planGoal, priceOf, runTask } from "./agents.js";
+import { askJson, extractJson } from "./llm.js";
+import { createStt, MAX_AUDIO } from "./stt.js";
+import { createVoice } from "./voice.js";
 import { blankLoft, loadLoft, saveLoft, validateLoft } from "./loftStore.js";
 import { createOrchestrator, HttpError } from "./orchestrator.js";
 import { createPreviews } from "./previews.js";
@@ -47,15 +54,21 @@ const PORT = Number(argPort > -1 ? process.argv[argPort + 1] : (process.env.PORT
 const HOST = process.env.HOST ?? "127.0.0.1";
 const TOKEN = process.env.LOFT_TOKEN ?? "";
 const WORKSPACE = path.resolve(process.env.WORKSPACE_DIR ?? path.join(here, "../workspace"));
-const MAX_BODY = 1_000_000;
+const MAX_BODY = 1_000_000; // JSON; audio has its own limit (MAX_AUDIO, 10 MB)
 
 if (!["127.0.0.1", "localhost", "::1"].includes(HOST) && !TOKEN) {
   console.error(`Refusing to listen on ${HOST} without LOFT_TOKEN: agents can run Bash in ${WORKSPACE}.`);
   process.exit(1);
 }
+const missing = llmProblems();
+if (missing.length) {
+  console.error(`LLM not configured: missing ${missing.join(", ")}. Put them in the repo-root .env (see backend/README.md).`);
+  process.exit(1);
+}
 fs.mkdirSync(WORKSPACE, { recursive: true });
 
-const ROLES_FILE = path.join(here, "../data/roles.json");
+const DATA = path.resolve(process.env.LOFT_DATA_DIR ?? path.join(here, "../data")); // a mounted volume in the cloud
+const ROLES_FILE = path.join(DATA, "roles.json");
 const savedRoles = (() => {
   try {
     return JSON.parse(fs.readFileSync(ROLES_FILE, "utf8"));
@@ -63,7 +76,6 @@ const savedRoles = (() => {
     return [];
   }
 })();
-const DATA = path.join(here, "../data");
 const PREVIEW_DIR = path.join(DATA, "previews");
 const projects = createProjects({
   dataDir: DATA,
@@ -81,6 +93,12 @@ const loft = createOrchestrator({
     fs.writeFileSync(ROLES_FILE, JSON.stringify(list, null, 2));
   },
 });
+const voice = createVoice({
+  snapshot: () => loft.snapshot(),
+  ask: (system, prompt) => askJson(process.env.LOFT_VOICE_MODEL || llmConfig().model, system, prompt, { temperature: 0, maxTokens: 2000 }),
+  extract: (t) => extractJson(t, "{"),
+  stt: createStt(),
+});
 const storeOpts = { localOnly: !process.env.SUPABASE_URL };
 
 const CORS = {
@@ -89,26 +107,32 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-const readBody = (req) =>
+const readRaw = (req, max) =>
   new Promise((resolve, reject) => {
     const chunks = [];
     let size = 0;
+    let over = false;
     req.on("data", (c) => {
       size += c.length;
-      if (size > MAX_BODY) {
+      if (over) return; // keep draining so the 413 reply can reach the client
+      if (size > max) {
+        over = true;
+        chunks.length = 0;
         reject(new HttpError(413, "body too large"));
-        req.destroy();
       } else chunks.push(c);
     });
-    req.on("end", () => {
-      try {
-        resolve(chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {});
-      } catch {
-        reject(new HttpError(400, "invalid JSON body"));
-      }
-    });
+    req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
+
+const readBody = async (req) => {
+  const buf = await readRaw(req, MAX_BODY);
+  try {
+    return buf.length ? JSON.parse(buf.toString("utf8")) : {};
+  } catch {
+    throw new HttpError(400, "invalid JSON body");
+  }
+};
 
 const send = (res, code, obj) => {
   res.writeHead(code, { "Content-Type": "application/json", ...CORS });
@@ -144,6 +168,13 @@ async function route(req, res) {
   if (m === "GET" && p === "/health") return send(res, 200, { ok: true, workspace: WORKSPACE });
   if (!authorized(req)) return send(res, 401, { ok: false, error: "missing or wrong LOFT_TOKEN" });
 
+  if (m === "POST" && p === "/voice") {
+    const wav = await readRaw(req, MAX_AUDIO);
+    if (!wav.length) throw new HttpError(400, "empty audio body (send raw 16 kHz mono 16-bit WAV)");
+    const q = url.searchParams;
+    return send(res, 200, await voice.handleAudio(wav, { agentId: q.get("agentId"), projectId: q.get("projectId"), scene: q.get("scene") }));
+  }
+  if (m === "POST" && p === "/voice/text") return send(res, 200, await voice.handleText(await readBody(req)));
   if (m === "GET" && p === "/events") return openEvents(req, res);
   if (m === "GET" && p === "/state") return send(res, 200, loft.snapshot());
   if (m === "POST" && p === "/agents") return send(res, 201, { ok: true, agent: loft.spawn(await readBody(req)) });
@@ -238,5 +269,5 @@ const server = http.createServer((req, res) =>
 
 server.listen(PORT, HOST, () => {
   console.log(`loft server: http://${HOST}:${PORT}  workspace: ${WORKSPACE}  auth: ${TOKEN ? "token" : "none (loopback only)"}`);
-  console.log(`llm: ${process.env.LLM_BASE_URL || "https://openrouter.ai/api/v1"}  default model: ${loft.snapshot().defaultModel}${process.env.LLM_API_KEY ? "" : "  (LLM_API_KEY missing!)"}`);
+  console.log(`llm: ${llmConfig().baseURL}  default model: ${llmConfig().model}  (env files: ${loadedEnvFiles.length})`);
 });

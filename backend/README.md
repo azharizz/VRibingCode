@@ -1,14 +1,16 @@
 # VIRTUAL LOFT — backend (the agents)
 
 Spawnable AI agents (default **3**, max **20**) on the **OpenAI Agents SDK**,
-talking to any OpenAI-compatible endpoint: **OpenRouter** (default), the Muse
-Spark gateway, OpenAI, a local server, by setting `LLM_BASE_URL`.
+talking to any OpenAI-compatible endpoint (Nebius, OpenRouter, OpenAI, a local
+server...), configured in the **repo-root `.env`**: `AGENT_API_KEY`,
+`AGENT_BASE_URL`, `AGENT_MODEL`. There is no built-in default endpoint or model:
+if one is missing the server refuses to start and names what to set.
 
 Every agent is free-form, set in the spawn form:
 
 | field | |
 | --- | --- |
-| `model` | any model id you type, e.g. `anthropic/claude-haiku-5-5`, `qwen/qwen3-coder`, `openai/gpt-5-mini:online` (OpenRouter `:online` = web search) |
+| `model` | any model id the endpoint serves (empty = `AGENT_MODEL`), e.g. `qwen/qwen3-coder`, or on OpenRouter `openai/gpt-5-mini:online` (web search) |
 | `role` | a saved role, or a new one: describe what you need and AI writes `{title, instructions, tools}`, which you review and save |
 | `skin` | any of the 8 animals, or random (unused animals first) |
 | `name` | anything |
@@ -62,20 +64,21 @@ Project fields: `dev` = dev-server command (`{port}` / `$PORT` filled in),
 agents run **in parallel** (one task at a time each) → every tool call streams
 to Unity ("edit_file src/auth.ts") → result waits in **review** → approve, or
 reject with feedback (re-queued). Tokens are counted per task and per agent;
-cost in $ is added when the model is in OpenRouter's public price list.
+cost in $ is added only on OpenRouter (public price list); on any other provider `costUsd` stays `null` and tokens are still counted.
 
 ## Run
 
 ```bash
 cd backend
 npm install
-cp .env.example .env            # LLM_API_KEY, LOFT_DEFAULT_MODEL, WORKSPACE_DIR
-npm run check -- qwen/qwen3-coder   # one real agent turn with a tool call; exit 0 = works
-npm run serve                   # http://127.0.0.1:4101
+# put AGENT_API_KEY / AGENT_BASE_URL / AGENT_MODEL in the repo-root .env (see .env.example)
+npm run check                   # one real agent turn with a tool call; exit 0 = works
+npm run serve                   # http://127.0.0.1:4101 (loads ../.env, then backend/.env if present)
+tools/setup-stt.sh              # once, for local voice (whisper.cpp + multilingual model)
 npm test                        # offline: orchestrator + real SDK loop vs a fake LLM server
 ```
 
-Muse Spark gateway: `LLM_BASE_URL=<gateway>/v1`, `LLM_API_KEY=<key>`, and use its model ids.
+`LLM_API_KEY`, `LLM_BASE_URL` and `LOFT_DEFAULT_MODEL` still work as overrides of the `AGENT_*` values. Models that return a `reasoning` field or `<think>` text are fine: think text is stripped and JSON is extracted tolerantly (code fences, prose around it).
 
 **Pick models that support tool calling.** Cheap models are fine for reading
 and reviewing roles. Coding roles need a model that handles long multi-step tool
@@ -108,7 +111,32 @@ The server refuses non-loopback hosts without `LOFT_TOKEN`, because agents can r
 | `POST /party {on}` | party mode on/off, broadcast to every headset (late joiners get it in the snapshot) |
 | `GET /projects` · `POST /projects {name, path, dev?, setup?, url?, init?}` · `POST /projects/new {name, template}` · `DELETE /projects/:id` | projects (unregister keeps the folder) |
 | `GET /previews/<task>-desktop.png` / `-mobile.png` | screenshots of a task in review |
+| `POST /voice?agentId=&projectId=&scene=` | raw 16 kHz mono 16-bit WAV (max 10 MB) -> `{transcript, summary, needsConfirm, risky, intent}` |
+| `POST /voice/text {text, agentId?, projectId?, scene?}` | same without audio |
 | `GET /loft/:room[/boards]` · `POST /loft` | board layout store |
+
+## Voice
+
+`POST /voice` turns speech into one validated **intent** for the confirm card;
+`POST /voice/text` does the same from text (tests, desktop harness). Actions:
+`goal`, `task`, `spawn`, `remove`, `scene`, `approve`, `reject`, `stop`, `party`,
+`project`, `selectNext`, `none{reply}`. `risky` (approve, reject, remove, stop-all)
+must be pressed in VR; `needsConfirm` is false for scene, party, selectNext, none.
+Approve/reject carry the `taskId` of the review task they refer to.
+
+- English, Indonesian and mixed speech. Spoken code words are fixed ("slash health" -> `/health`, "dot js" -> `.js`).
+- The intent prompt includes the live roster, roles, projects, review queue, the pointed-at agent and current scene,
+  and every id in the answer is checked against them. Bad model output gives `action: "none"` with a reply, never an error.
+- A pointed-at `agentId` means "this one": a bare instruction becomes a `task` for it.
+- One action per utterance ("switch to the city and start the party" yields the first).
+
+STT is chosen by env (`src/stt.js`): `STT_PROVIDER=local` (whisper.cpp, language auto-detected) or `openai`
+(`STT_BASE_URL`, `STT_API_KEY`, `STT_MODEL`, any OpenAI-compatible `/audio/transcriptions`).
+Local setup: `tools/setup-stt.sh` (builds `whisper-cli` and downloads `ggml-small.bin` into the gitignored `data/stt/`;
+on macOS 14 or older `brew install whisper-cpp` compiles llvm and rust from source, so the script builds whisper.cpp directly).
+Quiet or silent audio never reaches whisper (it invents text on silence).
+
+Cloud deployment notes: `DEPLOY.md`.
 
 ## Limits (on purpose, for now)
 

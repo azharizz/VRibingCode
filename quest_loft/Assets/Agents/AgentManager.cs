@@ -10,7 +10,7 @@ public class AgentManager : MonoBehaviour
 {
     public const int MAX_AGENTS = 20;
     const int PER_ROW = 10;
-    const float SPACING = 1.15f, FRONT_Z = 1.6f, ROW_GAP = 1.4f;
+    const float SPACING = 1.3f, FRONT_Z = 3.0f, ROW_GAP = 1.3f;
 
     public List<AgentStateMachine> agents = new List<AgentStateMachine>();
     public event Action<string> OnAgentDone; // fires when an agent's task reaches review

@@ -1,0 +1,10 @@
+{
+  "name": "Star Deck",
+  "scene": "galaxy",
+  "audio": "loft_ambient_night_hum_loop",
+  "board": "#0A0F26",
+  "sky": { "zenith": "#03051A", "mid": "#0A0D2E", "horizon": "#1A1550", "below": "#04051A", "sunColor": "#D4E2FF", "sunAz": -38, "sunEl": 16, "sunSize": 0.018, "glow": 0.25, "stars": 1.0, "neb": 0.9, "nebA": "#7A2CC4", "nebB": "#1E6CD8" },
+  "ambient": { "sky": "#5668B4", "equator": "#44488A", "ground": "#222250" },
+  "light": { "color": "#C4D4FF", "intensity": 0.95, "euler": [35, 170, 0] },
+  "water": { "amp": 0 }
+}

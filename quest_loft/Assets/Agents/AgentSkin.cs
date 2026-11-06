@@ -7,6 +7,7 @@
 // a primitive placeholder animal animated in code, so the room always works.
 // Nothing else touches the model: state flows in via AgentStateMachine.
 
+using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(AgentStateMachine))]
@@ -27,7 +28,7 @@ public class AgentSkin : MonoBehaviour
     Transform modelTf; // the 3D animal (string `model` = LLM model id)
     Animator animator;
     bool driveAnimator;
-    TextMesh label;
+    TMP_Text label, info; // name (big) + role/state lines
     float phase, bornAt;
 
     void Awake() => Init();
@@ -44,8 +45,47 @@ public class AgentSkin : MonoBehaviour
         var box = gameObject.AddComponent<BoxCollider>();
         box.center = new Vector3(0f, 0.6f, 0f);
         box.size = new Vector3(0.9f, 1.2f, 0.9f);
-        label = LoftUtil.Text(transform, "Label", new Vector3(0f, 1.75f, 0f), 48, 0.008f, Color.white);
+        MakePlate();
+        label = LoftUtil.Label(transform, "Label", new Vector3(0f, 1.79f, 0f), 0.13f, Color.white, 1.0f);
+        info = LoftUtil.Label(transform, "Info", new Vector3(0f, 1.535f, 0f), 0.1f, Color.white, 1.05f, TMPro.TextAlignmentOptions.Top, 0.34f);
+        foreach (var t in new[] { label, info })
+        {
+            t.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+            t.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
+        }
+        label.fontStyle = TMPro.FontStyles.Bold;
     }
+
+    // Dark rounded plate behind the text: readable over sky, sea or planks.
+    static Mesh plateMesh;
+    static Material plateMat;
+    void MakePlate()
+    {
+        if (plateMesh == null)
+        {
+            var m = new Mk();
+            float hw = 0.56f, hh = 0.31f, c = 0.07f;
+            var pts = new[] { new Vector3(-hw + c, hh), new Vector3(hw - c, hh), new Vector3(hw, hh - c), new Vector3(hw, -hh + c),
+                              new Vector3(hw - c, -hh), new Vector3(-hw + c, -hh), new Vector3(-hw, -hh + c), new Vector3(-hw, hh - c) };
+            for (int i = 1; i < pts.Length - 1; i++) m.QuadFacing(pts[0], pts[i], pts[i + 1], pts[i + 1], Color.white, Color.white, Vector3.forward);
+            plateMesh = m.Build("agent_plate");
+            plateMat = new Material(Resources.Load<Shader>("Shaders/LoftUnlit")) { name = "agent_plate" };
+            plateMat.SetColor("_Tint", new Color(0.03f, 0.05f, 0.1f, 0.86f));
+            plateMat.SetFloat("_Src", 5); plateMat.SetFloat("_Dst", 10); plateMat.SetFloat("_ZW", 0); plateMat.SetFloat("_FogAdd", 0);
+            plateMat.renderQueue = 2900;
+        }
+        var go = transform.Find("Plate")?.gameObject;
+        if (go == null)
+        {
+            go = new GameObject("Plate");
+            go.transform.SetParent(transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = plateMesh;
+            go.AddComponent<MeshRenderer>().sharedMaterial = plateMat;
+        }
+        go.transform.localPosition = new Vector3(0f, 1.62f, -0.03f);
+        plate = go;
+    }
+    GameObject plate;
 
     void OnDestroy()
     {
@@ -92,9 +132,18 @@ public class AgentSkin : MonoBehaviour
     {
         if (modelTf != null) LoftUtil.Kill(modelTf.gameObject);
         var prefab = Resources.Load<GameObject>($"Skins/{skinId}");
-        var go = prefab != null ? Instantiate(prefab) : Placeholder(skinId);
-        go.name = "Model";
+        GameObject go;
+        if (prefab != null)
+        {   // the imported animals face -Z: wrap them so they face the CEO (+Z)
+            go = new GameObject("Model");
+            var inner = Instantiate(prefab);
+            inner.name = "Mesh";
+            inner.transform.SetParent(go.transform, false);
+            inner.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        }
+        else go = Placeholder(skinId);
         modelTf = go.transform;
+        modelTf.localScale = Vector3.one * 1.25f;
         modelTf.SetParent(transform, false);
         animator = go.GetComponentInChildren<Animator>();
         driveAnimator = false;
@@ -124,9 +173,10 @@ public class AgentSkin : MonoBehaviour
             : s == AgentState.Done ? new Color(0.5f, 1f, 0.5f)
             : s == AgentState.Failed ? new Color(1f, 0.45f, 0.4f)
             : Color.white;
-        string head = (selected ? "▶ " : "") + displayName;
+        label.text = (selected ? "> " : "") + displayName;
+        info.color = label.color;
         string body = $"{role} · {LoftDesk.ShortModel(model)}\n{s.ToString().ToUpperInvariant()}{(costUsd > 0 ? $" ${costUsd:0.000}" : "")}";
-        label.text = string.IsNullOrEmpty(line) ? $"{head}\n{body}" : $"{head}\n{body}\n{LoftUtil.Trunc(line, 28)}";
+        info.text = string.IsNullOrEmpty(line) ? body : $"{body}\n{LoftUtil.Trunc(line, 20)}";
     }
 
     void Update()
@@ -134,7 +184,7 @@ public class AgentSkin : MonoBehaviour
         var target = partying && Time.time >= partyDelay ? partySpot : home;
         bool travelling = (transform.position - target).sqrMagnitude > 0.0004f;
         transform.position = Vector3.MoveTowards(transform.position, target, (partying ? 2.6f : 2f) * Time.deltaTime);
-        if (label != null) label.gameObject.SetActive(!partying); // labels off: let the dance floor breathe
+        if (label != null) { label.gameObject.SetActive(!partying); info.gameObject.SetActive(!partying); plate.SetActive(!partying); } // labels off: let the dance floor breathe
         if (modelTf == null || driveAnimator) return;
         // Placeholder animation: breathe / busy bounce / happy hop / slump / dance.
         float t = Time.time + phase;

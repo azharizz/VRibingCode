@@ -18,7 +18,7 @@ public static class LoftBootstrap
             scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
 
         // Idempotent rebuild: drop everything this tool (or older versions) made.
-        foreach (var name in new[] { "Loft", "Scout", "Builder", "Keeper", "MainWall", "Floor", "QuestPanel", "ThemeProps",
+        foreach (var name in new[] { "Loft", "Scout", "Builder", "Keeper", "MainWall", "Floor", "QuestPanel", "ConfirmCard", "WristMenu", "ThemeProps",
             "Board_notes", "Board_kanban", "Board_calendar", "Board_log", "TelePad_0", "TelePad_1", "TelePad_2", "PartyMode", "PreviewScreen" })
         {
             GameObject old;
@@ -32,14 +32,13 @@ public static class LoftBootstrap
         var boards = loft.AddComponent<BoardManager>();
         loft.AddComponent<LoftClient>().boards = boards;
         loft.AddComponent<AgentManager>();
-        loft.AddComponent<VoiceCommands>().testMode = true;
         loft.AddComponent<Multiplayer>();
         loft.AddComponent<Comfort>();
         var world = loft.AddComponent<LoftWorld>();
         loft.AddComponent<LoftParty>();
         loft.AddComponent<LoftPreviewScreen>();
         loft.AddComponent<LoftDesk>();
-        loft.AddComponent<LoftQuestPanel>();
+        loft.AddComponent<LoftInteraction>();
 
         // Keep Standard's _EMISSION variant in player builds (party floor, ball, theme glow):
         // a material that uses it, inside Resources, is always shipped.
@@ -53,13 +52,17 @@ public static class LoftBootstrap
             AssetDatabase.CreateAsset(glow, "Assets/Resources/LoftGlowKeep.mat");
         }
 
+        // Same for the voice card + wrist menu (Unlit/Color).
+        if (AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/LoftUiKeep.mat") == null)
+            AssetDatabase.CreateAsset(new Material(Shader.Find("Unlit/Color")), "Assets/Resources/LoftUiKeep.mat");
+
         // Same for the preview screen's screenshots (Unlit/Texture).
         if (AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/LoftUnlitKeep.mat") == null)
             AssetDatabase.CreateAsset(new Material(Shader.Find("Unlit/Texture")), "Assets/Resources/LoftUnlitKeep.mat");
 
         world.Build();               // floor, wall, 4 boards, CameraRig
-        world.ApplyTheme(world.defaultTheme);
-        loft.GetComponent<LoftQuestPanel>().EnsureBuilt();
+        world.ApplyTheme(world.Resolve(world.defaultTheme));
+        loft.GetComponent<LoftInteraction>().EnsureBuilt();
         loft.GetComponent<LoftPreviewScreen>().EnsureBuilt();
 
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Loft.unity");

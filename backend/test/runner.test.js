@@ -37,6 +37,7 @@ before(async () => {
   await new Promise((r) => server.listen(0, "127.0.0.1", r));
   process.env.LLM_BASE_URL = `http://127.0.0.1:${server.address().port}/v1`;
   process.env.LLM_API_KEY = "test-key";
+  process.env.LOFT_DEFAULT_MODEL = "test/default-model"; // there is no built-in default model any more
   process.env.SUPER_SECRET_TOKEN = "do-not-leak";
   agents = await import("../src/agents.js");
   tools = await import("../src/tools.js");

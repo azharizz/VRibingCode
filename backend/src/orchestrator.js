@@ -114,7 +114,7 @@ export function createOrchestrator({
   function spawn({ name, skin, model, roleId, role } = {}) {
     if (agents.size >= maxAgents) throw new HttpError(409, `agent limit reached (${maxAgents})`);
     const m = String(model ?? "").trim() || defaultModel();
-    if (!MODEL_ID_RE.test(m)) throw new HttpError(400, `invalid model id '${m}'`);
+    if (m && !MODEL_ID_RE.test(m)) throw new HttpError(400, `invalid model id '${m}'`);
     let r;
     if (role) r = cleanRole(role);
     else if (roleId) {

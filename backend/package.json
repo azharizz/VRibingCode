@@ -1,15 +1,15 @@
 {
   "name": "virtual-loft-agents",
   "version": "0.1.0",
-  "description": "VIRTUAL LOFT backend: spawnable agents (default 3, max 20) on the OpenAI Agents SDK, any OpenAI-compatible LLM (OpenRouter), per-agent model + AI-written roles, SSE events for Unity.",
+  "description": "VIRTUAL LOFT backend: spawnable agents (default 3, max 20) on the OpenAI Agents SDK, any OpenAI-compatible LLM (repo-root .env), per-agent model + AI-written roles, SSE events for Unity.",
   "type": "module",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "test": "node --test --test-force-exit",
-    "serve": "node --env-file-if-exists=.env src/server.js",
-    "check": "node --env-file-if-exists=.env tools/check-connection.js"
+    "serve": "node src/server.js",
+    "check": "node tools/check-connection.js"
   },
   "dependencies": {
     "@openai/agents": "^0.21.0",

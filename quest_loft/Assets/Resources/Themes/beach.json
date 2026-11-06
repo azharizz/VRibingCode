@@ -1,19 +1,11 @@
 {
-  "name": "Beach Chill",
-  "background": "#8FD3FF",
-  "ambient": "#CDE8FF",
-  "light": { "color": "#FFF1D0", "intensity": 1.25, "euler": [45, -25, 0] },
-  "fog": { "color": "#BFE6FF", "density": 0.012 },
-  "floor": "#E8D3A2", "wall": "#7FC8E8", "board": "#1E3A4C",
+  "name": "Beach Cabana",
+  "scene": "beach",
   "audio": "beach_waves_loop",
-  "props": [
-    { "shape": "Cube", "pos": [0, -0.02, 11.0], "scale": [30, 0.02, 6], "color": "#2E9FD8" },
-    { "shape": "Cylinder", "pos": [-5.0, 1.6, 6.0], "scale": [0.18, 1.6, 0.18], "euler": [0, 0, 6], "color": "#8B6A43" },
-    { "shape": "Sphere", "pos": [-4.8, 3.2, 6.0], "scale": [2.2, 0.5, 2.2], "color": "#3E9B4F" },
-    { "shape": "Cylinder", "pos": [5.0, 1.0, 6.2], "scale": [0.05, 1.0, 0.05], "color": "#FFFFFF" },
-    { "shape": "Sphere", "pos": [5.0, 2.0, 6.2], "scale": [2.0, 0.35, 2.0], "color": "#FF6B6B" },
-    { "shape": "Cube", "pos": [4.2, 0.2, 5.2], "scale": [0.7, 0.12, 1.6], "euler": [-15, 0, 0], "color": "#FFD166" },
-    { "shape": "Sphere", "pos": [-3.6, 0.25, 4.6], "scale": [0.5, 0.5, 0.5], "color": "#FFFFFF" },
-    { "shape": "Sphere", "pos": [0, 9, -30], "scale": [5, 5, 5], "color": "#FFE9A8", "glow": true }
-  ]
+  "board": "#10202E",
+  "sky": { "zenith": "#2C78C8", "mid": "#6FB4E8", "horizon": "#FFDDB0", "sunColor": "#FFE0A8", "sunAz": 4, "sunEl": 12, "sunSize": 0.05, "glow": 0.7 },
+  "ambient": { "sky": "#A8CFF2", "equator": "#E2CDB0", "ground": "#9A8260" },
+  "light": { "color": "#FFE8C4", "intensity": 1.1, "euler": [38, 160, 0] },
+  "fog": { "color": "#F3D9B8", "density": 0.0014 },
+  "water": { "shallow": "#2DC6C0", "deep": "#0A5E95", "amp": 0.2, "speed": 1.0, "glint": 1.6, "foam": 0.5 }
 }

@@ -31,12 +31,8 @@ public class LoftParty : MonoBehaviour
     readonly List<Material> tiles = new List<Material>();
     ParticleSystem confetti;
     AudioSource music;
-    TextMesh[] banner;
+    TMPro.TMP_Text[] banner;
     float t0;
-    // saved room lighting
-    Color savedAmbient, savedBg;
-    float savedSun;
-    bool savedFog;
 
     void Awake()
     {
@@ -59,11 +55,6 @@ public class LoftParty : MonoBehaviour
         t0 = Time.time;
         Build();
         root.gameObject.SetActive(true);
-        savedAmbient = RenderSettings.ambientLight;
-        savedFog = RenderSettings.fog;
-        var sun = Sun();
-        savedSun = sun != null ? sun.intensity : -1f;
-        if (world != null && world.cam != null) savedBg = world.cam.backgroundColor;
         ball.localPosition = new Vector3(0f, BALL_START_Y, 0f);
         confetti.Clear();
         confetti.Play();
@@ -78,12 +69,7 @@ public class LoftParty : MonoBehaviour
         root.gameObject.SetActive(false);
         confetti.Stop();
         music.Stop();
-        RenderSettings.ambientLight = savedAmbient;
-        RenderSettings.fog = savedFog;
-        var sun = Sun();
-        if (sun != null && savedSun >= 0f) sun.intensity = savedSun;
-        if (world != null && world.cam != null) world.cam.backgroundColor = savedBg;
-        if (world != null && world.Current != null) world.ApplyTheme(world.Current.id); // exact theme restore
+        if (world != null) world.SetMood(0f); // back to the theme's own light
     }
 
     void Update()
@@ -93,13 +79,9 @@ public class LoftParty : MonoBehaviour
         float beat = t * BPM / 60f;
         float pulse = Mathf.Pow(1f - Mathf.Repeat(beat, 1f), 3f); // kick on every beat
 
-        // Club lighting fades in over 0.4 s.
+        // Club lighting fades in over 0.4 s (sky, water, ambient and sun all dim; glow stays).
         float k = Mathf.Clamp01(t / 0.4f);
-        RenderSettings.ambientLight = Color.Lerp(savedAmbient, new Color(0.12f, 0.04f, 0.2f), k);
-        RenderSettings.fog = false;
-        var sun = Sun();
-        if (sun != null && savedSun >= 0f) sun.intensity = Mathf.Lerp(savedSun, 0.08f, k);
-        if (world != null && world.cam != null) world.cam.backgroundColor = Color.Lerp(savedBg, new Color(0.03f, 0.01f, 0.05f), k);
+        if (world != null) world.SetMood(k);
 
         // Disco ball: drop with a little bounce after 0.15 s, then spin.
         float d = Mathf.Clamp01((t - 0.15f) / 0.5f);
@@ -127,17 +109,6 @@ public class LoftParty : MonoBehaviour
         }
         var bc = Color.Lerp(Color.clear, new Color(1f, 0.25f, 0.65f), Mathf.Clamp01((t - 0.5f) / 0.3f));
         foreach (var w in banner) w.color = bc; // per-mesh color: never touch the shared font material
-    }
-
-    Light sunCache;
-    Light Sun()
-    {
-        if (sunCache == null)
-        {
-            var go = GameObject.Find("Directional Light"); // LoftWorld's key light
-            if (go != null) sunCache = go.GetComponent<Light>();
-        }
-        return sunCache;
     }
 
     static float EaseOutBack(float x)
@@ -227,10 +198,11 @@ public class LoftParty : MonoBehaviour
         var words = new GameObject("Banner").transform;
         words.SetParent(root, false);
         words.localPosition = new Vector3(0f, 3.15f, -3.65f); // just in front of the wall face
-        var left = LoftUtil.Text(words, "Launch", new Vector3(-2.4f, 0f, 0f), 80, 0.012f, Color.clear);
+        var left = LoftUtil.Label(words, "Launch", new Vector3(-2.6f, 0f, 0f), 0.75f, Color.clear, 4f);
         left.text = "LAUNCH";
-        var right = LoftUtil.Text(words, "Party", new Vector3(2.4f, 0f, 0f), 80, 0.012f, Color.clear);
+        var right = LoftUtil.Label(words, "Party", new Vector3(2.6f, 0f, 0f), 0.75f, Color.clear, 4f);
         right.text = "PARTY!";
+        left.fontStyle = right.fontStyle = TMPro.FontStyles.Bold;
         banner = new[] { left, right };
 
         // Music: a 120 BPM kick + hi-hat loop generated in code (or Resources/Audio/party).

@@ -1,0 +1,11 @@
+{
+  "name": "Dusk Penthouse",
+  "scene": "city",
+  "audio": "loft_ambient_focus_rain_loop",
+  "board": "#12142A",
+  "sky": { "zenith": "#1B1B4B", "mid": "#6B3F7E", "horizon": "#F6896A", "below": "#3A2A4A", "sunColor": "#FF9D5C", "sunAz": 24, "sunEl": 3, "sunSize": 0.06, "glow": 1.1 },
+  "ambient": { "sky": "#7478B8", "equator": "#9A7090", "ground": "#443658" },
+  "light": { "color": "#FFC9A6", "intensity": 0.95, "euler": [30, 165, 0] },
+  "fog": { "color": "#B56D86", "density": 0.0016 },
+  "water": { "shallow": "#2C3A6A", "deep": "#0C1230", "amp": 0.0, "speed": 0, "glint": 0, "foam": 0 }
+}

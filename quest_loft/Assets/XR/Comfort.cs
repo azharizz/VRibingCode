@@ -1,7 +1,7 @@
 // VIRTUAL LOFT — Comfort.cs
 // Comfort + session rules: teleport-only, seated default, vignette on move,
 // 15-30 min sessions, 30s autosave. Quest 3/3S only (no Quest 2).
-// Teleport = LoftQuestPanel moving the CameraRig. Height: in XR the tracking
+// Teleport and snap turn = LoftInteraction moving the CameraRig. Height: in XR the tracking
 // origin is set per mode (seated = Device + rig at eye height, standing =
 // Floor + rig on the floor); on desktop the rig sits at eye height.
 
@@ -107,6 +107,24 @@ namespace VirtualLoft.XR
         {
             vignetteFading = true;
             onTeleportEnd?.Invoke();
+        }
+
+        public const float SNAP_DEGREES = 30f;
+
+        /// <summary>
+        /// Snap turn (dir = +1 right, -1 left): rotates the rig about the HEAD so you
+        /// stay put, with a brief dim to hide the jump. Never smooth.
+        /// </summary>
+        public void SnapTurn(int dir, Transform head = null)
+        {
+            if (dir == 0) return;
+            if (rig == null && Camera.main != null) rig = Camera.main.transform.parent;
+            if (rig == null) return;
+            if (head == null && Camera.main != null) head = Camera.main.transform;
+            var pivot = head != null ? head.position : rig.position;
+            rig.RotateAround(pivot, Vector3.up, SNAP_DEGREES * Mathf.Sign(dir));
+            BeginTeleport();
+            EndTeleport();
         }
 
         /// <summary>Seated/standing switch. Seated default per policy.</summary>

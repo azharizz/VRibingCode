@@ -72,13 +72,20 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
     await fs.writeFile(file, JSON.stringify([...projects.values()], null, 2));
   }
 
+  async function isRepoRoot(dir) {
+    const top = await git(dir, ["rev-parse", "--show-toplevel"], { ok: true });
+    return top !== null && (await fs.realpath(top.trim())) === (await fs.realpath(dir));
+  }
+
   async function ensureRepo(dir, init) {
     if (!(await exists(dir))) {
       if (!init) throw new ProjectError(400, `folder '${dir}' does not exist`);
       await fs.mkdir(dir, { recursive: true });
     }
-    if ((await git(dir, ["rev-parse", "--show-toplevel"], { ok: true })) === null) {
-      if (!init) throw new ProjectError(400, `'${dir}' is not a git repo (send init:true to create one)`);
+    // A folder nested in some other repo is NOT a project: its branches and
+    // approve-merges would land in that outer repo.
+    if (!(await isRepoRoot(dir))) {
+      if (!init) throw new ProjectError(400, `'${dir}' is not the root of a git repo (send init:true to create one)`);
       await git(dir, ["init", "-q", "-b", "main"]);
     }
     if ((await git(dir, ["rev-parse", "--verify", "HEAD"], { ok: true })) === null) {
@@ -96,6 +103,8 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
     }
     if (defaultPath && ![...projects.values()].some((p) => path.resolve(p.path) === path.resolve(defaultPath))) {
       await add({ name: "workspace", path: defaultPath, init: true, kind: "static" });
+    } else if (defaultPath) {
+      await ensureRepo(defaultPath, true); // registered by an older version: may still sit inside another repo
     }
     return list();
   }
@@ -151,6 +160,7 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
 
   // ---- per-task worktrees ----
   async function prepare(project, { taskId, agent }) {
+    if (!(await isRepoRoot(project.path))) throw new ProjectError(409, `'${project.path}' is not its own git repo: refusing to touch the outer repo`);
     const branch = `loft/${slug(agent)}/${taskId}`;
     const worktree = path.join(wtRoot, project.id, taskId);
     await fs.mkdir(path.dirname(worktree), { recursive: true });

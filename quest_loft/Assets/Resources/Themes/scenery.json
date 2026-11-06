@@ -1,0 +1,11 @@
+{
+  "name": "Mountain Lodge",
+  "scene": "scenery",
+  "audio": "loft_ambient_meadow_birds_loop",
+  "board": "#16231C",
+  "sky": { "zenith": "#3F7CC0", "mid": "#8AC0E8", "horizon": "#F2E3C8", "sunColor": "#FFF0C8", "sunAz": -24, "sunEl": 22, "sunSize": 0.05, "glow": 0.6 },
+  "ambient": { "sky": "#A7CBE8", "equator": "#DAD3BE", "ground": "#76835A" },
+  "light": { "color": "#FFF0D2", "intensity": 1.1, "euler": [40, 200, 0] },
+  "fog": { "color": "#E9E8DC", "density": 0.0007 },
+  "water": { "shallow": "#5FB4B5", "deep": "#2C6E86", "amp": 0.05, "speed": 0.6, "glint": 1.0, "foam": 0 }
+}

@@ -94,6 +94,8 @@ public static class LoftQuestBuild
             new[] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.OpenGLES3 });
         // Agents live on the backend over Wi-Fi: always request INTERNET.
         PlayerSettings.Android.forceInternetPermission = true;
+        // Voice: RECORD_AUDIO + cleartext http to a LAN backend (see LoftAndroidSetup).
+        LoftAndroidSetup.ApplySettings();
         // Input: project stays on old Input Manager (LoftDesk uses it); the
         // Input System *package* is present only as an OpenXR dependency.
         AssetDatabase.SaveAssets();

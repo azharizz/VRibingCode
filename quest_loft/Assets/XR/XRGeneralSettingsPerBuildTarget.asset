@@ -1,5 +1,22 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8756583530192967013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c3631f5e58749a59194e0cf6baf6d5, type: 3}
+  m_Name: Standalone Providers
+  m_EditorClassIdentifier: Unity.XR.Management::UnityEngine.XR.Management.XRManagerSettings
+  m_RequiresSettingsUpdate: 0
+  m_AutomaticLoading: 0
+  m_AutomaticRunning: 0
+  m_Loaders:
+  - {fileID: 11400000, guid: 870c39411d5354505916ff794f6ac60c, type: 2}
 --- !u!114 &-8206796230177580262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,7 +98,7 @@ MonoBehaviour:
   m_AutomaticLoading: 0
   m_AutomaticRunning: 0
   m_Loaders:
-  - {fileID: 11400000, guid: 870c39411d5354505916ff794f6ac60c, type: 2}
+  - {fileID: 0}
 --- !u!114 &-3044629362592774693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,7 +156,7 @@ MonoBehaviour:
   Keys: 0700000001000000i
   Values:
   - {fileID: -469797495115294192}
-  - {fileID: 1752146458626893342}
+  - {fileID: 7062217941161118817}
 --- !u!114 &1752146458626893342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
   m_Name: Standalone Settings
   m_EditorClassIdentifier: Unity.XR.Management::UnityEngine.XR.Management.XRGeneralSettings
-  m_LoaderManagerInstance: {fileID: -4282583036141537784}
+  m_LoaderManagerInstance: {fileID: -8756583530192967013}
   m_InitManagerOnStart: 1
 --- !u!114 &2496961956795140948
 MonoBehaviour:
@@ -199,3 +216,17 @@ MonoBehaviour:
   m_AutomaticRunning: 0
   m_Loaders:
   - {fileID: 0}
+--- !u!114 &7062217941161118817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d236b7d11115f2143951f1e14045df39, type: 3}
+  m_Name: Standalone Settings
+  m_EditorClassIdentifier: Unity.XR.Management::UnityEngine.XR.Management.XRGeneralSettings
+  m_LoaderManagerInstance: {fileID: -8756583530192967013}
+  m_InitManagerOnStart: 1

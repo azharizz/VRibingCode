@@ -8,15 +8,15 @@ using UnityEngine;
 
 public class LoftPreviewScreen : MonoBehaviour
 {
-    public static readonly Vector3 Position = new Vector3(4.3f, 1.75f, 3.6f);
-    const float W = 2.4f, H = 1.5f;
+    public static readonly Vector3 Position = LoftWorld.Polar(86f, 3.6f, 1.55f);
+    const float W = 2.0f, H = 1.25f;
 
     public LoftClient client;
     public string shownTaskId, shownDesktop;
 
     Transform root;
     Renderer desktopQuad, mobileQuad;
-    TextMesh caption, placeholder;
+    TMPro.TMP_Text caption, placeholder;
     Texture2D desktopTex, mobileTex;
 
     void Awake()
@@ -33,14 +33,14 @@ public class LoftPreviewScreen : MonoBehaviour
         root = new GameObject("PreviewScreen").transform;
         root.position = Position;
         // Face the CEO's seat; TextMesh/quads read from -Z, so look AWAY from the seat.
-        var seat = new Vector3(0f, Position.y, 6.5f);
+        var seat = new Vector3(0f, Position.y, LoftWorld.RIG_START_Z);
         root.rotation = Quaternion.LookRotation(Position - seat);
         LoftUtil.Prim(PrimitiveType.Cube, "Bezel", root, new Vector3(0f, 0f, 0.04f), new Vector3(W + 0.12f, H + 0.12f, 0.05f), new Color(0.06f, 0.06f, 0.08f));
         desktopQuad = Quad("Desktop", Vector3.zero, new Vector2(W, H));
         mobileQuad = Quad("Mobile", new Vector3(W / 2f - 0.27f, -H / 2f + 0.5f, -0.01f), new Vector2(0.42f, 0.9f));
-        caption = LoftUtil.Text(root, "Caption", new Vector3(0f, H / 2f + 0.2f, 0f), 40, 0.009f, new Color(1f, 0.95f, 0.8f));
-        placeholder = LoftUtil.Text(root, "Placeholder", new Vector3(0f, 0f, -0.01f), 44, 0.01f, new Color(0.7f, 0.75f, 0.85f));
-        // LoftUtil.Text faces +Z with a Y=180 turn; this screen's front is its -Z side.
+        caption = LoftUtil.Label(root, "Caption", new Vector3(0f, H / 2f + 0.12f, 0f), 0.075f, new Color(1f, 0.95f, 0.8f), W + 0.4f);
+        placeholder = LoftUtil.Label(root, "Placeholder", new Vector3(0f, 0f, -0.01f), 0.085f, new Color(0.7f, 0.75f, 0.85f), W - 0.2f);
+        // Label faces +Z of its parent; this screen's front is its -Z side.
         caption.transform.localRotation = Quaternion.identity;
         placeholder.transform.localRotation = Quaternion.identity;
         Show(null);
@@ -71,7 +71,7 @@ public class LoftPreviewScreen : MonoBehaviour
         string desktop = (string)preview?["desktop"];
         caption.text = task == null ? "PREVIEW"
             : $"PREVIEW · {(string)task["projectId"]} · {LoftUtil.Trunc(((string)task["title"] ?? "").Split('\n')[0], 34)}\n" +
-              $"{(string)task["diff"]?["stat"] ?? ""}{(status == "ready" ? $"   live: {(string)preview["url"]}" : "")}";
+              $"{(string)(task["diff"] as JObject)?["stat"] ?? ""}{(status == "ready" ? $"   live: {(string)preview["url"]}" : "")}";
         if (status != "ready")
         {
             desktopQuad.enabled = mobileQuad.enabled = false;
@@ -79,7 +79,7 @@ public class LoftPreviewScreen : MonoBehaviour
             placeholder.text = task == null ? "Nothing in review"
                 : status == "loading" ? "Taking screenshots…"
                 : status == "error" ? "Preview failed:\n" + LoftUtil.Wrap((string)preview["error"], 44, 4)
-                : (task["diff"]?["files"] as JArray)?.Count > 0 ? "No preview for this project" : "No file changes to preview";
+                : ((task["diff"] as JObject)?["files"] as JArray)?.Count > 0 ? "No preview for this project" : "No file changes to preview";
             return;
         }
         placeholder.text = "";

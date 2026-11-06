@@ -1,9 +1,9 @@
 // VIRTUAL LOFT — tiny shared helpers (text, materials, primitives, colors).
-// Legacy TextMesh + built-in font: zero asset dependencies, renders in
-// stripped player builds. TextMesh reads from -Z, so text faces +Z (the play
-// side) with a local Y=180 rotation.
+// Reading text: Label (TextMeshPro SDF). Text (legacy TextMesh) stays for old
+// callers. Both read from -Z, so text faces +Z (the play side) with a local Y=180.
 
 using System.Text;
+using TMPro;
 using UnityEngine;
 
 public static class LoftUtil
@@ -55,6 +55,36 @@ public static class LoftUtil
         tm.anchor = TextAnchor.MiddleCenter;
         tm.alignment = TextAlignment.Center;
         tm.color = color;
+        return tm;
+    }
+
+    // Crisp SDF text for anything the CEO reads in VR. heightM = LINE height in
+    // meters (a line of text takes heightM from baseline to baseline); width > 0
+    // wraps at that many meters, height > 0 sets the box (top/bottom aligned text
+    // needs it). Parent must be uniformly scaled. Text faces +Z of its parent.
+    public static TMP_Text Label(Transform parent, string name, Vector3 localPos, float heightM, Color color, float width = 0f,
+        TextAlignmentOptions align = TextAlignmentOptions.Center, float height = 0f)
+    {
+        var t = parent.Find(name);
+        if (t == null)
+        {
+            t = new GameObject(name, typeof(RectTransform)).transform;
+            t.SetParent(parent, false);
+        }
+        t.localPosition = localPos;
+        t.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        var tm = t.GetComponent<TextMeshPro>();
+        if (tm == null) tm = t.gameObject.AddComponent<TextMeshPro>();
+        if (tm.font == null) tm.font = TMP_Settings.defaultFontAsset;
+        // World line height = faceInfo.lineHeight / pointSize * fontSize * 0.1 (TMP's 3D scale).
+        float ratio = tm.font != null && tm.font.faceInfo.pointSize > 0 ? tm.font.faceInfo.lineHeight / tm.font.faceInfo.pointSize : 1.17f;
+        tm.fontSize = heightM * 10f / ratio;
+        tm.color = color;
+        tm.alignment = align;
+        tm.richText = false;
+        tm.textWrappingMode = width > 0f ? TextWrappingModes.Normal : TextWrappingModes.NoWrap;
+        tm.overflowMode = TextOverflowModes.Overflow;
+        tm.rectTransform.sizeDelta = new Vector2(width > 0f ? width : 20f, height > 0f ? height : 20f);
         return tm;
     }
 
