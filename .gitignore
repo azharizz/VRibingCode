@@ -157,3 +157,25 @@ vite.config.ts.timestamp-*
 /quest_loft/Logs/
 /quest_loft/MemoryCaptures/
 /quest_loft/UserSettings/
+
+# ---- VIRTUAL LOFT: generated output, never commit ----
+quest_loft/Library/
+quest_loft/Temp/
+quest_loft/Logs/
+quest_loft/obj/
+quest_loft/UserSettings/
+quest_loft/Builds/
+quest_loft/.utmp/
+quest_loft/Tools/*.png
+quest_loft/Tools/*.txt
+quest_loft/Tools/*.json
+!quest_loft/Tools/manifest.with-meta-photon.json
+/Tools/
+*.ppm
+*.apk
+backend/workspace/
+backend/data/
+
+# animal generator output (renders, .blend)
+animalgen/out/
+audiogen/out/

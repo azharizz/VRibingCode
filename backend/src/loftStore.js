@@ -8,6 +8,9 @@
 
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const DATA_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../data/lofts");
 
 export function blankLoft(roomId = "focus-loft") {
   return {
@@ -26,11 +29,19 @@ export function validateLoft(loft) {
   }
   if (!Array.isArray(loft.boards)) throw new Error("loft.boards must be an array");
   if (!Array.isArray(loft.agents)) throw new Error("loft.agents must be an array");
+  // One card shape everywhere: board.cards (Unity's shape). Migrate the old
+  // backend shape board.content.cards on the way in.
+  for (const b of loft.boards) {
+    if (!b || typeof b !== "object") throw new Error("loft.boards entries must be objects");
+    if (!Array.isArray(b.cards)) b.cards = Array.isArray(b.content?.cards) ? b.content.cards : [];
+    if (b.content?.cards) delete b.content.cards;
+  }
   return loft;
 }
 
 function localPath(roomId, localDir) {
-  const dir = localDir ?? path.resolve(process.cwd(), "backend/data/lofts");
+  if (!/^[\w.-]{1,64}$/.test(roomId) || roomId.startsWith(".")) throw new Error(`invalid roomId '${roomId}'`);
+  const dir = localDir ?? DATA_DIR;
   return path.join(dir, `${roomId}.json`);
 }
 

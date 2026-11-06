@@ -1,151 +1,357 @@
-// VIRTUAL LOFT — LoftDesk.cs (in-app HQ, Mac player self-contained)
-// The ONLY place the standalone Loft.app needs: walk, see boards, assign,
-// watch progress + read the result — no backend, no browser, no console.
+// VIRTUAL LOFT — LoftDesk.cs: the CEO's desk. Glue between the backend and
+// the room. It never simulates work:
+//   server events (LoftClient.OnEvent) -> animals (AgentManager) + wall boards
+//   CEO actions (panel / voice / keys / desktop overlay) -> LoftClient commands
 //
-// - Walk: WASD / arrows on XZ, hold RIGHT mouse + drag to look. Y locked to
-//   seated eye height (1.2m). XR comfort policy (teleport-only) is untouched:
-//   this walker is the desktop test harness; Comfort.allowSmoothLocomotion
-//   stays false and FullA/A28 still passes.
-// - Boards: renders BoardManager cards onto the in-world plates (Content
-//   TextMesh under Board_<id>) + mirrors them in the left overlay panel.
-// - Assign: Assign(agentId, title) creates a kanban card, sets the agent
-//   Working, logs to log board + activity log, then simulates real work over
-//   ~12s with a visible progress %. Finish moves the card to Done, writes the
-//   result to the log board, sets the agent Done. All inside this app.
-// - Voice events are deliberately NOT auto-wired here: headless Play tests
-//   fire InvokeCommand() and must stay isolated. In-app path is GUI + keys
-//   1/2/3 (assign), M (done), X (stop).
+// Desktop harness (no headset): WASD walk + right-drag look move the
+// CameraRig; the OnGUI overlay only draws when no XR device is active
+// (OnGUI never renders inside a headset — LoftQuestPanel is the VR UI).
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
+using UnityEngine.XR;
 using VirtualLoft.XR;
 
 public class LoftDesk : MonoBehaviour
 {
     [Header("Wire (auto-found if empty)")]
     public AgentManager agents;
-    public BoardManager boards;
-    public Multiplayer net;
+    public LoftClient client;
+    public LoftWorld world;
+    public VoiceCommands voice;
+    public LoftParty party;
 
-    [Header("Walk (desktop test harness)")]
+    [Header("Desktop walk")]
     public float walkSpeed = 2.5f;
     public float lookSpeed = 3f;
 
-    [Header("Work simulation")]
-    public float workSeconds = 12f;
-
-    // ---- runtime ----
     [Serializable]
-    public class TaskRec
-    {
-        public string cardId;
-        public string agentId;
-        public string title;
-        public float progress; // 0..1
-        public bool done;
-        public string result;
-    }
+    public class TaskView { public string id, agentId, title, status, last, result; }
 
-    public readonly List<TaskRec> tasks = new List<TaskRec>();
-    public readonly List<TaskRec> doneTasks = new List<TaskRec>();
-    public readonly List<string> eventLog = new List<string>(capacity: 40);
-    readonly Dictionary<string, Coroutine> running = new Dictionary<string, Coroutine>();
+    public readonly Dictionary<string, TaskView> tasks = new Dictionary<string, TaskView>();
+    public readonly List<string> eventLog = new List<string>(40);
+    public string selectedAgentId;
+    public int maxAgents = AgentManager.MAX_AGENTS;
+    public bool Connected => client != null && client.Connected;
+    public Rect overlayRect; // LoftQuestPanel ignores mouse clicks inside it
 
-    string taskInput = "run landing test";
-    int selAgent = 1;
-    readonly string[] agentIds = { "scout", "builder", "keeper" };
-    readonly string[] agentNames = { "Scout", "Builder", "Keeper" };
+    // ---- spawn form (shared by the desktop overlay and the VR console) ----
+    // Everything is free: any model id (typed), any saved role or an AI-written
+    // one, any animal. Lists come from the server snapshot.
+    public readonly List<JObject> roles = new List<JObject>();
+    public List<string> skins = new List<string> { "fox", "owl", "cat", "bear", "rabbit", "penguin", "frog", "panda" };
+    public List<string> writeTools = new List<string> { "write_file", "edit_file", "run_command" };
+    public string defaultModel = "";
+    public string formName = "", formModel = "", formSkin = "random", formRoleId = "builder", formDescribe = "";
+    public JObject formDraft; // AI-written role awaiting CREATE (null = use formRoleId)
+    public bool drafting;
+    bool showForm;
 
-    float yaw = 180f, pitch;
-    float viewTimer;
-    Camera cam;
-    readonly Dictionary<string, Color> baseColors = new Dictionary<string, Color>();
-    bool seeded;
+    string input = "Add a /health endpoint with a test";
+    string feedback = "";
+    float pitch;
 
     void Awake()
     {
         if (agents == null) agents = FindFirstObjectByType<AgentManager>();
-        if (boards == null) boards = FindFirstObjectByType<BoardManager>();
-        if (net == null) net = FindFirstObjectByType<Multiplayer>();
-        cam = Camera.main ?? FindFirstObjectByType<Camera>();
-        if (cam != null) { yaw = cam.transform.rotation.eulerAngles.y; pitch = 0f; }
-        foreach (var a in agents.agents)
+        if (client == null) client = FindFirstObjectByType<LoftClient>();
+        if (world == null) world = FindFirstObjectByType<LoftWorld>();
+        if (world == null) world = gameObject.AddComponent<LoftWorld>(); // scenes built before themes existed
+        if (party == null) party = FindFirstObjectByType<LoftParty>();
+        if (party == null) party = gameObject.AddComponent<LoftParty>();
+        if (voice == null) voice = FindFirstObjectByType<VoiceCommands>();
+        if (client != null) client.OnEvent += HandleEvent;
+        if (voice != null) voice.OnCommand += HandleVoice;
+        Note($"Connecting to {client?.serverUrl ?? "(no LoftClient)"} …");
+    }
+
+    void OnDestroy()
+    {
+        if (client != null) client.OnEvent -= HandleEvent;
+        if (voice != null) voice.OnCommand -= HandleVoice;
+    }
+
+    // ---- server events -> room (the only place agent/task state changes) ----
+    public void HandleEvent(JObject e)
+    {
+        switch ((string)e["type"])
         {
-            if (a == null) continue;
-            // Belt-and-braces: labels must face the play side (+Z). Scenes
-            // baked before the mirror fix have them backwards.
-            var lab = a.transform.Find("Label");
-            if (lab != null) lab.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-            var body = a.transform.Find("Body");
-            if (body != null)
-            {
-                var r = body.GetComponent<Renderer>();
-                if (r != null && !baseColors.ContainsKey(a.agentId)) baseColors[a.agentId] = r.material.color;
-            }
+            case "snapshot":
+                maxAgents = (int?)e["maxAgents"] ?? maxAgents;
+                defaultModel = (string)e["defaultModel"] ?? defaultModel;
+                if (e["skins"] is JArray sk) skins = sk.Select(x => (string)x).ToList();
+                if (e["writeTools"] is JArray wt) writeTools = wt.Select(x => (string)x).ToList();
+                SetRoles(e["roles"] as JArray);
+                if (party != null) party.SetParty((bool?)e["party"] ?? false); // join a party already going
+                var ids = new HashSet<string>();
+                foreach (var a in e["agents"] ?? new JArray()) { UpsertAgent((JObject)a); ids.Add((string)a["id"]); }
+                foreach (var a in agents.agents.ToArray())
+                    if (a != null && !ids.Contains(a.agentId)) agents.Remove(a.agentId);
+                if (selectedAgentId != null && !ids.Contains(selectedAgentId)) selectedAgentId = null;
+                tasks.Clear();
+                foreach (var t in e["tasks"] ?? new JArray()) UpsertTask((JObject)t, false);
+                Note($"Connected — {ids.Count}/{maxAgents} agents");
+                break;
+            case "agent":
+                bool fresh = agents.Find((string)e["agent"]?["id"]) == null;
+                UpsertAgent((JObject)e["agent"]);
+                var born = agents.Find((string)e["agent"]?["id"]);
+                if (fresh && born != null) LoftAudio.PlayAt("sfx_spawn", born.GetComponent<AgentSkin>().home + Vector3.up * 0.6f);
+                break;
+            case "agent.removed":
+                var gone = (string)e["id"];
+                var leaving = agents.Find(gone);
+                if (leaving != null) LoftAudio.PlayAt("sfx_remove", leaving.transform.position + Vector3.up * 0.6f);
+                agents.Remove(gone);
+                if (selectedAgentId == gone) selectedAgentId = null;
+                Note($"– {gone} left the team");
+                break;
+            case "task":
+                UpsertTask((JObject)e["task"], true);
+                break;
+            case "roles":
+                SetRoles(e["roles"] as JArray);
+                break;
+            case "party":
+                bool on = (bool?)e["on"] ?? false;
+                if (party != null && party.On != on) { party.SetParty(on); Note(on ? "★ PARTY TIME! ★" : "Party's over — back to work"); }
+                break;
+            case "goal":
+                Note($"GOAL {(string)e["status"]}: {LoftUtil.Trunc((string)e["goal"], 40)} {(string)e["error"]}");
+                break;
+            case "error":
+                Note($"⚠ {(string)e["message"]}");
+                break;
+            case "disconnected":
+                Note("Backend offline — retrying…");
+                break;
         }
-        EnsureBoardViews();
-        SeedIfEmpty();
-#if !UNITY_EDITOR
-        LoadPersisted(); // player only: editor Play stays hermetic for tests
-#endif
-        Note("Desk ready — WASD walk, assign below, all in-app.");
-    }
-
-    // ---- public: the in-app assign path ----
-    public string Assign(string agentId, string title)
-    {
-        if (agents == null || boards == null) { Note("Assign FAILED: systems missing"); return null; }
-        var a = agents.agents.Find(x => x != null && x.agentId == agentId);
-        if (a == null) { Note($"Assign FAILED: unknown agent '{agentId}'"); return null; }
-        if (string.IsNullOrWhiteSpace(title)) title = "untitled task";
-        title = title.Trim();
-
-        string cardId = boards.AddCard("kanban", $"{title} [{agentId}]", "Doing");
-        agents.AssignTask(agentId, title);
-        try { net.Assign("CEO", $"agent:{agentId}", agentId); } catch { }
-        try { net.Log("CEO", "assign", $"card:{cardId}", "", $"{agentId}:{title}"); } catch { }
-        boards.AddCard("log", $"ASSIGN {agentId}: {title}", "ToDo");
-
-        var rec = new TaskRec { cardId = cardId, agentId = agentId, title = title };
-        tasks.Add(rec);
-        Note($"ASSIGN {agentId}: {title}");
-        if (running.TryGetValue(agentId, out var old) && old != null) StopCoroutine(old);
-        running[agentId] = StartCoroutine(RunTask(rec));
-        RefreshViews();
-        return cardId;
-    }
-
-    public void Complete(string agentId)
-    {
-        var rec = tasks.Find(t => !t.done && t.agentId == agentId);
-        if (rec == null) { Note($"Done: no active task for {agentId}"); return; }
-        if (running.TryGetValue(agentId, out var old) && old != null) StopCoroutine(old);
-        running[agentId] = StartCoroutine(FinishTask(rec, true));
-    }
-
-    public void StopAll()
-    {
-        foreach (var kv in running) if (kv.Value != null) StopCoroutine(kv.Value);
-        running.Clear();
-        foreach (var t in tasks) if (!t.done) { t.done = true; t.result = "STOPPED"; }
-        if (agents != null) agents.StopAll();
-        if (boards != null) boards.AddCard("log", "STOP all", "ToDo");
-        Note("STOP all tasks");
         RefreshViews();
     }
 
-    public void WakeAll()
+    void UpsertAgent(JObject a)
     {
-        if (agents != null) agents.WakeAll();
-        Note("Wake all agents");
+        if (a == null) return;
+        var id = (string)a["id"];
+        bool isNew = agents.Find(id) == null;
+        var role = RoleTitle(a);
+        var sm = agents.Upsert(id, (string)a["name"], role, (string)a["skin"], AgentManager.ParseState((string)a["state"]));
+        if (sm == null) return;
+        var model = (string)a["model"] ?? "";
+        if (isNew) Note($"+ {(string)a["name"]} ({role}, {ShortModel(model)}, {(string)a["skin"]}) joined");
+        var skin = sm.GetComponent<AgentSkin>();
+        skin.SetMeta(model, (double?)a["usage"]?["costUsd"], (long?)a["usage"]?["inputTokens"] + (long?)a["usage"]?["outputTokens"]);
+        skin.SetSelected(id == selectedAgentId);
+    }
+
+    void UpsertTask(JObject t, bool log)
+    {
+        if (t == null) return;
+        var id = (string)t["id"];
+        tasks.TryGetValue(id, out var old);
+        var v = new TaskView
+        {
+            id = id,
+            agentId = (string)t["agentId"],
+            title = (string)t["title"],
+            status = (string)t["status"],
+            last = (string)t["last"],
+            result = (string)t["result"],
+        };
+        tasks[id] = v;
+        if (log && (old == null || old.status != v.status))
+        {
+            if (v.status == "approved") LoftAudio.Play("sfx_approve");
+            else if (v.status == "rejected") LoftAudio.Play("sfx_reject");
+            string who = AgentName(v.agentId);
+            string mark = v.status switch
+            {
+                "queued" => "QUEUED", "running" => "▶", "review" => "✓ REVIEW", "approved" => "★ APPROVED",
+                "rejected" => "↺ REDO", "failed" => "✗ FAILED", "stopped" => "■ STOPPED", _ => v.status,
+            };
+            Note($"{mark} {who}: {LoftUtil.Trunc(FirstLine(v.title), 36)}");
+        }
+        var skin = agents.Find(v.agentId)?.GetComponent<AgentSkin>();
+        if (skin != null && v.status == "running") skin.SetLine(string.IsNullOrEmpty(v.last) ? FirstLine(v.title) : v.last);
+        else if (skin != null && old?.status == "running") skin.SetLine(v.status == "review" ? "waiting for CEO review" : v.status);
+    }
+
+    static string RoleTitle(JObject a) => a["role"] is JObject ro ? (string)ro["title"] : (string)a["role"];
+    public static string ShortModel(string m) => string.IsNullOrEmpty(m) ? "default" : m.Substring(m.LastIndexOf('/') + 1);
+
+    void SetRoles(JArray list)
+    {
+        if (list == null) return;
+        roles.Clear();
+        foreach (var r in list) if (r is JObject o) roles.Add(o);
+        if (!roles.Any(r => (string)r["id"] == formRoleId) && roles.Count > 0) formRoleId = (string)roles[0]["id"];
+    }
+
+    // ---- spawn form actions ----
+    public void CycleRole()
+    {
+        formDraft = null;
+        if (roles.Count == 0) return;
+        int i = roles.FindIndex(r => (string)r["id"] == formRoleId);
+        formRoleId = (string)roles[(i + 1) % roles.Count]["id"];
+    }
+
+    public void CycleSkin()
+    {
+        var all = new List<string> { "random" };
+        all.AddRange(skins);
+        formSkin = all[(all.IndexOf(formSkin) + 1) % all.Count];
+    }
+
+    // Plain-language need -> AI writes the role; shown in the form until CREATE.
+    public void DraftRole(string description)
+    {
+        if (string.IsNullOrWhiteSpace(description)) return;
+        formDescribe = description.Trim();
+        drafting = true;
+        Note($"Writing a role for: {LoftUtil.Trunc(formDescribe, 30)} …");
+        client.Then(client.DraftRole(formDescribe), res =>
+        {
+            drafting = false;
+            formDraft = res?["draft"] as JObject;
+            if (formDraft != null) Note($"Role ready: {(string)formDraft["title"]} — review, then CREATE");
+        });
+    }
+
+    JObject FormRole() => formDraft ?? roles.FirstOrDefault(r => (string)r["id"] == formRoleId);
+
+    public List<string> FormTools() => (FormRole()?["tools"] as JArray)?.Select(t => (string)t).ToList() ?? new List<string>();
+
+    // CEO can take a risky tool away from an AI-written role before creating it.
+    public void ToggleDraftTool(string tool)
+    {
+        if (formDraft == null) return;
+        var tools = FormTools();
+        if (!tools.Remove(tool)) tools.Add(tool);
+        formDraft["tools"] = new JArray(tools);
+    }
+
+    public string FormSummary()
+    {
+        var role = FormRole();
+        var risky = FormTools().Where(writeTools.Contains).ToList();
+        return $"{(formDraft != null ? "NEW " : "")}{(string)role?["title"] ?? "?"}" +
+               $"{(risky.Count > 0 ? $" ⚠ {string.Join(",", risky)}" : "")} · {formSkin} · " +
+               $"{(string.IsNullOrWhiteSpace(formModel) ? $"default ({ShortModel(defaultModel)})" : formModel)}" +
+               $"{(string.IsNullOrWhiteSpace(formName) ? "" : $" · \"{formName}\"")}";
+    }
+
+    public void SpawnFromForm()
+    {
+        if (agents.agents.Count >= maxAgents) { Note($"Team is full ({maxAgents} max)"); return; }
+        if (drafting) { Note("Still writing the role…"); return; }
+        string model = string.IsNullOrWhiteSpace(formModel) ? null : formModel.Trim();
+        string name = string.IsNullOrWhiteSpace(formName) ? null : formName.Trim();
+        if (formDraft != null)
+        {
+            var role = new JObject { ["title"] = formDraft["title"], ["instructions"] = formDraft["instructions"], ["tools"] = formDraft["tools"] };
+            _ = client.SaveRole(role); // keep it in the library for next time
+            _ = client.Spawn(model, null, role, name, formSkin);
+            formDraft = null;
+        }
+        else _ = client.Spawn(model, formRoleId, null, name, formSkin);
+        formName = "";
+        Note($"Spawning {FormSummaryShort(name)} …");
+    }
+
+    string FormSummaryShort(string name) => name ?? (string)FormRole()?["title"] ?? "agent";
+
+    // ---- CEO actions (panel, voice, keys and overlay all land here) ----
+    public void Goal(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        Note($"CEO GOAL: {LoftUtil.Trunc(text, 40)}");
+        _ = client.Goal(text.Trim());
+    }
+
+    public void Assign(string agentId, string title)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return;
+        if (string.IsNullOrEmpty(agentId) || agents.Find(agentId) == null) { Goal(title); return; }
+        _ = client.Assign(agentId, title.Trim());
+    }
+
+    public TaskView ReviewTask()
+    {
+        var waiting = tasks.Values.Where(t => t.status == "review" || t.status == "failed").ToList();
+        return waiting.LastOrDefault(t => t.agentId == selectedAgentId) ?? waiting.FirstOrDefault();
+    }
+
+    public void Approve()
+    {
+        var t = ReviewTask();
+        if (t == null || t.status != "review") { Note("Nothing waiting for approval"); return; }
+        _ = client.Approve(t.id);
+    }
+
+    public void Reject(string why)
+    {
+        var t = ReviewTask();
+        if (t == null) { Note("Nothing to reject"); return; }
+        _ = client.Reject(t.id, why);
+    }
+
+    public void Stop(string agentId = null)
+    {
+        Note(agentId == null ? "STOP everyone" : $"STOP {AgentName(agentId)}");
+        _ = client.Stop(agentId);
+    }
+
+    // Quick spawn: a saved role with the form's model, random animal.
+    public void SpawnAgent(string roleId)
+    {
+        if (agents.agents.Count >= maxAgents) { Note($"Team is full ({maxAgents} max)"); return; }
+        _ = client.Spawn(string.IsNullOrWhiteSpace(formModel) ? null : formModel.Trim(), roleId, null, null, "random");
+    }
+
+    public void RemoveSelected()
+    {
+        if (selectedAgentId == null) { Note("Select an agent first (point at it)"); return; }
+        _ = client.RemoveAgent(selectedAgentId);
+    }
+
+    public void Select(string agentId)
+    {
+        selectedAgentId = agentId;
+        foreach (var a in agents.agents)
+            if (a != null) a.GetComponent<AgentSkin>().SetSelected(a.agentId == agentId);
+        if (agentId != null) Note($"Selected {AgentName(agentId)}");
+    }
+
+    public void SelectNext()
+    {
+        var list = agents.agents.Where(a => a != null).ToList();
+        if (list.Count == 0) return;
+        int i = list.FindIndex(a => a.agentId == selectedAgentId);
+        Select(list[(i + 1) % list.Count].agentId);
+    }
+
+    // PARTY button / P key / voice: shared through the server so every headset
+    // parties together; works locally too when the backend is offline.
+    public void Party()
+    {
+        bool on = party == null || !party.On;
+        if (party != null) party.SetParty(on);
+        Note(on ? "★ PARTY TIME! ★" : "Party's over — back to work");
+        if (client != null) _ = client.Party(on);
+    }
+
+    public void NextTheme()
+    {
+        var id = world != null ? world.NextTheme() : null;
+        Note(id != null ? $"Scene → {world.Current.name ?? id}" : "No themes in Resources/Themes");
     }
 
     public void ExitApp()
     {
-        Note("Exit — closing app");
-        try { SavePersisted(); } catch { }
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -153,334 +359,203 @@ public class LoftDesk : MonoBehaviour
 #endif
     }
 
-    IEnumerator RunTask(TaskRec rec)
+    void HandleVoice(VoiceCommandId id, string words)
     {
-        yield return RunTaskInner(rec);
-        running.Remove(rec.agentId);
-    }
-
-    IEnumerator RunTaskInner(TaskRec rec)
-    {
-        float el = 0f;
-        while (el < workSeconds && !rec.done)
+        switch (id)
         {
-            el += Time.deltaTime;
-            rec.progress = Mathf.Clamp01(el / workSeconds);
-            viewTimer += Time.deltaTime;
-            if (viewTimer > 0.25f) { viewTimer = 0f; RefreshViews(); }
-            yield return null;
-        }
-        if (!rec.done) yield return FinishTask(rec, false);
-    }
-
-    IEnumerator FinishTask(TaskRec rec, bool manual)
-    {
-        rec.done = true;
-        rec.progress = 1f;
-        string verdict = "PASS 12/12";
-        rec.result = $"{verdict} — {rec.title}";
-        if (boards != null)
-        {
-            boards.MoveCard("kanban", rec.cardId, "Done");
-            boards.AddCard("log", $"{(manual ? "DONE" : "AUTO-DONE")} {rec.agentId}: {rec.result}", "Done");
-        }
-        if (agents != null)
-        {
-            var a = agents.agents.Find(x => x != null && x.agentId == rec.agentId);
-            if (a != null) a.SetState(AgentState.Done);
-        }
-        try { net.Log("CEO", "done", $"card:{rec.cardId}", "Doing", "Done"); } catch { }
-        Note($"{(manual ? "DONE" : "FINISH")} {rec.agentId}: {rec.result}");
-        RefreshViews();
-        yield break;
-    }
-
-    // ---- per-frame: walk + look + agent pulse ----
-    void Update()
-    {
-        if (cam == null) cam = Camera.main ?? FindFirstObjectByType<Camera>();
-        if (cam == null) return;
-        bool typing = GUI.GetNameOfFocusedControl() == "taskField";
-        if (!typing)
-        {
-            // Look: right-mouse drag.
-            if (Input.GetMouseButton(1))
-            {
-                yaw -= Input.GetAxis("Mouse X") * lookSpeed;
-                pitch -= Input.GetAxis("Mouse Y") * lookSpeed;
-                pitch = Mathf.Clamp(pitch, -60f, 60f);
-            }
-            // Walk: WASD + arrows, camera-relative on XZ.
-            float h = 0f, v = 0f;
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) v += 1f;
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) v -= 1f;
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) h -= 1f;
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) h += 1f;
-            h += Input.GetAxis("Horizontal") * 0.5f;
-            v += Input.GetAxis("Vertical") * 0.5f;
-            h = Mathf.Clamp(h, -1f, 1f); v = Mathf.Clamp(v, -1f, 1f);
-            if (Mathf.Abs(h) > 0.001f || Mathf.Abs(v) > 0.001f)
-            {
-                var dir = Quaternion.Euler(0f, yaw, 0f) * new Vector3(h, 0f, v);
-                var p = cam.transform.position + dir.normalized * walkSpeed * Time.deltaTime;
-                p.x = Mathf.Clamp(p.x, -6f, 6f);
-                p.z = Mathf.Clamp(p.z, 0.2f, 8f); // stay on content side of wall
-                p.y = Comfort.SEATED_EYE_HEIGHT;
-                cam.transform.position = p;
-            }
-            else
-            {
-                var p = cam.transform.position; // pin eye height even when idle (A28)
-                if (Mathf.Abs(p.y - Comfort.SEATED_EYE_HEIGHT) > 0.001f)
-                { p.y = Comfort.SEATED_EYE_HEIGHT; cam.transform.position = p; }
-            }
-            cam.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
-
-            // Keys: 1/2/3 assign presets, M done, X stop.
-            if (Input.GetKeyDown(KeyCode.Alpha1)) Assign("scout", string.IsNullOrWhiteSpace(taskInput) ? "review travel notes" : taskInput);
-            if (Input.GetKeyDown(KeyCode.Alpha2)) Assign("builder", string.IsNullOrWhiteSpace(taskInput) ? "run landing test" : taskInput);
-            if (Input.GetKeyDown(KeyCode.Alpha3)) Assign("keeper", string.IsNullOrWhiteSpace(taskInput) ? "tidy log wall" : taskInput);
-            if (Input.GetKeyDown(KeyCode.M)) Complete(agentIds[Mathf.Clamp(selAgent, 0, 2)]);
-            if (Input.GetKeyDown(KeyCode.X)) StopAll();
-            if (Input.GetKeyDown(KeyCode.Escape)) ExitApp();
-        }
-
-        // Agent glow: Working pulses, Done goes green.
-        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
-        foreach (var a in agents.agents)
-        {
-            if (a == null) continue;
-            var body = a.transform.Find("Body");
-            if (body == null) continue;
-            var r = body.GetComponent<Renderer>();
-            if (r == null) continue;
-            Color c = baseColors.TryGetValue(a.agentId, out var b) ? b : Color.gray;
-            if (a.CurrentState == AgentState.Working) r.material.color = Color.Lerp(c, Color.yellow, 0.35f + 0.3f * pulse);
-            else if (a.CurrentState == AgentState.Done) r.material.color = Color.Lerp(c, Color.green, 0.55f);
-            else r.material.color = c;
+            case VoiceCommandId.Run: if (words.Length > 0) Goal(words); else Note("Say: run <goal>"); break;
+            case VoiceCommandId.Assign: Assign(selectedAgentId, words); break;
+            case VoiceCommandId.Stop: Stop(); break;
+            case VoiceCommandId.Done: Approve(); break;
+            case VoiceCommandId.Next: SelectNext(); break;
+            case VoiceCommandId.FocusMode: NextTheme(); break;
+            case VoiceCommandId.Party: Party(); break;
+            case VoiceCommandId.Wake: Note("Team is listening"); break;
+            default: Note($"Voice '{id}' has no action yet"); break;
         }
     }
 
-    // ---- overlay panel: everything visible + clickable in-app ----
-    void OnGUI()
-    {
-        if (agents == null || boards == null) return;
-        var left = new Rect(10, 10, 348, Mathf.Min(Screen.height - 20, 640));
-        GUILayout.BeginArea(left, GUI.skin.box);
-        GUILayout.Label("VIRTUAL LOFT — in-app desk (offline)");
-        GUILayout.Label("Walk WASD/arrows • Look: RIGHT-drag • 1/2/3 assign • M done • X stop", GUI.skin.box);
-
-        GUILayout.Space(4);
-        GUILayout.Label("AGENTS");
-        for (int i = 0; i < agentIds.Length; i++)
-        {
-            var a = agents.agents.Find(x => x != null && x.agentId == agentIds[i]);
-            var rec = tasks.FindLast(t => t.agentId == agentIds[i]);
-            string st = a != null ? a.CurrentState.ToString() : "?";
-            string extra = "";
-            if (rec != null && !rec.done) extra = $" {Mathf.RoundToInt(rec.progress * 100)}% — {rec.title}";
-            else if (rec != null && rec.done) extra = $" ✓ {rec.result}";
-            GUILayout.Label($"{agentNames[i]}: {st}{extra}");
-        }
-
-        GUILayout.Space(4);
-        GUILayout.Label("ASSIGN (creates kanban card + runs it)");
-        GUI.SetNextControlName("taskField");
-        taskInput = GUILayout.TextField(taskInput, GUILayout.Height(22));
-        selAgent = GUILayout.SelectionGrid(selAgent, agentNames, 3);
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Assign")) Assign(agentIds[Mathf.Clamp(selAgent, 0, 2)], taskInput);
-        if (GUILayout.Button("Done")) Complete(agentIds[Mathf.Clamp(selAgent, 0, 2)]);
-        if (GUILayout.Button("Stop")) StopAll();
-        if (GUILayout.Button("Wake")) WakeAll();
-        GUILayout.EndHorizontal();
-
-        var kan = boards.ListCards("kanban");
-        int todo = kan.FindAll(c => c.column == "ToDo").Count;
-        int doing = kan.FindAll(c => c.column == "Doing").Count;
-        int done = kan.FindAll(c => c.column == "Done").Count;
-        GUILayout.Label($"KANBAN ToDo {todo} • Doing {doing} • Done {done}");
-        var logs = boards.ListCards("log");
-        GUILayout.Label("LOG (latest)");
-        for (int i = Mathf.Max(0, logs.Count - 3); i < logs.Count; i++)
-            GUILayout.Label($"• {Trunc(logs[i].text, 44)} [{logs[i].column}]");
-        var notes = boards.ListCards("notes");
-        if (notes.Count > 0) GUILayout.Label($"NOTES: {Trunc(notes[notes.Count - 1].text, 44)}");
-
-        GUILayout.Space(4);
-        GUILayout.Label("EVENTS");
-        for (int i = Mathf.Max(0, eventLog.Count - 4); i < eventLog.Count; i++)
-            GUILayout.Label($"• {Trunc(eventLog[i], 46)}");
-
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Save")) SavePersisted();
-        if (GUILayout.Button("Load")) LoadPersisted();
-        if (GUILayout.Button("Exit")) ExitApp();
-        GUILayout.EndHorizontal();
-        GUILayout.EndArea();
-    }
-
-    // ---- board plates: draw cards in the 3D world ----
-    public void EnsureBoardViews()
-    {
-        foreach (var id in new[] { "notes", "kanban", "calendar", "log" })
-        {
-            var plate = GameObject.Find($"Board_{id}");
-            if (plate == null) continue;
-            // Fix pre-mirror-fix scenes: title must face play side, proud of face.
-            var t = plate.transform.Find("Title");
-            if (t != null)
-            {
-                t.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                var tp = t.transform.localPosition;
-                if (tp.z < 0.5f) t.transform.localPosition = new Vector3(tp.x, tp.y, 0.7f);
-            }
-            var c = plate.transform.Find("Content");
-            if (c != null)
-            {
-                c.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                var cp = c.transform.localPosition;
-                if (cp.z < 0.5f) c.transform.localPosition = new Vector3(cp.x, cp.y, 0.7f);
-                continue;
-            }
-            var go = new GameObject("Content");
-            go.transform.SetParent(plate.transform, false);
-            go.transform.localPosition = new Vector3(0f, -0.12f, 0.7f);
-            go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-            var tm = go.AddComponent<TextMesh>();
-            tm.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            tm.fontSize = 40;
-            tm.characterSize = 0.01f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.alignment = TextAlignment.Center;
-            tm.color = new Color(0.85f, 0.92f, 1f);
-        }
-    }
-
-    void SeedIfEmpty()
-    {
-        if (seeded || boards == null) return;
-        seeded = true;
-        if (boards.ListCards("kanban").Count == 0)
-        {
-            boards.AddCard("kanban", "Morning standup [keeper]", "Doing");
-            boards.AddCard("kanban", "Write launch notes [builder]", "ToDo");
-            boards.AddCard("kanban", "Book Quest for weekend [scout]", "ToDo");
-        }
-        if (boards.ListCards("log").Count == 0)
-            boards.AddCard("log", "Welcome — assign below, watch it run here.", "ToDo");
-        if (boards.ListCards("notes").Count == 0)
-            boards.AddCard("notes", "Infinite wall, zero mess.", "ToDo");
-        RefreshViews();
-    }
-
+    // ---- wall boards ----
     public void RefreshViews()
     {
-        if (boards == null) return;
-        SetContent("kanban", KanbanText());
-        SetContent("log", LogText());
-        SetContent("notes", CardsText("notes", 3));
-        SetContent("calendar", CardsText("calendar", 3));
-        RefreshAgentLabels();
-    }
-
-    void SetContent(string id, string text)
-    {
-        var plate = GameObject.Find($"Board_{id}");
-        var c = plate != null ? plate.transform.Find("Content") : null;
-        if (c == null) return;
-        var tm = c.GetComponent<TextMesh>();
-        if (tm != null) tm.text = text;
+        SetBoard("kanban", KanbanText());
+        SetBoard("log", string.Join("\n", eventLog.Skip(Math.Max(0, eventLog.Count - 6)).Select(s => LoftUtil.Trunc(s, 34))));
+        var r = ReviewTask();
+        SetBoard("notes", r == null ? "Nothing to review yet."
+            : $"{AgentName(r.agentId)} — {r.status.ToUpperInvariant()}\n{LoftUtil.Wrap(r.result, 40, 7)}");
+        var counts = agents.agents.Where(a => a != null).GroupBy(a => a.CurrentState).Select(g => $"{g.Key} {g.Count()}");
+        var skinsNow = agents.agents.Where(a => a != null).Select(a => a.GetComponent<AgentSkin>()).ToList();
+        double cost = skinsNow.Sum(k => k.costUsd ?? 0);
+        long tokens = skinsNow.Sum(k => k.tokens);
+        SetBoard("calendar", $"{agents.agents.Count}/{maxAgents} agents\n{string.Join("  ", counts)}\n" +
+                             $"{tokens / 1000}k tokens{(cost > 0 ? $" · ${cost:0.000}" : "")}\n{(Connected ? "● live" : "○ offline")}");
     }
 
     string KanbanText()
     {
-        var kan = boards.ListCards("kanban");
-        string Line(string col)
+        string Col(string label, params string[] statuses)
         {
-            var list = kan.FindAll(c => c.column == col);
-            if (list.Count == 0) return $"{col}: —";
-            int show = Math.Min(3, list.Count);
-            var parts = new List<string>();
-            for (int i = 0; i < show; i++) parts.Add(Trunc(list[i].text, 22));
-            string more = list.Count > show ? $" +{list.Count - show}" : "";
-            return $"{col}({list.Count}): {string.Join(" | ", parts)}{more}";
+            var list = tasks.Values.Where(t => statuses.Contains(t.status)).ToList();
+            var shown = list.Skip(Math.Max(0, list.Count - 2)).Select(t => LoftUtil.Trunc(FirstLine(t.title), 18));
+            return $"{label}({list.Count}): {string.Join(" | ", shown)}";
         }
-        return $"{Line("ToDo")}\n{Line("Doing")}\n{Line("Done")}";
+        return $"{Col("ToDo", "queued")}\n{Col("Doing", "running")}\n{Col("Review", "review", "failed")}\n{Col("Done", "approved")}";
     }
 
-    string LogText()
+    static void SetBoard(string id, string text)
     {
-        var logs = boards.ListCards("log");
-        var parts = new List<string>();
-        for (int i = Mathf.Max(0, logs.Count - 4); i < logs.Count; i++)
-            parts.Add($"• {Trunc(logs[i].text, 30)}");
-        return parts.Count == 0 ? "log: —" : string.Join("\n", parts);
+        var c = GameObject.Find($"Board_{id}")?.transform.Find("Content");
+        var tm = c != null ? c.GetComponent<TextMesh>() : null;
+        if (tm != null) tm.text = text;
     }
 
-    string CardsText(string id, int max)
-    {
-        var list = boards.ListCards(id);
-        if (list.Count == 0) return $"{id}: —";
-        var parts = new List<string>();
-        for (int i = Mathf.Max(0, list.Count - max); i < list.Count; i++)
-            parts.Add($"• {Trunc(list[i].text, 30)}");
-        return string.Join("\n", parts);
-    }
+    string AgentName(string id) => agents.Find(id)?.GetComponent<AgentSkin>()?.displayName ?? id;
+    static string FirstLine(string s) => string.IsNullOrEmpty(s) ? "" : s.Split('\n')[0];
 
-    void RefreshAgentLabels()
+    public void Note(string s)
     {
-        foreach (var a in agents.agents)
-        {
-            if (a == null) continue;
-            var label = a.transform.Find("Label");
-            if (label == null) continue;
-            var tm = label.GetComponent<TextMesh>();
-            if (tm == null) continue;
-            var rec = tasks.FindLast(t => t.agentId == a.agentId);
-            string line2 = a.CurrentState.ToString().ToUpperInvariant();
-            if (rec != null && !rec.done) line2 += $" {Mathf.RoundToInt(rec.progress * 100)}%";
-            string task = rec != null ? Trunc(rec.title, 24) : "";
-            tm.text = string.IsNullOrEmpty(task) ? $"{a.agentId.ToUpperInvariant()}\n{line2}" : $"{a.agentId.ToUpperInvariant()}\n{line2}\n{task}";
-        }
-    }
-
-    void Note(string s)
-    {
-        eventLog.Add($"{DateTime.Now:HH:mm:ss} {s}");
+        eventLog.Add($"{DateTime.Now:HH:mm} {s}");
         if (eventLog.Count > 40) eventLog.RemoveAt(0);
         Debug.Log($"[Desk] {s}");
     }
 
-    static string Trunc(string s, int n)
+    // ---- desktop harness: walk/look + shortcut keys ----
+    void Update()
     {
-        if (string.IsNullOrEmpty(s)) return "";
-        s = s.Replace("\n", " ").Trim();
-        return s.Length <= n ? s : s.Substring(0, n - 1) + "…";
+        if (XRSettings.isDeviceActive || world == null || world.rig == null) return;
+        if (GUIUtility.keyboardControl != 0) return; // typing in the overlay
+        var rig = world.rig;
+        if (Input.GetMouseButton(1))
+        {
+            rig.Rotate(0f, Input.GetAxis("Mouse X") * lookSpeed, 0f, Space.World);
+            pitch = Mathf.Clamp(pitch - Input.GetAxis("Mouse Y") * lookSpeed, -60f, 60f);
+            world.cam.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+        var move = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
+        if (move.sqrMagnitude > 0.01f)
+        {
+            var p = rig.position + rig.rotation * move.normalized * walkSpeed * Time.deltaTime;
+            rig.position = new Vector3(Mathf.Clamp(p.x, -6f, 6f), rig.position.y, Mathf.Clamp(p.z, 0.2f, 8f));
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SpawnAgent("scout");
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SpawnAgent("builder");
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SpawnAgent("keeper");
+        if (showForm && Input.GetKeyDown(KeyCode.Return)) SpawnFromForm();
+        if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) RemoveSelected();
+        if (Input.GetKeyDown(KeyCode.Tab)) SelectNext();
+        if (Input.GetKeyDown(KeyCode.T)) NextTheme();
+        if (Input.GetKeyDown(KeyCode.P)) Party();
+        if (Input.GetKeyDown(KeyCode.Y)) Approve();
+        if (Input.GetKeyDown(KeyCode.N)) Reject(null);
+        if (Input.GetKeyDown(KeyCode.X)) Stop();
+        if (Input.GetKeyDown(KeyCode.Escape)) ExitApp();
     }
 
-    // ---- persistence inside the app (player-local) ----
-    void SavePersisted()
+    void SpawnForm()
     {
-        try
+        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Name", GUILayout.Width(52));
+        formName = GUILayout.TextField(formName);
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Model", GUILayout.Width(52));
+        formModel = GUILayout.TextField(formModel);
+        GUILayout.EndHorizontal();
+        if (string.IsNullOrWhiteSpace(formModel)) GUILayout.Label($"   empty = default: {defaultModel}");
+        GUILayout.Label("Animal");
+        var animals = new List<string> { "random" };
+        animals.AddRange(skins);
+        formSkin = animals[Mathf.Max(0, GUILayout.SelectionGrid(Mathf.Max(0, animals.IndexOf(formSkin)), animals.ToArray(), 5))];
+        GUILayout.Label("Role (saved)");
+        if (roles.Count > 0)
         {
-            var path = System.IO.Path.Combine(Application.persistentDataPath, "loft-desk.json");
-            System.IO.File.WriteAllText(path, boards.Save());
-            Note($"Saved {path}");
+            int cur = formDraft != null ? -1 : roles.FindIndex(r => (string)r["id"] == formRoleId);
+            int pick = GUILayout.SelectionGrid(cur, roles.Select(r => (string)r["title"]).ToArray(), 3);
+            if (pick != cur && pick >= 0) { formRoleId = (string)roles[pick]["id"]; formDraft = null; }
         }
-        catch (Exception e) { Note($"Save FAILED: {e.Message}"); }
+        GUILayout.Label("…or describe a new role, AI writes it:");
+        GUILayout.BeginHorizontal();
+        formDescribe = GUILayout.TextField(formDescribe);
+        GUI.enabled = !drafting;
+        if (GUILayout.Button(drafting ? "writing…" : "Write role", GUILayout.Width(90))) DraftRole(formDescribe);
+        GUI.enabled = true;
+        GUILayout.EndHorizontal();
+        if (formDraft != null)
+        {
+            GUILayout.Label($"NEW ROLE: {(string)formDraft["title"]}", GUI.skin.box);
+            GUILayout.Label(LoftUtil.Trunc((string)formDraft["instructions"], 300));
+            GUILayout.Label("Tools (click to grant/remove; ⚠ = changes your project):");
+            GUILayout.BeginHorizontal();
+            var granted = FormTools();
+            foreach (var t in new[] { "read_file", "list_files", "search_files", "fetch_url", "write_file", "edit_file", "run_command" })
+            {
+                bool on = granted.Contains(t);
+                if (GUILayout.Toggle(on, $"{(writeTools.Contains(t) ? "⚠" : "")}{t}") != on) ToggleDraftTool(t);
+            }
+            GUILayout.EndHorizontal();
+        }
+        GUILayout.Label(FormSummary());
+        if (GUILayout.Button("CREATE AGENT")) SpawnFromForm();
+        GUILayout.EndVertical();
     }
 
-    void LoadPersisted()
+    void OnGUI()
     {
-        try
+        if (XRSettings.isDeviceActive || agents == null) return;
+        overlayRect = new Rect(10, 10, 440, Screen.height - 20);
+        GUILayout.BeginArea(overlayRect, GUI.skin.box);
+        GUILayout.Label($"VIRTUAL LOFT — CEO desk   {(Connected ? "● live" : "○ offline")}   scene: {world?.Current?.name}");
+        GUILayout.Label("WASD walk · right-drag look · click animal = select · 1/2/3 quick spawn · Tab next · T scene · P party · Y/N approve/reject · X stop", GUI.skin.box);
+
+        input = GUILayout.TextArea(input, GUILayout.Height(44));
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Send as TEAM GOAL")) Goal(input);
+        GUI.enabled = selectedAgentId != null;
+        if (GUILayout.Button($"Give to {(selectedAgentId != null ? AgentName(selectedAgentId) : "selected")}")) Assign(selectedAgentId, input);
+        GUI.enabled = true;
+        GUILayout.EndHorizontal();
+
+        GUILayout.Label($"TEAM {agents.agents.Count}/{maxAgents}");
+        foreach (var a in agents.agents.ToArray())
         {
-            var path = System.IO.Path.Combine(Application.persistentDataPath, "loft-desk.json");
-            if (!System.IO.File.Exists(path)) return;
-            boards.Load(System.IO.File.ReadAllText(path));
-            Note("Loaded saved loft");
-            RefreshViews();
+            if (a == null) continue;
+            var skin = a.GetComponent<AgentSkin>();
+            var label = $"{(a.agentId == selectedAgentId ? "▶ " : "")}{skin.displayName} · {skin.role} · {ShortModel(skin.model)}{(skin.costUsd > 0 ? $" ${skin.costUsd:0.000}" : "")} — {a.CurrentState} {LoftUtil.Trunc(skin.line, 24)}";
+            if (GUILayout.Button(label, GUI.skin.label)) Select(a.agentId);
         }
-        catch (Exception e) { Note($"Load skipped: {e.Message}"); }
+        GUILayout.BeginHorizontal();
+        GUI.enabled = agents.agents.Count < maxAgents;
+        if (GUILayout.Button(showForm ? "▾ New agent" : "＋ New agent…")) showForm = !showForm;
+        GUI.enabled = selectedAgentId != null;
+        if (GUILayout.Button("Remove selected")) RemoveSelected();
+        GUI.enabled = true;
+        GUILayout.EndHorizontal();
+        if (showForm) SpawnForm();
+
+        var review = ReviewTask();
+        if (review != null)
+        {
+            GUILayout.Label($"REVIEW — {AgentName(review.agentId)}: {LoftUtil.Trunc(FirstLine(review.title), 40)} [{review.status}]", GUI.skin.box);
+            GUILayout.Label(LoftUtil.Trunc(review.result, 400));
+            feedback = GUILayout.TextField(feedback);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Approve")) Approve();
+            if (GUILayout.Button("Reject + feedback")) { Reject(feedback); feedback = ""; }
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Stop all")) Stop();
+        if (GUILayout.Button("Next scene")) NextTheme();
+        if (GUILayout.Button(party != null && party.On ? "End party" : "★ PARTY")) Party();
+        if (GUILayout.Button("Exit")) ExitApp();
+        GUILayout.EndHorizontal();
+
+        GUILayout.Label("EVENTS");
+        for (int i = Math.Max(0, eventLog.Count - 6); i < eventLog.Count; i++) GUILayout.Label(LoftUtil.Trunc(eventLog[i], 56));
+        GUILayout.EndArea();
+        if (Event.current.type == EventType.MouseDown && !overlayRect.Contains(Event.current.mousePosition))
+            GUIUtility.keyboardControl = 0; // click in the world = stop typing
     }
 }

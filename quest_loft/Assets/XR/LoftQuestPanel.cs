@@ -1,287 +1,326 @@
-// VIRTUAL LOFT — LoftQuestPanel.cs (Quest-shaped in-world UI)
-// The SAME LoftDesk.Assign()/Complete()/StopAll() API the desktop overlay
-// uses, but on physical 3D buttons you point at: mouse-click raycast today,
-// XR controller ray tomorrow (wire UF/press straight to PressAgent(i) etc).
-// Teleport pads move the camera with the Comfort vignette events, so the
-// locomotion path is already teleport-only — Quest policy from day one.
+// VIRTUAL LOFT — LoftQuestPanel.cs: the CEO's in-world (VR) controls.
+//
+// Point with the RIGHT controller (laser) and pull the trigger — or click
+// with the mouse on desktop — at:
+//   * an animal          -> select that agent
+//   * a panel button     -> + AGENT / – AGENT / SCENE ▶ / GOAL ⌨ / TASK ⌨ /
+//                           STOP / APPROVE / REJECT / EXIT / ★ PARTY
+//     + AGENT opens the new-agent page (same form as the desktop panel):
+//       ROLE ▶ / ANIMAL ▶ / MODEL ⌨ / NAME ⌨ / DESCRIBE ⌨ (AI writes a role) /
+//       CREATE / BACK — the console text shows the form, ⚠ marks tools that change files
+//   * a teleport pad     -> teleport (moves the CameraRig, comfort vignette)
+// GOAL/TASK/REJECT open the headset's system keyboard (TouchScreenKeyboard).
+// Hold A to talk (VoiceCommands push-to-talk). Uses only UnityEngine.XR
+// input — no extra SDK.
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace VirtualLoft.XR
 {
     [DisallowMultipleComponent]
     public class LoftQuestPanel : MonoBehaviour
     {
-        LoftDesk desk;
-        Comfort comfort;
-        Camera cam;
-
-        // preset task per agent (same words as desktop keys 1/2/3)
-        readonly string[] agentIds = { "scout", "builder", "keeper" };
-        readonly string[] presets = { "review travel notes", "run landing test", "tidy log wall" };
-        readonly Color[] colors = { new Color(0.4f, 0.7f, 1f), new Color(0.5f, 1f, 0.5f), new Color(1f, 0.8f, 0.4f) };
-
-        string lastAgent = "builder";
-        TextMesh statusTm;
-        float pollTimer;
-
-        static readonly Vector3[] PadPos =
+        static readonly (string id, string label, Color color)[] Buttons =
+        {
+            ("spawn", "+ AGENT", new Color(0.45f, 0.75f, 1f)),
+            ("remove", "– AGENT", new Color(0.6f, 0.6f, 0.7f)),
+            ("theme", "SCENE ▶", new Color(1f, 0.75f, 0.35f)),
+            ("goal", "GOAL ⌨", new Color(0.5f, 1f, 0.6f)),
+            ("task", "TASK ⌨", new Color(0.7f, 0.95f, 0.5f)),
+            ("stop", "STOP", new Color(0.95f, 0.45f, 0.4f)),
+            ("approve", "APPROVE", new Color(0.45f, 0.9f, 0.45f)),
+            ("reject", "REJECT", new Color(0.95f, 0.6f, 0.35f)),
+            ("exit", "EXIT", new Color(0.55f, 0.55f, 0.6f)),
+            ("party", "★ PARTY", new Color(1f, 0.35f, 0.75f)),
+        };
+        static readonly (string id, string label, Color color)[] SpawnButtons =
+        {
+            ("role", "ROLE ▶", new Color(0.45f, 0.75f, 1f)),
+            ("animal", "ANIMAL ▶", new Color(1f, 0.75f, 0.35f)),
+            ("model", "MODEL ⌨", new Color(0.75f, 0.65f, 1f)),
+            ("name", "NAME ⌨", new Color(0.7f, 0.95f, 0.5f)),
+            ("describe", "DESCRIBE ⌨", new Color(0.5f, 1f, 0.8f)),
+            ("create", "CREATE", new Color(0.45f, 0.9f, 0.45f)),
+            ("back", "BACK", new Color(0.55f, 0.55f, 0.6f)),
+        };
+        public static readonly Vector3[] PadPos =
         {
             new Vector3(-3f, 0.03f, 4.6f),
             new Vector3(0f, 0.03f, 5.2f),
             new Vector3(3f, 0.03f, 4.6f),
         };
 
+        LoftDesk desk;
+        LoftWorld world;
+        Comfort comfort;
+        VoiceCommands voice;
+        TextMesh statusTm;
+        Transform panel;
+        LineRenderer laser;
+        TouchScreenKeyboard keyboard;
+        string keyboardFor;
+        Transform mainPage, spawnPage;
+        bool triggerWas;
+        float refreshTimer;
+
         void Awake()
         {
-            desk = FindFirstObjectByType<LoftDesk>();
-            comfort = FindFirstObjectByType<Comfort>();
-            cam = Camera.main ?? FindFirstObjectByType<Camera>();
+            Wire();
             EnsureBuilt();
-            Refresh();
         }
 
-        // ---- public: XR ray (and mouse today) calls these ----
-        public void PressAgent(int i)
+        // Lazy too, so editor tools can drive the panel outside Play mode.
+        void Wire()
         {
             if (desk == null) desk = FindFirstObjectByType<LoftDesk>();
-            if (desk == null || i < 0 || i >= agentIds.Length) return;
-            lastAgent = agentIds[i];
-            desk.Assign(lastAgent, presets[i]);
-            Refresh();
+            if (world == null) world = FindFirstObjectByType<LoftWorld>();
+            if (comfort == null) comfort = FindFirstObjectByType<Comfort>();
+            if (voice == null) voice = FindFirstObjectByType<VoiceCommands>();
         }
 
-        public void PressDone()
+        // ---- actions (public so tests/voice/other UIs can call them) ----
+        public void Press(string id)
         {
-            if (desk == null) desk = FindFirstObjectByType<LoftDesk>();
+            Wire();
             if (desk == null) return;
-            desk.Complete(lastAgent);
-            Refresh();
-        }
-
-        public void PressStop()
-        {
-            if (desk == null) desk = FindFirstObjectByType<LoftDesk>();
-            if (desk == null) return;
-            desk.StopAll();
-            Refresh();
-        }
-
-        public void PressExit()
-        {
-            if (desk == null) desk = FindFirstObjectByType<LoftDesk>();
-            if (desk != null) { desk.ExitApp(); return; }
-            Application.Quit();
+            switch (id)
+            {
+                case "spawn": ShowSpawnPage(true); break;
+                case "back": ShowSpawnPage(false); break;
+                case "role": desk.CycleRole(); break;
+                case "animal": desk.CycleSkin(); break;
+                case "model": OpenKeyboard("model", desk.formModel); break;
+                case "name": OpenKeyboard("name", desk.formName); break;
+                case "describe": OpenKeyboard("describe", ""); break;
+                case "create": desk.SpawnFromForm(); ShowSpawnPage(false); break;
+                case "remove": desk.RemoveSelected(); break;
+                case "theme": desk.NextTheme(); break;
+                case "goal": OpenKeyboard("goal"); break;
+                case "task":
+                    if (desk.selectedAgentId == null) desk.Note("Point at an animal first, then TASK");
+                    else OpenKeyboard("task");
+                    break;
+                case "stop": desk.Stop(); break;
+                case "approve": desk.Approve(); break;
+                case "reject": if (!OpenKeyboard("reject")) desk.Reject(null); break;
+                case "exit": desk.ExitApp(); break;
+                case "party": desk.Party(); break;
+            }
         }
 
         public void TeleportTo(int i)
         {
-            if (cam == null) cam = Camera.main ?? FindFirstObjectByType<Camera>();
-            if (cam == null || i < 0 || i >= PadPos.Length) return;
+            Wire();
+            if (world == null || world.rig == null || i < 0 || i >= PadPos.Length) return;
             if (comfort != null) comfort.BeginTeleport();
-            var p = PadPos[i];
-            p.y = Comfort.SEATED_EYE_HEIGHT;
-            cam.transform.position = p;
-            cam.transform.rotation = Quaternion.Euler(0f, 180f, 0f); // face the wall
+            var rig = world.rig;
+            rig.SetPositionAndRotation(new Vector3(PadPos[i].x, rig.position.y, PadPos[i].z), Quaternion.Euler(0f, 180f, 0f));
             if (comfort != null) comfort.EndTeleport();
-            Debug.Log($"[QuestPanel] teleport -> pad {i} ({p})");
+            LoftAudio.PlayAt("sfx_teleport", PadPos[i] + Vector3.up * 1.2f, 0.8f);
         }
 
-        public void Refresh()
+        // Routes a pointed-at collider to the right action.
+        public void Click(GameObject go)
         {
-            if (statusTm == null || desk == null || desk.boards == null) return;
-            var kan = desk.boards.ListCards("kanban");
-            int todo = 0, doing = 0, done = 0;
-            foreach (var c in kan)
+            for (var t = go.transform; t != null; t = t.parent)
             {
-                if (c.column == "ToDo") todo++;
-                else if (c.column == "Doing") doing++;
-                else if (c.column == "Done") done++;
+                var n = t.name;
+                if (n.StartsWith("Btn_")) { LoftAudio.Play("sfx_click", 0.8f); Press(n.Substring(4)); return; }
+                if (n.StartsWith("TelePad_") && int.TryParse(n.Substring(8), out int pad)) { TeleportTo(pad); return; }
+                var agent = t.GetComponent<AgentStateMachine>();
+                if (agent != null) { desk?.Select(agent.agentId); return; }
             }
-            string last = desk.eventLog.Count > 0 ? desk.eventLog[desk.eventLog.Count - 1] : "—";
-            if (last.Length > 42) last = last.Substring(0, 41) + "…";
-            statusTm.text = $"TODO {todo}  DOING {doing}  DONE {done}\n{last}";
         }
 
-        // ---- per-frame: mouse point-and-click (desktop stand-in for XR ray) ----
+        public void ShowSpawnPage(bool on)
+        {
+            if (mainPage != null) mainPage.gameObject.SetActive(!on);
+            if (spawnPage != null) spawnPage.gameObject.SetActive(on);
+            RefreshStatus();
+        }
+
+        bool OpenKeyboard(string target, string text = "")
+        {
+            if (!TouchScreenKeyboard.isSupported)
+            {
+                desk.Note(XRSettings.isDeviceActive
+                    ? "No system keyboard — hold A and speak (\"run …\")"
+                    : "Type in the desk panel (top-left)");
+                return false;
+            }
+            keyboardFor = target;
+            string hint = target switch
+            {
+                "reject" => "What should change?",
+                "task" => "Task for the selected agent",
+                "model" => "Model id, e.g. qwen/qwen3-coder (empty = default)",
+                "name" => "Agent name",
+                "describe" => "What should this agent do? AI writes the role",
+                _ => "Goal for the team",
+            };
+            keyboard = TouchScreenKeyboard.Open(text ?? "", TouchScreenKeyboardType.Default, false, target != "model" && target != "name", false, false, hint);
+            return true;
+        }
+
         void Update()
         {
-            pollTimer += Time.deltaTime;
-            if (pollTimer > 0.5f) { pollTimer = 0f; Refresh(); }
-            if (cam == null) cam = Camera.main ?? FindFirstObjectByType<Camera>();
-            if (cam == null) return;
-            // Left click only; right-drag look stays with LoftDesk.
-            if (!Input.GetMouseButtonDown(0)) return;
-            var ray = cam.ScreenPointToRay(Input.mousePosition);
-            if (!Physics.Raycast(ray, out var hit, 50f)) return;
-            string n = hit.collider.gameObject.name;
-            if (n.StartsWith("Btn_"))
+            refreshTimer += Time.deltaTime;
+            if (refreshTimer > 0.5f) { refreshTimer = 0f; RefreshStatus(); }
+            PollKeyboard();
+
+            if (XRSettings.isDeviceActive) UpdateControllerRay();
+            else
             {
-                string key = n.Substring(4);
-                for (int i = 0; i < agentIds.Length; i++)
-                    if (agentIds[i] == key) { PressAgent(i); return; }
-                if (key == "done") PressDone();
-                else if (key == "stop") PressStop();
-                else if (key == "exit") PressExit();
-            }
-            else if (n.StartsWith("TelePad_"))
-            {
-                if (int.TryParse(n.Substring(8), out int idx)) TeleportTo(idx);
+                if (laser != null) laser.enabled = false;
+                if (!Input.GetMouseButtonDown(0) || world == null || world.cam == null) return;
+                var gui = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+                if (desk != null && desk.overlayRect.Contains(gui)) return;
+                if (Physics.Raycast(world.cam.ScreenPointToRay(Input.mousePosition), out var hit, 50f)) Click(hit.collider.gameObject);
             }
         }
 
-        // ---- build (idempotent: safe to run on an already-built scene) ----
+        void PollKeyboard()
+        {
+            if (keyboard == null) return;
+            if (keyboard.status == TouchScreenKeyboard.Status.Done)
+            {
+                var text = keyboard.text;
+                if (keyboardFor == "goal") desk.Goal(text);
+                else if (keyboardFor == "task") desk.Assign(desk.selectedAgentId, text);
+                else if (keyboardFor == "reject") desk.Reject(text);
+                else if (keyboardFor == "model") desk.formModel = text.Trim();
+                else if (keyboardFor == "name") desk.formName = text.Trim();
+                else if (keyboardFor == "describe") desk.DraftRole(text);
+                keyboard = null;
+            }
+            else if (keyboard.status != TouchScreenKeyboard.Status.Visible) keyboard = null;
+        }
+
+        // Right controller pose is in tracking space = CameraRig local space.
+        void UpdateControllerRay()
+        {
+            var hand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            if (world == null || world.rig == null || !hand.isValid
+                || !hand.TryGetFeatureValue(CommonUsages.devicePosition, out var pos)
+                || !hand.TryGetFeatureValue(CommonUsages.deviceRotation, out var rot))
+            {
+                if (laser != null) laser.enabled = false;
+                return;
+            }
+            var origin = world.rig.TransformPoint(pos);
+            var dir = world.rig.rotation * rot * Vector3.forward;
+            bool hitSomething = Physics.Raycast(origin, dir, out var hit, 30f);
+            EnsureLaser();
+            laser.enabled = true;
+            laser.SetPosition(0, origin);
+            laser.SetPosition(1, hitSomething ? hit.point : origin + dir * 5f);
+
+            hand.TryGetFeatureValue(CommonUsages.triggerButton, out bool trigger);
+            if (trigger && !triggerWas && hitSomething) Click(hit.collider.gameObject);
+            triggerWas = trigger;
+
+            if (voice != null && hand.TryGetFeatureValue(CommonUsages.primaryButton, out bool talk)) voice.pushToTalkHeld = talk;
+        }
+
+        void EnsureLaser()
+        {
+            if (laser != null) return;
+            var go = new GameObject("Laser");
+            laser = go.AddComponent<LineRenderer>();
+            laser.positionCount = 2;
+            laser.widthMultiplier = 0.006f;
+            var shader = Shader.Find("Sprites/Default");
+            if (shader != null) laser.material = new Material(shader) { color = new Color(0.4f, 0.9f, 1f, 0.8f) };
+        }
+
+        void RefreshStatus()
+        {
+            if (statusTm == null || desk == null) return;
+            int working = 0, review = 0;
+            foreach (var t in desk.tasks.Values)
+            {
+                if (t.status == "running") working++;
+                else if (t.status == "review") review++;
+            }
+            if (spawnPage != null && spawnPage.gameObject.activeSelf)
+            {
+                statusTm.text = $"NEW AGENT {desk.agents.agents.Count + 1}/{desk.maxAgents}{(desk.drafting ? "  (AI is writing the role…)" : "")}\n" +
+                                LoftUtil.Wrap(desk.FormSummary(), 52, 3);
+                return;
+            }
+            string sel = desk.selectedAgentId ?? "none (point at an animal)";
+            string last = desk.eventLog.Count > 0 ? desk.eventLog[desk.eventLog.Count - 1] : "—";
+            statusTm.text = $"{(desk.Connected ? "● live" : "○ offline")}  team {desk.agents.agents.Count}/{desk.maxAgents}  working {working}  review {review}\n" +
+                            $"selected: {sel}\n{LoftUtil.Trunc(last, 46)}";
+        }
+
+        // ---- build (idempotent; replaces the old fixed 3-agent panel) ----
+        // The console rides on the CameraRig, low in front of the CEO (like a
+        // desk), so it never blocks the view of the team and follows teleports.
         public void EnsureBuilt()
         {
+            Wire();
             var root = GameObject.Find("QuestPanel");
+            if (root != null && root.transform.Find("Main/Btn_party") == null) { LoftUtil.Kill(root); root = null; }
             if (root == null)
             {
                 root = new GameObject("QuestPanel");
-                root.transform.position = new Vector3(0f, 1.35f, 4.6f);
+                root.transform.localScale = Vector3.one * 0.25f;
+                LoftUtil.Prim(PrimitiveType.Cube, "Back", root.transform, new Vector3(0f, -0.16f, 0f), new Vector3(2.8f, 1.85f, 0.06f), new Color(0.13f, 0.14f, 0.19f));
+                Page(root.transform, "Main", Buttons);
+                Page(root.transform, "Spawn", SpawnButtons).gameObject.SetActive(false);
             }
-            // Unrotated root: legacy TextMesh children already carry their own
-            // Y=180 so they read correctly from the camera side (+Z). (An
-            // earlier build rotated the root too and mirrored every label.)
-
-            var back = root.transform.Find("Back");
-            if (back == null)
+            panel = root.transform;
+            mainPage = panel.Find("Main");
+            spawnPage = panel.Find("Spawn");
+            if (world != null && world.rig != null && panel.parent != world.rig)
             {
-                var b = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                b.name = "Back";
-                b.transform.SetParent(root.transform, false);
-                b.transform.localPosition = Vector3.zero;
-                b.transform.localScale = new Vector3(2.8f, 1.7f, 0.1f);
-                b.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"))
-                    { color = new Color(0.13f, 0.14f, 0.19f) };
+                panel.SetParent(world.rig, false);
+                panel.localPosition = new Vector3(0f, -0.5f, 0.6f);
+                // Face the CEO (rig-local -Z), tilted up like a console.
+                panel.localRotation = Quaternion.Euler(0f, 180f, 0f) * Quaternion.Euler(-30f, 0f, 0f);
             }
+            statusTm = LoftUtil.Text(panel, "Status", new Vector3(0f, -0.9f, 0.04f), 32, 0.008f, new Color(0.85f, 0.92f, 1f));
 
-            Text("Title", "◆ ASSIGN ◆", 64, new Vector3(0f, 0.62f, 0.08f), 0.008f, new Color(1f, 0.95f, 0.8f), root.transform);
-
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < PadPos.Length; i++)
             {
-                float x = -0.9f + i * 0.9f;
-                Button(root.transform, $"Btn_{agentIds[i]}",
-                    $"{agentIds[i].ToUpperInvariant()}\n{presets[i]}",
-                    new Vector3(x, 0.22f, 0.08f), new Vector3(0.8f, 0.42f, 0.08f), colors[i]);
-            }
-            Button(root.transform, "Btn_done", "DONE", new Vector3(-0.9f, -0.38f, 0.08f), new Vector3(0.8f, 0.3f, 0.08f), new Color(0.45f, 0.85f, 0.45f));
-            Button(root.transform, "Btn_stop", "STOP", new Vector3(0f, -0.38f, 0.08f), new Vector3(0.8f, 0.3f, 0.08f), new Color(0.9f, 0.45f, 0.4f));
-            Button(root.transform, "Btn_exit", "EXIT", new Vector3(0.9f, -0.38f, 0.08f), new Vector3(0.8f, 0.3f, 0.08f), new Color(0.55f, 0.55f, 0.6f));
-            SetBtnPos(root.transform, "Btn_done", new Vector3(-0.9f, -0.38f, 0.08f));
-            SetBtnPos(root.transform, "Btn_stop", new Vector3(0f, -0.38f, 0.08f));
-            SetBtnPos(root.transform, "Btn_exit", new Vector3(0.9f, -0.38f, 0.08f));
-
-            var st = root.transform.Find("Status");
-            if (st == null)
-            {
-                var go = new GameObject("Status");
-                go.transform.SetParent(root.transform, false);
-                go.transform.localPosition = new Vector3(0f, -0.68f, 0.08f);
-                go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                var tm = go.AddComponent<TextMesh>();
-                tm.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                tm.fontSize = 36;
-                tm.characterSize = 0.008f;
-                tm.anchor = TextAnchor.MiddleCenter;
-                tm.alignment = TextAlignment.Center;
-                tm.color = new Color(0.85f, 0.92f, 1f);
-                tm.text = "…";
-            }
-            statusTm = root.transform.Find("Status").GetComponent<TextMesh>();
-            // Repair pre-fix scenes: Status must face the camera side (+Z).
-            root.transform.Find("Status").localRotation = Quaternion.Euler(0f, 180f, 0f);
-
-            for (int i = 0; i < PadPos.Length; i++) EnsurePad(i);
-        }
-
-        void EnsurePad(int i)
-        {
-            var pad = GameObject.Find($"TelePad_{i}");
-            if (pad == null)
-            {
-                pad = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                pad.name = $"TelePad_{i}";
+                var pad = GameObject.Find($"TelePad_{i}");
+                if (pad != null && pad.transform.Find("Disk") == null) { LoftUtil.Kill(pad); pad = null; }
+                if (pad != null) continue;
+                pad = new GameObject($"TelePad_{i}");
                 pad.transform.position = PadPos[i];
-                pad.transform.localScale = new Vector3(0.9f, 0.15f, 0.9f);
-                pad.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"))
-                    { color = new Color(0.3f, 0.75f, 0.9f) };
-            }
-            var lab = pad.transform.Find("Label");
-            if (lab == null)
-            {
-                lab = new GameObject("Label").transform;
-                lab.SetParent(pad.transform, false);
-                lab.localPosition = new Vector3(0f, 1.2f, 0f);
-                var tm = lab.gameObject.AddComponent<TextMesh>();
-                tm.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                tm.fontSize = 64;
-                tm.characterSize = 0.008f;
-                tm.anchor = TextAnchor.MiddleCenter;
-                tm.alignment = TextAlignment.Center;
-                tm.color = Color.white;
-                tm.text = $"PAD {i}";
-                lab.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                LoftUtil.Prim(PrimitiveType.Cylinder, "Disk", pad.transform, Vector3.zero, new Vector3(0.9f, 0.03f, 0.9f), new Color(0.3f, 0.75f, 0.9f), keepCollider: true);
+                LoftUtil.Text(pad.transform, "Label", new Vector3(0f, 0.9f, 0f), 64, 0.008f, Color.white).text = $"PAD {i}";
             }
         }
 
-        static void SetBtnPos(Transform parent, string name, Vector3 pos)
+        // 3 buttons per row. Unscaled parents keep label text proportions.
+        static Transform Page(Transform root, string name, (string id, string label, Color color)[] buttons)
         {
-            var t = parent.Find(name);
-            if (t != null) t.localPosition = pos;
+            var page = new GameObject(name).transform;
+            page.SetParent(root, false);
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                var (id, label, color) = buttons[i];
+                var b = new GameObject($"Btn_{id}").transform;
+                b.SetParent(page, false);
+                b.localPosition = new Vector3(-0.9f + (i % 3) * 0.9f, 0.45f - (i / 3) * 0.36f, 0.04f);
+                LoftUtil.Prim(PrimitiveType.Cube, "Face", b, Vector3.zero, new Vector3(0.8f, 0.3f, 0.04f), color, keepCollider: true);
+                LoftUtil.Text(b, "Label", new Vector3(0f, 0f, 0.03f), 44, 0.008f, Color.black).text = label;
+            }
+            return page;
         }
 
-        static void Button(Transform parent, string name, string label, Vector3 pos, Vector3 size, Color color)
+        // Keep the console ~0.5 m below the eyes (seated or standing tracking).
+        void LateUpdate()
         {
-            Transform t = parent.Find(name);
-            if (t == null)
-            {
-                var b = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                b.name = name;
-                b.transform.SetParent(parent, false);
-                b.transform.localPosition = pos;
-                b.transform.localScale = size;
-                b.GetComponent<Renderer>().material = new Material(Shader.Find("Standard")) { color = color };
-                t = b.transform;
-            }
-            var l = t.Find("Label");
-            if (l == null)
-            {
-                var go = new GameObject("Label");
-                go.transform.SetParent(t, false);
-                go.transform.localPosition = new Vector3(0f, 0f, 0.6f);
-                go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                var tm = go.AddComponent<TextMesh>();
-                tm.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                tm.fontSize = 44;
-                tm.characterSize = 0.008f;
-                tm.anchor = TextAnchor.MiddleCenter;
-                tm.alignment = TextAlignment.Center;
-                tm.color = Color.black;
-                tm.text = label;
-            }
-        }
-
-        static void Text(string name, string s, int size, Vector3 pos, float cs, Color color, Transform parent)
-        {
-            var t = parent.Find(name);
-            TextMesh tm;
-            if (t == null)
-            {
-                var go = new GameObject(name);
-                go.transform.SetParent(parent, false);
-                go.transform.localPosition = pos;
-                go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                tm = go.AddComponent<TextMesh>();
-            }
-            else tm = t.GetComponent<TextMesh>();
-            tm.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            tm.fontSize = size;
-            tm.characterSize = cs;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.alignment = TextAlignment.Center;
-            tm.color = color;
-            tm.text = s;
+            if (panel == null) return;
+            Wire();
+            if (world == null || world.cam == null || world.rig == null) return;
+            if (panel.parent != world.rig) EnsureBuilt();
+            panel.localPosition = new Vector3(0f, world.cam.transform.localPosition.y - 0.5f, 0.6f);
         }
     }
 }

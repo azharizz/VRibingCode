@@ -1,0 +1,18 @@
+{
+  "name": "Calm Meadow",
+  "background": "#BFE3D0",
+  "ambient": "#EAF4EC",
+  "light": { "color": "#FFF2DC", "intensity": 1.1, "euler": [40, -40, 0] },
+  "fog": { "color": "#FFF8EC", "density": 0.015 },
+  "floor": "#7FB069", "wall": "#EDE4D3", "board": "#2E3A33",
+  "audio": "loft_ambient_meadow_birds_loop",
+  "props": [
+    { "shape": "Cylinder", "pos": [-5.0, 1.0, 6.5], "scale": [0.25, 1.0, 0.25], "color": "#6B4A2E" },
+    { "shape": "Sphere", "pos": [-5.0, 2.5, 6.5], "scale": [1.8, 1.6, 1.8], "color": "#4E9A4A" },
+    { "shape": "Cylinder", "pos": [5.2, 0.9, 7.0], "scale": [0.22, 0.9, 0.22], "color": "#6B4A2E" },
+    { "shape": "Sphere", "pos": [5.2, 2.2, 7.0], "scale": [1.5, 1.4, 1.5], "color": "#5DAA55" },
+    { "shape": "Sphere", "pos": [-3.0, 0.1, 4.4], "scale": [0.25, 0.25, 0.25], "color": "#F7D44C" },
+    { "shape": "Sphere", "pos": [3.4, 0.1, 4.0], "scale": [0.25, 0.25, 0.25], "color": "#F28AB2" },
+    { "shape": "Cube", "pos": [0, 3.7, -0.25], "scale": [11.8, 0.06, 0.06], "color": "#E8C87E", "glow": true }
+  ]
+}

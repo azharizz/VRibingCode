@@ -2,7 +2,7 @@
 // Unity 6 + Meta XR SDK v71 + Photon Fusion 2 (room: 2-6 users, same loft)
 // Roles: CEO can assign any agent/card; member can move ONLY own cards.
 // Activity log records who-moved-what (cloud + wall Log board).
-// Ray + avatar sync are stubs: wire to Interaction SDK ray + Fusion NetworkTransform.
+// Shared team state syncs through the backend; avatar/ray sync needs Fusion.
 //
 // Pinned versions (verified Nov 2026): Photon Fusion 2.1.1 Stable (Build 2177,
 // 30 Jun 2026; also 2.0.12 Mar 2026), Meta XR All-in-One v207.0 (baseline v71
@@ -144,23 +144,10 @@ namespace VirtualLoft.XR
             // Production: also POST to Supabase agent_runs / board_events table.
         }
 
-        // ---- Sync stubs ------------------------------------------------------------
-        // STUB (ray sync): each player spawns a Networked ray-pointer prefab with a
-        // NetworkTransform; hover highlight (agent ring / board handles) is LOCAL
-        // only — never spam RPCs for hover. Send RPC only on select/grab commit.
-        public void SyncRayStub(Vector3 origin, Vector3 direction)
-        {
-            // Wire: ray visual prefab position = origin/direction via Fusion
-            // NetworkTransform; remote clients render remote rays in team color.
-        }
-
-        // STUB (avatar sync): spawn one Networked avatar prefab per player
-        // (head + hands via OVR CameraRig / Meta Movement SDK data, sent through
-        // NetworkTransform + compressed hand blendshape struct at 20Hz).
-        public void SyncAvatarStub(Vector3 headPos, Quaternion headRot, Vector3 leftHand, Vector3 rightHand)
-        {
-            // Wire: write into [Networked] struct on player NetworkObject.
-        }
+        // Agents, tasks and results are ALREADY shared: every headset that
+        // connects to the same backend sees the same team live (SSE). What
+        // still needs Photon Fusion 2 (package + AppId, not in this project):
+        // avatar head/hand sync and ray pointers between players.
 
         // 2-fake-user Simulator test: Play scene twice (or ParrelSync clone),
         // JoinRoom same loft id, simulatedUsers = both names, move a card on

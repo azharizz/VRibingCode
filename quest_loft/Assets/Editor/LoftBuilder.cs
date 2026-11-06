@@ -12,7 +12,7 @@ public static class LoftBuilder
         // Active target may be Android after an APK build; rest it here so
         // the Mac artifact + later editor Play both use the desktop path.
         EditorUserBuildSettings.SwitchActiveBuildTarget(UnityEditor.Build.NamedBuildTarget.Standalone, BuildTarget.StandaloneOSX);
-        var scenes = new[] { "Assets/Scenes/Loft.unity" };
+        var scenes = new[] { LoftQuestBuild.RebuiltScene() };
         var opts = new BuildPlayerOptions
         {
             scenes = scenes,

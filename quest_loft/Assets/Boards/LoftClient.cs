@@ -1,125 +1,225 @@
-// VIRTUAL LOFT — LoftClient.cs
-// Runtime link Unity <-> backend. Talks to backend/src/server.js
-// (default http://127.0.0.1:4101) via System.Net.Http (pure .NET — no
-// engine-module dependency, compiles in stripped/batch contexts).
-// Attach next to BoardManager. In XR Simulator (Play on the dev Mac) the
-// server runs on the same machine, so localhost just works.
+// VIRTUAL LOFT — LoftClient.cs: Unity <-> backend/src/server.js.
 //
-// Flow: BoardManager.Save() -> POST /loft -> cloud/local fallback.
-// Agent voice command ("run X") -> POST /agent/run -> live Spark text ->
-// Log board. Server speaks BoardManager's native {"boards":[...]} shape:
-// GET .../boards feeds Load() directly; Save() output nests under snapshot.
+// Commands go out as small HTTP calls (spawn/assign/goal/approve/...); ALL
+// state comes back through the /events Server-Sent-Events stream and is
+// raised as OnEvent on the main thread. Unity never fakes progress.
+//
+// Server address: inspector `serverUrl`/`token`, or on a headset push
+// {"url":"http://192.168.1.20:4101","token":"..."} to
+// <Application.persistentDataPath>/loft-server.json (see backend/README.md).
+// System.Net.Http only — no engine-module dependency.
 
 using System;
-using System.Collections;
+using System.Collections.Concurrent;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 public class LoftClient : MonoBehaviour
 {
-    [Tooltip("Backend bridge: run `npm run serve -- --env-file=.env` in backend/ (or: node --env-file=.env src/server.js)")]
     public string serverUrl = "http://127.0.0.1:4101";
-
-    [Tooltip("Room id shared by Unity + backend (same loft everywhere).")]
+    [Tooltip("LOFT_TOKEN from backend/.env (required when the server listens on the LAN).")]
+    public string token = "";
+    [Tooltip("Room id for the board layout store.")]
     public string roomId = "focus-loft";
-
-    [Tooltip("Optional BoardManager to push server state into after load.")]
     public BoardManager boards;
 
-    static readonly HttpClient http = new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
-
-    // Test hook: per-call timeout budget. Production stays 120s (reasoning
-    // model streams); headless resilience tests (A18) set it to seconds.
+    // Per-call budget for commands (goal planning can take a while).
     public static int timeoutSeconds = 120;
-    static CancellationTokenSource LinkedTimeout()
-    {
-        var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, timeoutSeconds)));
-        return cts;
-    }
+
+    public bool Connected => connected;
+    public event Action<JObject> OnEvent;
+
+    // No HttpClient timeout: the SSE stream is open forever; commands use their own CTS.
+    static readonly HttpClient http = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
+    readonly ConcurrentQueue<JObject> inbox = new ConcurrentQueue<JObject>();
+    readonly ConcurrentQueue<Action> mainThread = new ConcurrentQueue<Action>();
+    CancellationTokenSource streamCts;
+    volatile bool connected;
 
     void Awake()
     {
         if (boards == null) boards = FindFirstObjectByType<BoardManager>();
+        LoadOverride();
     }
 
-    // ---- async core (Task) ----
+    void OnEnable() => StartEvents();
+    void OnDisable() => StopEvents();
 
-    public async Task<bool> CheckHealthAsync()
+    // Run onMain(result) on Unity's main thread once the request finishes (null on failure).
+    public void Then(Task<JObject> task, Action<JObject> onMain)
+    {
+        task.ContinueWith(t => mainThread.Enqueue(() => onMain(t.Status == TaskStatus.RanToCompletion ? t.Result : null)));
+    }
+
+    void Update()
+    {
+        while (mainThread.TryDequeue(out var act))
+        {
+            try { act(); }
+            catch (Exception ex) { Debug.LogException(ex); }
+        }
+        while (inbox.TryDequeue(out var e))
+        {
+            try { OnEvent?.Invoke(e); }
+            catch (Exception ex) { Debug.LogException(ex); }
+        }
+    }
+
+    void LoadOverride()
     {
         try
         {
-            using var cts = LinkedTimeout();
-            var res = await http.GetAsync(serverUrl + "/health", cts.Token).ConfigureAwait(false);
-            Debug.Log(res.IsSuccessStatusCode ? "[LoftClient] backend reachable" : $"[LoftClient] backend HTTP {(int)res.StatusCode}");
-            return res.IsSuccessStatusCode;
+            var p = Path.Combine(Application.persistentDataPath, "loft-server.json");
+            if (!File.Exists(p)) return;
+            var o = JObject.Parse(File.ReadAllText(p));
+            serverUrl = (string)o["url"] ?? serverUrl;
+            token = (string)o["token"] ?? token;
+            Debug.Log($"[LoftClient] server from loft-server.json: {serverUrl}");
         }
-        catch (Exception e) { Debug.LogWarning($"[LoftClient] backend DOWN: {e.Message}"); return false; }
+        catch (Exception e) { Debug.LogWarning($"[LoftClient] loft-server.json ignored: {e.Message}"); }
     }
+
+    // ---- live events (SSE) ----
+
+    public void StartEvents()
+    {
+        StopEvents();
+        streamCts = new CancellationTokenSource();
+        _ = EventLoop(streamCts.Token);
+    }
+
+    public void StopEvents()
+    {
+        streamCts?.Cancel();
+        streamCts = null;
+        connected = false;
+    }
+
+    async Task EventLoop(CancellationToken ct)
+    {
+        int backoff = 1;
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                using var req = Request(HttpMethod.Get, "/events");
+                using var res = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+                res.EnsureSuccessStatusCode();
+                using var stream = await res.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                using var reader = new StreamReader(stream, Encoding.UTF8);
+                using var reg = ct.Register(() => res.Dispose()); // unblocks ReadLineAsync on stop
+                connected = true;
+                backoff = 1;
+                string line;
+                while (!ct.IsCancellationRequested && (line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                {
+                    if (!line.StartsWith("data: ")) continue; // ": ping" keep-alives, blank separators
+                    try { inbox.Enqueue(JObject.Parse(line.Substring(6))); }
+                    catch (JsonException) { }
+                }
+            }
+            catch (Exception e) when (!ct.IsCancellationRequested)
+            {
+                Debug.LogWarning($"[LoftClient] event stream: {e.Message}");
+            }
+            catch (Exception) { }
+            if (connected) inbox.Enqueue(new JObject { ["type"] = "disconnected" });
+            connected = false;
+            if (ct.IsCancellationRequested) break;
+            try { await Task.Delay(backoff * 1000, ct).ConfigureAwait(false); }
+            catch (Exception) { break; }
+            backoff = Math.Min(backoff * 2, 10);
+        }
+    }
+
+    // ---- commands (fire-and-forget friendly: never throw, null on failure) ----
+
+    // Free-form agent: any model id, a saved role (roleId) OR a role object, any animal ("random" ok).
+    public Task<JObject> Spawn(string model, string roleId, JObject role = null, string name = null, string skin = null)
+    {
+        var body = Body("model", model, "roleId", role == null ? roleId : null, "name", name, "skin", skin);
+        if (role != null) body["role"] = role;
+        return Send(HttpMethod.Post, "/agents", body);
+    }
+    public Task<JObject> DraftRole(string description) =>
+        Send(HttpMethod.Post, "/roles/draft", Body("description", description));
+    public Task<JObject> SaveRole(JObject role) => Send(HttpMethod.Post, "/roles", role);
+    public Task<JObject> Party(bool on) => Send(HttpMethod.Post, "/party", new JObject { ["on"] = on });
+    public Task<JObject> RemoveAgent(string agentId) =>
+        Send(HttpMethod.Delete, "/agents/" + Uri.EscapeDataString(agentId ?? ""), null);
+    public Task<JObject> Assign(string agentId, string title) =>
+        Send(HttpMethod.Post, "/tasks", Body("agentId", agentId, "title", title));
+    public Task<JObject> Goal(string goal) =>
+        Send(HttpMethod.Post, "/goal", Body("goal", goal));
+    public Task<JObject> Approve(string taskId) =>
+        Send(HttpMethod.Post, $"/tasks/{Uri.EscapeDataString(taskId ?? "")}/approve", null);
+    public Task<JObject> Reject(string taskId, string feedback) =>
+        Send(HttpMethod.Post, $"/tasks/{Uri.EscapeDataString(taskId ?? "")}/reject", Body("feedback", feedback));
+    public Task<JObject> Stop(string agentId = null) =>
+        Send(HttpMethod.Post, "/stop", Body("agentId", agentId));
+
+    public async Task<bool> CheckHealthAsync() => await Send(HttpMethod.Get, "/health", null, quiet: true).ConfigureAwait(false) != null;
 
     public async Task<bool> LoadFromServerAsync(string id)
     {
-        try
-        {
-            using var cts = LinkedTimeout();
-            var resp = await http.GetAsync($"{serverUrl}/loft/{Uri.EscapeDataString(id)}/boards", cts.Token).ConfigureAwait(false);
-            resp.EnsureSuccessStatusCode();
-            var text = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-            if (boards != null) boards.Load(text);
-            Debug.Log($"[LoftClient] loaded loft '{id}' from server");
-            return true;
-        }
-        catch (Exception e) { Debug.LogWarning($"[LoftClient] load failed: {e.Message}"); return false; }
+        var res = await Send(HttpMethod.Get, $"/loft/{Uri.EscapeDataString(id)}/boards", null, quiet: true).ConfigureAwait(false);
+        if (res == null || boards == null) return false;
+        boards.Load(res.ToString(Formatting.None));
+        return true;
     }
-
     public Task<bool> LoadFromServerAsync() => LoadFromServerAsync(roomId);
 
     public async Task<bool> SaveToServerAsync()
     {
         if (boards == null) return false;
-        try
-        {
-            using var cts = LinkedTimeout();
-            var body = "{\"roomId\":" + JsonEscape(roomId) + ",\"snapshot\":" + boards.Save() + "}";
-            var res = await http.PostAsync(serverUrl + "/loft", new StringContent(body, Encoding.UTF8, "application/json"), cts.Token).ConfigureAwait(false);
-            Debug.Log(res.IsSuccessStatusCode ? "[LoftClient] saved loft to server" : $"[LoftClient] save HTTP {(int)res.StatusCode}");
-            return res.IsSuccessStatusCode;
-        }
-        catch (Exception e) { Debug.LogWarning($"[LoftClient] save failed: {e.Message}"); return false; }
+        var body = new JObject { ["roomId"] = roomId, ["snapshot"] = JObject.Parse(boards.Save()) };
+        return await Send(HttpMethod.Post, "/loft", body, quiet: true).ConfigureAwait(false) != null;
     }
 
-    public async Task<string> RunAgentAsync(string role, string task)
+    public async Task<JObject> Send(HttpMethod method, string path, JObject body, bool quiet = false)
     {
         try
         {
-            using var cts = LinkedTimeout();
-            var body = "{\"role\":" + JsonEscape(role) + ",\"task\":" + JsonEscape(task) + "}";
-            var res = await http.PostAsync(serverUrl + "/agent/run", new StringContent(body, Encoding.UTF8, "application/json"), cts.Token).ConfigureAwait(false);
-            if (!res.IsSuccessStatusCode) { Debug.LogWarning($"[LoftClient] agent HTTP {(int)res.StatusCode}"); return null; }
-            return await res.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(1, timeoutSeconds)));
+            using var req = Request(method, path);
+            if (body != null) req.Content = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
+            using var res = await http.SendAsync(req, cts.Token).ConfigureAwait(false);
+            var text = await res.Content.ReadAsStringAsync().ConfigureAwait(false);
+            JObject json;
+            try { json = string.IsNullOrEmpty(text) ? new JObject() : JObject.Parse(text); }
+            catch (JsonException) { json = new JObject { ["error"] = text }; }
+            if (res.IsSuccessStatusCode) return json;
+            Fail(method, path, $"HTTP {(int)res.StatusCode}: {json["error"]}", quiet);
         }
-        catch (Exception e) { Debug.LogWarning($"[LoftClient] agent failed: {e.Message}"); return null; }
+        catch (Exception e) { Fail(method, path, e.Message, quiet); }
+        return null;
     }
 
-    // ---- coroutine wrappers (for Play-Mode tests / UI buttons) ----
-
-    public IEnumerator CheckHealth(Action<bool> done) => AwaitToCoroutine(CheckHealthAsync(), done);
-    public IEnumerator LoadFromServer(Action<bool> done) => AwaitToCoroutine(LoadFromServerAsync(), done);
-    public IEnumerator LoadFromServer(string id, Action<bool> done) => AwaitToCoroutine(LoadFromServerAsync(id), done);
-    public IEnumerator SaveToServer(Action<bool> done) => AwaitToCoroutine(SaveToServerAsync(), done);
-    public IEnumerator RunAgent(string role, string task, Action<string> done) => AwaitToCoroutine(RunAgentAsync(role, task), done);
-
-    static IEnumerator AwaitToCoroutine<T>(Task<T> task, Action<T> done)
+    void Fail(HttpMethod method, string path, string why, bool quiet)
     {
-        while (!task.IsCompleted) yield return null;
-        T result = default;
-        if (task.Status == TaskStatus.RanToCompletion) result = task.Result;
-        else Debug.LogWarning($"[LoftClient] task faulted: {task.Exception?.InnerException?.Message}");
-        done?.Invoke(result);
+        Debug.LogWarning($"[LoftClient] {method} {path} failed: {why}");
+        if (!quiet) inbox.Enqueue(new JObject { ["type"] = "error", ["message"] = why });
     }
 
-    static string JsonEscape(string s) => "\"" + (s ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n") + "\"";
+    HttpRequestMessage Request(HttpMethod method, string path)
+    {
+        var req = new HttpRequestMessage(method, serverUrl.TrimEnd('/') + path);
+        if (!string.IsNullOrEmpty(token)) req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return req;
+    }
+
+    // Body("k1", v1, "k2", v2...) — skips null values so the server applies its defaults.
+    static JObject Body(params string[] kv)
+    {
+        var o = new JObject();
+        for (int i = 0; i + 1 < kv.Length; i += 2) if (kv[i + 1] != null) o[kv[i]] = kv[i + 1];
+        return o;
+    }
 }

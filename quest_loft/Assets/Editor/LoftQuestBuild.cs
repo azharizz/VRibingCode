@@ -92,6 +92,8 @@ public static class LoftQuestBuild
         PlayerSettings.colorSpace = ColorSpace.Linear;
         PlayerSettings.SetGraphicsAPIs(BuildTarget.Android,
             new[] { GraphicsDeviceType.Vulkan, GraphicsDeviceType.OpenGLES3 });
+        // Agents live on the backend over Wi-Fi: always request INTERNET.
+        PlayerSettings.Android.forceInternetPermission = true;
         // Input: project stays on old Input Manager (LoftDesk uses it); the
         // Input System *package* is present only as an OpenXR dependency.
         AssetDatabase.SaveAssets();
@@ -160,7 +162,7 @@ public static class LoftQuestBuild
         AssetDatabase.SaveAssets();
         var opts = new BuildPlayerOptions
         {
-            scenes = new[] { "Assets/Scenes/Loft.unity" },
+            scenes = new[] { RebuiltScene() },
             locationPathName = "Builds/FocusLoft.apk",
             target = BuildTarget.Android,
             options = BuildOptions.None,
@@ -184,26 +186,37 @@ public static class LoftQuestBuild
         general.InitManagerOnStart = false;
         EditorUtility.SetDirty(general);
         AssetDatabase.SaveAssets();
+        int code = 1;
         try
         {
             EditorUserBuildSettings.SwitchActiveBuildTarget(NamedBuildTarget.Android, BuildTarget.Android);
             var opts = new BuildPlayerOptions
             {
-                scenes = new[] { "Assets/Scenes/Loft.unity" },
+                scenes = new[] { RebuiltScene() },
                 locationPathName = "Builds/FocusLoft-2D.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.None,
             };
             var report = BuildPipeline.BuildPlayer(opts);
             Debug.Log($"[BUILD] FocusLoft-2D.apk: {report.summary.result} in {report.summary.totalTime.TotalSeconds:F0}s");
-            EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
+            code = report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1;
         }
         finally
         {
+            // Exit() kills the process, so restore XR init first or every later VR build ships with XR off.
             general.InitManagerOnStart = prevInit;
             EditorUtility.SetDirty(general);
             AssetDatabase.SaveAssets();
         }
+        EditorApplication.Exit(code);
+    }
+
+    // Builds ship the scene the code generates, never a stale committed one.
+    public static string RebuiltScene()
+    {
+        UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Scenes/Loft.unity");
+        LoftBootstrap.Build();
+        return "Assets/Scenes/Loft.unity";
     }
 
     static void EnsureFolder(string path)

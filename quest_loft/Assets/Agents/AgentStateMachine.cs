@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-public enum AgentState { Idle, Working, Done }
+// Int values are the Animator "State" parameter (see AgentSkin).
+public enum AgentState { Idle = 0, Working = 1, Done = 2, Failed = 3 }
 
 public class AgentStateMachine : MonoBehaviour
 {

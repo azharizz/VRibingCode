@@ -1,6 +1,10 @@
 // VIRTUAL LOFT — VoiceCommands.cs
-// Unity 6 + Meta XR SDK v71 + Meta Voice SDK (Wit.ai) + Interaction SDK
 // 10 voice commands V1 (EN + ID). Every command has a button fallback event.
+// Speech-to-text is NOT in this project yet: feed transcripts from any STT
+// (Meta Voice SDK / Wit.ai, Whisper, ...) into HandleTranscription(). LoftDesk
+// listens to OnCommand: "run <goal>" -> team goal, "assign <task>" -> selected
+// agent, "stop", "done" (approve), "next" (select next agent), "focus mode".
+// Push-to-talk is the right controller's A button (LoftQuestPanel).
 // Mic rule: PUSH-TO-TALK ONLY — hold controller trigger to talk (see Note below).
 // Voice SDK wiring: attach Wit + AppVoiceExperience in scene, set TestMode for
 // Simulator/PC-mic validation without a headset. This script never assumes
@@ -32,7 +36,8 @@ namespace VirtualLoft.XR
         Remind = 6,     // remind at [time]
         Next = 7,       // next item
         Done = 8,       // mark done
-        FocusMode = 9   // focus mode on/off
+        FocusMode = 9,  // focus mode on/off
+        Party = 10      // party time!
     }
 
     [Serializable]
@@ -63,7 +68,9 @@ namespace VirtualLoft.XR
         public bool pushToTalkHeld;
 
         [Header("Commands (10) — EN + ID phrases, one fallback event each")]
-        public VoiceCommandPhrases[] commands = new VoiceCommandPhrases[10]
+        public VoiceCommandPhrases[] commands = Defaults();
+
+        static VoiceCommandPhrases[] Defaults() => new VoiceCommandPhrases[11]
         {
             new VoiceCommandPhrases { id = VoiceCommandId.Wake,
                 english = new[]{"wake", "wake up", "wake everyone"},
@@ -95,6 +102,9 @@ namespace VirtualLoft.XR
             new VoiceCommandPhrases { id = VoiceCommandId.FocusMode,
                 english = new[]{"focus mode", "focus on", "focus off", "quiet mode"},
                 indonesian = new[]{"mode fokus", "fokus", "mode diam", "fokus mati"} },
+            new VoiceCommandPhrases { id = VoiceCommandId.Party,
+                english = new[]{"party", "party time", "let's party", "celebrate"},
+                indonesian = new[]{"pesta", "ayo pesta", "rayakan", "party"} },
         };
 
         [Header("Diagnostics")]
@@ -102,18 +112,20 @@ namespace VirtualLoft.XR
         public VoiceCommandId lastCommand = VoiceCommandId.Wake;
         public UnityEvent<string> onUnrecognized;
 
-        // NOTE (push-to-talk, hold-trigger): Voice SDK activation must be gated
-        // behind the controller trigger held down. Suggested wiring:
-        //   pushToTalkHeld = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger)
-        //                    || XRInputModalityManager decides hand-pinch hold.
-        // Show mic waveform on wrist UI only while pushToTalkHeld == true.
-        // This avoids always-listening battery drain + fan/kids false triggers
-        // (mic fails 10-20% in noise — button fallback below covers it).
+        /// <summary>Command + the words after the trigger phrase ("run add login" -> Run, "add login").</summary>
+        public event Action<VoiceCommandId, string> OnCommand;
+
+        // Push-to-talk: LoftQuestPanel sets pushToTalkHeld while the right
+        // controller's A button is held. Never always-listening.
 
         void Awake()
         {
-            if (commands == null || commands.Length != 10)
-                Debug.LogError("[VoiceCommands] Must define exactly 10 commands (wake/run/stop/move-that/summarize/assign/remind/next/done/focus-mode).");
+            // Scenes saved before a command existed keep their old serialized list:
+            // append any missing default commands (e.g. Party) instead of losing them.
+            var list = new List<VoiceCommandPhrases>(commands ?? new VoiceCommandPhrases[0]);
+            foreach (var d in Defaults())
+                if (!list.Exists(c => c.id == d.id)) list.Add(d);
+            commands = list.ToArray();
         }
 
         // ---- Voice SDK entry point ------------------------------------------------
@@ -143,15 +155,22 @@ namespace VirtualLoft.XR
 
             string heard = text.Trim().ToLowerInvariant();
             lastHeard = heard;
-            foreach (var cmd in commands)
+            // Longest trigger phrase wins ("jalankan" beats "jalan").
+            int best = -1, bestLen = 0;
+            for (int i = 0; i < commands.Length; i++)
             {
-                if (Matches(heard, cmd.english) || Matches(heard, cmd.indonesian))
-                {
-                    lastCommand = cmd.id;
-                    Debug.Log($"[VoiceCommands] Matched {cmd.id}: '{heard}'");
-                    cmd.onInvoke?.Invoke();
-                    return true;
-                }
+                int len = Math.Max(MatchLength(heard, commands[i].english), MatchLength(heard, commands[i].indonesian));
+                if (len > bestLen) { best = i; bestLen = len; }
+            }
+            if (best >= 0)
+            {
+                var cmd = commands[best];
+                lastCommand = cmd.id;
+                Debug.Log($"[VoiceCommands] Matched {cmd.id}: '{heard}'");
+                cmd.onInvoke?.Invoke();
+                // Payload keeps the user's casing.
+                OnCommand?.Invoke(cmd.id, text.Trim().Substring(Math.Min(bestLen, text.Trim().Length)).Trim());
+                return true;
             }
             Debug.Log($"[VoiceCommands] Unrecognized: '{heard}'");
             onUnrecognized?.Invoke(text);
@@ -171,6 +190,7 @@ namespace VirtualLoft.XR
                     lastCommand = id;
                     Debug.Log($"[VoiceCommands] Button fallback invoked: {id}");
                     cmd.onInvoke?.Invoke();
+                    OnCommand?.Invoke(id, "");
                     return;
                 }
             }
@@ -183,19 +203,19 @@ namespace VirtualLoft.XR
 
         public void SimulateCommand(string phrase) => HandleTranscription(phrase);
 
-        static bool Matches(string heard, string[] phrases)
+        // Length of the longest phrase that is the whole utterance or a
+        // word-boundary prefix of it ("run x" matches "run", "running" doesn't).
+        static int MatchLength(string heard, string[] phrases)
         {
-            if (phrases == null) return false;
+            int best = 0;
+            if (phrases == null) return 0;
             foreach (var p in phrases)
             {
                 if (string.IsNullOrWhiteSpace(p)) continue;
                 string key = p.Trim().ToLowerInvariant();
-                // StartsWith allows "run landing test X" to match "run landing test",
-                // and bare "run ..." to match "run".
-                if (heard.Equals(key) || heard.StartsWith(key + " ") || heard.StartsWith(key))
-                    return true;
+                if ((heard == key || heard.StartsWith(key + " ")) && key.Length > best) best = key.Length;
             }
-            return false;
+            return best;
         }
 
         // Suggested Wit.ai intents (mirror in Wit console, one intent per command):

@@ -57,8 +57,7 @@ public static class LoftSimShot
             string state = "NO-DESK";
             if (desk != null)
             {
-                desk.Assign("builder", "simulator proof task");
-                state = $"tasks={desk.tasks.Count} boards={(desk.boards != null ? desk.boards.ListCards("kanban").Count : -1)}";
+                state = $"connected={desk.Connected} agents={desk.agents.agents.Count} tasks={desk.tasks.Count}";
             }
             var dir = Path.Combine(Directory.GetCurrentDirectory(), "Tools");
             ScreenCapture.CaptureScreenshot(Path.Combine(dir, "sim-shot.png"));

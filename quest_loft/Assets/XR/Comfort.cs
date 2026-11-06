@@ -1,10 +1,14 @@
 // VIRTUAL LOFT — Comfort.cs
 // Comfort + session rules: teleport-only, seated default, vignette on move,
 // 15-30 min sessions, 30s autosave. Quest 3/3S only (no Quest 2).
-// Wire to Interaction SDK locomotion (Teleport) + OVR CameraRig height.
+// Teleport = LoftQuestPanel moving the CameraRig. Height: in XR the tracking
+// origin is set per mode (seated = Device + rig at eye height, standing =
+// Floor + rig on the floor); on desktop the rig sits at eye height.
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR;
 
 namespace VirtualLoft.XR
 {
@@ -44,8 +48,12 @@ namespace VirtualLoft.XR
         public UnityEvent onAutosaveTick;
         public UnityEvent onBreakSuggested;
 
+        [Tooltip("CameraRig (auto: Main Camera's parent).")]
+        public Transform rig;
+
         float autosaveTimer;
         bool vignetteFading;
+        Renderer vignette;
 
         void OnValidate()
         {
@@ -105,15 +113,45 @@ namespace VirtualLoft.XR
         public void SetSeated(bool seated)
         {
             seatedMode = seated;
-            float h = seated ? SEATED_EYE_HEIGHT : STANDING_EYE_HEIGHT;
-            Debug.Log($"[Comfort] Eye height -> {h}m ({(seated ? "seated" : "standing")}). Wire to CameraRig tracking-space height.");
-            // Wire: cameraRig.trackingSpace.localPosition / OVRManager eye height.
+            ApplyHeight();
         }
 
+        public void ApplyHeight()
+        {
+            if (rig == null && Camera.main != null) rig = Camera.main.transform.parent;
+            if (rig == null) return;
+            bool xr = XRSettings.isDeviceActive;
+            if (xr)
+            {
+                var inputs = new List<XRInputSubsystem>();
+                SubsystemManager.GetSubsystems(inputs);
+                var mode = seatedMode ? TrackingOriginModeFlags.Device : TrackingOriginModeFlags.Floor;
+                foreach (var s in inputs) s.TrySetTrackingOriginMode(mode);
+            }
+            var p = rig.position;
+            p.y = xr && !seatedMode ? 0f : (seatedMode ? SEATED_EYE_HEIGHT : STANDING_EYE_HEIGHT);
+            rig.position = p;
+        }
+
+        // Black see-through quad just in front of the eyes; hidden at 0.
         void ApplyVignette(float strength)
         {
-            // Wire: fullscreen vignette material / URP post-process weight.
-            // Stub: strength stored in currentVignette for the render hook.
+            if (vignette == null)
+            {
+                var cam = Camera.main;
+                var shader = Shader.Find("Sprites/Default");
+                if (cam == null || shader == null) return;
+                var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                q.name = "Vignette";
+                LoftUtil.Kill(q.GetComponent<Collider>());
+                q.transform.SetParent(cam.transform, false);
+                q.transform.localPosition = new Vector3(0f, 0f, cam.nearClipPlane + 0.01f);
+                q.transform.localScale = Vector3.one * 2f;
+                vignette = q.GetComponent<Renderer>();
+                vignette.sharedMaterial = new Material(shader);
+            }
+            vignette.enabled = strength > 0.001f;
+            vignette.sharedMaterial.color = new Color(0f, 0f, 0f, strength);
         }
 
         void Awake()
@@ -121,5 +159,7 @@ namespace VirtualLoft.XR
             allowSmoothLocomotion = false; // enforce teleport-only even if prefab was edited.
             if (seatedMode != SEATED_DEFAULT) seatedMode = SEATED_DEFAULT;
         }
+
+        void Start() => ApplyHeight();
     }
 }
