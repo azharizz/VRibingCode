@@ -12,20 +12,21 @@ namespace VirtualLoft.XR
     public static class LoftIntent
     {
         public static readonly string[] Actions =
-            { "goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "selectNext", "chat", "board", "browse", "watch", "none" };
+            { "goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "autoApprove", "menu", "note", "selectNext", "chat", "board", "browse", "preview", "menu", "note", "watch", "none" };
 
         // Safe to run with no confirmation at all.
-        static readonly string[] Harmless = { "scene", "party", "selectNext", "chat", "board", "browse", "watch", "none" };
+        static readonly string[] Harmless = { "scene", "party", "selectNext", "chat", "board", "browse", "preview", "watch", "none" };
 
         public static string Action(JObject intent) => (string)intent?["action"];
 
-        // approve / remove / reject / stop-all. A single-agent stop still goes through the card.
+        // approve / remove / reject / stop-all / auto-approve on. A single-agent stop still goes through the card.
         public static bool IsRisky(JObject intent)
         {
             switch (Action(intent))
             {
                 case "approve": case "remove": case "reject": return true;
                 case "stop": return string.IsNullOrEmpty((string)intent["agentId"]);
+                case "autoApprove": return (bool?)intent["on"] ?? true;
                 default: return false;
             }
         }

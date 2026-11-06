@@ -117,10 +117,18 @@ public static class LoftVerify
         withDiff["preview"] = new JObject { ["status"] = "loading" };
         desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = withDiff });
         var rv = Board("review");
-        Check(rv.Contains("2") && rv.Contains("+40") && rv.Contains("Hold to approve"), "REVIEW board shows change size and a hold-to-approve action");
+        Check(rv.Any(t => t.StartsWith("2 file")) && rv.Contains("+40") && rv.Contains("Try it") && rv.Contains("Hold to approve"), "REVIEW board shows change size, Try it and a hold-to-approve action");
         Check(Board("preview").Any(t => t.Contains("Where to?")), "PREVIEW board explains itself when no page is open");
-        Check(Board("diff").Any(t => t.Contains("No changes")) && Board("log").Count > 0 && Board("files").Count > 0 && Board("notes").Any(t => t.Contains("New note")), "every board type builds");
+        Check(Board("diff").Any(t => t.Contains("No changes")) && Board("log").Count > 0 && Board("files").Count > 0 && Board("notes").Any(t => t.Contains("New note")) && Board("project").Contains("Browse files"), "every board type builds");
         Check(desk.ReviewTask()?.id == "t1", "approve/reject target = task in review");
+
+        // 3b. Ball game: arcs land exactly, and only idle agents play.
+        var arcA = new Vector3(0f, 1f, 0f); var arcB = new Vector3(2f, 1f, 0f);
+        Check(LoftKeepUp.Arc(arcA, arcB, 1f, 0f) == arcA && LoftKeepUp.Arc(arcA, arcB, 1f, 1f) == arcB && Mathf.Abs(LoftKeepUp.Arc(arcA, arcB, 1f, 0.5f).y - 2f) < 0.001f, "ball arc starts and lands on target");
+        var bench = builder.GetComponent<AgentSkin>();
+        bench.JoinGame(LoftKeepUp.Center, LoftKeepUp.Center);
+        Check(bench.Body != null, "agents get a body for walking and touches");
+        bench.LeaveGame();
 
         // 4. Spawn up to 20, never more; layout stays distinct.
         for (int i = 4; i <= 21; i++) desk.HandleEvent(new JObject { ["type"] = "agent", ["agent"] = Agent($"builder-{i}", "builder", "cat") });
@@ -366,6 +374,12 @@ public static class LoftVerify
         fake.Frame(); fake.cancelDown = true; inter.Tick(0.016f); // 1st B dismisses the "stopped" card
         fake.Frame(); fake.cancelDown = true; inter.Tick(0.016f);
         Check(!wrist.IsOpen && !inter.card.Visible, "B closes the card, then the wrist menu");
+        // The Simulator's A+X key: a quick tap opens the menu, a second tap closes it.
+        void TapBoth() { fake.Frame(); fake.talkDown = fake.talkHeld = fake.wristHeld = true; inter.Tick(0.016f); fake.Frame(); fake.talkUp = true; fake.talkHeld = fake.wristHeld = false; inter.Tick(0.016f); fake.Frame(); inter.Tick(0.016f); }
+        TapBoth();
+        Check(wrist.IsOpen && !inter.card.Visible, "a quick tap of A+X opens the menu");
+        TapBoth();
+        Check(!wrist.IsOpen && !inter.card.Visible, "a second tap closes it, with no talk card left behind");
         // Keyboard backup page.
         wrist.SetOpen(true, true); wrist.page = LoftWrist.Page.Keys; wrist.Rebuild();
         Check(new[] { "k_goal", "k_model", "k_name", "k_create" }.All(k => wrist.Root.GetComponentsInChildren<LoftButton>(true).Any(bt => bt.id == k)), "keyboard backup page: goal, model id, name, create");
@@ -440,8 +454,31 @@ public static class LoftVerify
         Aim(false, false, true, tgo.transform.position + Vector3.up * 30f);
         Check(ptr.released == 1 && !ptr.hover, "IPointerTarget: OnRelease on trigger up, hover cleared");
         Check(desk.selectedAgentId == null, "IPointerTarget swallowed the click (no agent select)");
-        inter.inputOverride = null;
         Object.DestroyImmediate(tgo);
+        // The laser keyboard: typed with the trigger, including the shift key, then OK.
+        LoftTextEntry.ForceWorld = true;
+        string typedOut = null;
+        var te = inter.GetComponent<LoftTextEntry>();
+        te.Request("Test", "~/", t => typedOut = t, out _);
+        Physics.SyncTransforms();
+        void PressKey(string id) { var at = te.transform.Find("VrKeyboard/Btn_" + id).position; Aim(false, false, false, at); Aim(true, true, false, at); Aim(false, false, true, at); }
+        PressKey("shift"); PressKey("key_" + (int)'a'); PressKey("shift"); PressKey("key_" + (int)'b'); PressKey("del"); PressKey("key_" + (int)'c'); PressKey("ok");
+        Check(typedOut == "~/Ac" && !te.Active && !te.InWorld, $"laser keyboard types, shifts, deletes and submits (got '{typedOut}')");
+        LoftTextEntry.ForceWorld = false;
+        // Nothing on the interaction object may take the clicks of the card and wrist under it.
+        Check(inter.GetComponent<IPointerTarget>() == null, "no IPointerTarget on the interaction object");
+        var ideaCard = inter.GetComponent<LoftCard>();
+        bool ideaSent = false;
+        ideaCard.ShowSuggestion("Keeper", "An idea", "Why");
+        ideaCard.onSend = () => ideaSent = true;
+        Physics.SyncTransforms();
+        var acceptAt = ideaCard.transform.Find("ConfirmCard/Btn_send").position;
+        Aim(false, false, false, acceptAt);
+        Aim(true, true, false, acceptAt);
+        Aim(false, false, true, acceptAt);
+        Check(ideaSent, "trigger on ACCEPT really clicks the card button");
+        ideaCard.Hide();
+        inter.inputOverride = null;
 
         // 6g3. Round 2 voice actions, speech and suggestions (fake backend).
         srv = new FakeServer(); client.serverUrl = srv.Url;
@@ -477,7 +514,7 @@ public static class LoftVerify
         Check(wbtn.Contains("walk") && wbtn.Contains("boards"), "wrist menu has smooth-walk toggle and the boards page");
         inter.wrist.page = LoftWrist.Page.Boards; inter.wrist.Rebuild();
         wbtn = inter.wrist.Root.GetComponentsInChildren<LoftButton>(true).Select(bt => bt.id).ToList();
-        Check(LoftBridge.BoardTypes.All(t => wbtn.Contains("board_" + t)), "boards page lists all 7 board types");
+        Check(LoftBridge.BoardTypes.All(t => wbtn.Contains("board_" + t)), "boards page lists every board type");
         inter.wrist.SetOpen(false);
         inter.inputOverride = null;
         srv.Dispose();
@@ -565,6 +602,8 @@ public static class LoftVerify
             var earL = go.GetComponentsInChildren<Transform>().FirstOrDefault(t => t.name == "ear.L");
             Check(head && tail && earL && tail.position.z > head.position.z && earL.position.x > 0f && head.position.y > 0.4f,
                 $"animal '{id}': upright, raw prefab faces -Z (AgentSkin turns it to the CEO), not mirrored (head {head?.position}, tail {tail?.position})");
+            var bones = go.GetComponentsInChildren<Transform>().Select(t => t.name).ToList();
+            Check(new[] { "thigh.L", "thigh.R", "foot.L", "foot.R", "upperarm.L", "upperarm.R", "head", "chest" }.All(bones.Contains), $"animal '{id}': has every bone the walk and ball game use");
             var r = go.GetComponentInChildren<SkinnedMeshRenderer>();
             float h = r != null ? r.bounds.size.y : 0f;
             Check(r != null && h > 0.8f && h < 1.4f && r.sharedMaterial != null && r.sharedMaterial.shader.name == "Loft/VertexColorLit",

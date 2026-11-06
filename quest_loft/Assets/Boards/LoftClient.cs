@@ -158,6 +158,7 @@ public partial class LoftClient : MonoBehaviour
         Send(HttpMethod.Post, "/roles/draft", Body("description", description));
     public Task<JObject> SaveRole(JObject role) => Send(HttpMethod.Post, "/roles", role);
     public Task<JObject> Party(bool on) => Send(HttpMethod.Post, "/party", new JObject { ["on"] = on });
+    public Task<JObject> AutoApprove(bool on) => Send(HttpMethod.Post, "/auto-approve", new JObject { ["on"] = on });
     public Task<JObject> RemoveAgent(string agentId) =>
         Send(HttpMethod.Delete, "/agents/" + Uri.EscapeDataString(agentId ?? ""), null);
     public Task<JObject> Assign(string agentId, string title, string projectId = null) =>
@@ -168,6 +169,7 @@ public partial class LoftClient : MonoBehaviour
         Send(HttpMethod.Post, $"/agents/{Uri.EscapeDataString(agentId ?? "")}/chat", Body("text", text));
     public Task<JObject> AnswerSuggestion(string id, bool accept) =>
         Send(HttpMethod.Post, $"/suggestions/{Uri.EscapeDataString(id ?? "")}/{(accept ? "accept" : "dismiss")}", null);
+    public Task<JObject> AddProject(string path) => Send(HttpMethod.Post, "/projects", new JObject { ["path"] = path }, true);
     public Task<JObject> CreateProject(string name, string template = "static") =>
         Send(HttpMethod.Post, "/projects/new", Body("name", name, "template", template));
 

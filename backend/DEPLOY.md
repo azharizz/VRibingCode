@@ -118,3 +118,9 @@ Clickable previews need Playwright: build with `--build-arg PREVIEWS=1`.
 `POST /cinema {url}` downloads a public video, converts it to H.264 with ffmpeg, and serves it at `/cinema/<id>/video.mp4`. It needs `ffmpeg` (in the Docker image) and disk space: 1.5 GB limit per download, last 3 videos kept in `data/cinema`. Those video URLs skip the token, because a video player cannot send one. The long random id is the permission.
 
 Only real video files work. YouTube and similar sites stream protected data with no file, so they stay on the flat Browser board.
+
+## Qwen3-ASR on a Mac
+
+`tools/setup-qwen.sh` once, then `tools/start-qwen.sh` and `npm run serve:qwen`. It runs on the Apple GPU through MLX, audio stays on the machine, and it listens on loopback only. It needs about 3 GB of disk.
+
+On the first real recordings it clearly beat whisper.cpp `small`, at about 0.7 s per clip. For other hosts use `stt-server/app.py` or a hosted speech API.

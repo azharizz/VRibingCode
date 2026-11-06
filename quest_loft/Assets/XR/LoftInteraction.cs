@@ -10,6 +10,8 @@
 // (mouse aims, click = trigger, hold V = A, Esc/C = B, Q/E turn, M wrist). Both
 // feed this one class, so the desktop rig tests the real thing.
 
+using System.Linq;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.XR;
@@ -59,6 +61,27 @@ namespace VirtualLoft.XR
             cinema = GetComponent<LoftCinema>();
             if (cinema == null) cinema = gameObject.AddComponent<LoftCinema>();
             cinema.world = world; cinema.desk = desk; cinema.interaction = this;
+            if (GetComponent<LoftKeepUp>() == null) gameObject.AddComponent<LoftKeepUp>();
+        }
+
+        // A hand swung through the ball. Only a moving hand counts, so resting near it does nothing.
+        Vector3 lastRight, lastLeft;
+        public bool BallHit(Vector3 ball, float reach)
+        {
+            if (input == null) return false;
+            bool hit = false;
+            float dt = Mathf.Max(Time.deltaTime, 1e-3f);
+            if (input.hasRay)
+            {
+                hit |= Vector3.Distance(input.handPos, ball) < reach && (input.handPos - lastRight).magnitude / dt > 0.35f;
+                lastRight = input.handPos;
+            }
+            if (input.hasLeftHand)
+            {
+                hit |= Vector3.Distance(input.leftPos, ball) < reach && (input.leftPos - lastLeft).magnitude / dt > 0.35f;
+                lastLeft = input.leftPos;
+            }
+            return hit;
         }
 
         // What stays usable while the world is hidden.
@@ -126,7 +149,8 @@ namespace VirtualLoft.XR
 
             if (input.snap != 0) { comfort?.SnapTurn(input.snap, world.cam.transform); input.Haptic(0.2f, 0.03f); }
             // One thing at a time: no menu over the talk card (the Simulator also presses A and X together).
-            bool busy = Talking || input.talkHeld || card.Visible;
+            if (input.talkDown) menuWasOpen = wrist.IsOpen;
+            bool busy = Talking || input.talkHeld || card.Visible || entry.Active;
             wrist.suppressed = busy;
             if (busy && wrist.IsOpen) wrist.SetOpen(false);
             if (input.wristDown && !entry.Active && !busy) { wrist.Toggle(); input.Haptic(0.2f, 0.03f); }
@@ -233,11 +257,37 @@ namespace VirtualLoft.XR
                 }
                 else { holding.HoldProgress = 0f; holding = null; }
             }
+            RiskyHold(dt);
+        }
+
+        // A risky card: hold the trigger anywhere, no aiming. It must be a fresh press made
+        // while the card is up, so neither voice nor a trigger already held can confirm it.
+        float riskyHold;
+        bool riskyArmed;
+        void RiskyHold(float dt)
+        {
+            bool open = card.Visible && card.State == LoftCard.CardState.Proposal && card.Risky;
+            if (!open) { riskyArmed = false; riskyHold = 0f; return; }
+            var b = card.RiskyButton;
+            if (input.triggerDown) { riskyArmed = true; riskyHold = 0f; }
+            if (!riskyArmed || !input.triggerHeld)
+            {
+                riskyArmed = false;
+                if (holding == null) b.HoldProgress = 0f;
+                return;
+            }
+            riskyHold += dt;
+            b.HoldProgress = Mathf.Clamp01(riskyHold / b.holdSeconds);
+            if (riskyHold < b.holdSeconds) return;
+            riskyArmed = false; riskyHold = 0f; b.HoldProgress = 0f; holding = null;
+            LoftAudio.Play("sfx_click", 0.8f);
+            input.Haptic(0.8f, 0.08f);
+            b.Press();
         }
 
         bool BlockedByGui()
         {
-            if (entry != null && entry.Active) return true;
+            if (entry != null && entry.Active && !entry.InWorld) return true;
             if (XRSettings.isDeviceActive || inputOverride != null || desk == null) return false;
             var gui = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
             return desk.overlayRect.Contains(gui);
@@ -326,17 +376,32 @@ namespace VirtualLoft.XR
         }
 
         // ---- voice ---------------------------------------------------------------------------
+        // The Simulator's one key presses A and X together, so X alone can't open the menu there:
+        // a quick tap of both does (a hold is still talking). Tapped again, the menu closes.
+        float menuTapAt = -1f;
+        bool menuWasOpen;
+
+        public void OpenMenu() { Wire(); wrist.OpenInFront(world.cam); }
+
         void Talk()
         {
+            if (entry != null && entry.Active) return; // typing: A and the menu tap stay out of the way
             if (input.talkDown)
             {
+                menuTapAt = input.wristHeld && !card.Visible ? Time.unscaledTime : -1f;
+                talkIdea = card.IsSuggestion ? shownSuggestion : null;
                 if (card.IsSuggestion) { DeferSuggestion(); StartTalk(); }
                 else if (card.State == LoftCard.CardState.Proposal && !card.Risky) { talkConsumed = true; if (card.PressSend()) input.Haptic(0.5f, 0.05f); }
-                else if (card.State == LoftCard.CardState.Proposal) { talkConsumed = true; Say("This one needs the red button. A can't confirm it."); }
+                else if (card.State == LoftCard.CardState.Proposal) { talkConsumed = true; Say("Hold the trigger for this one. A can't confirm it."); }
                 else if (card.State == LoftCard.CardState.Thinking) talkConsumed = true;
                 else StartTalk();
             }
             if (Talking && (input.talkUp || !input.talkHeld || voice.HitMax)) EndTalk();
+            if (input.talkUp && menuTapAt >= 0f)
+            {
+                if (Time.unscaledTime - menuTapAt < LoftVoice.MinSeconds) { card.Hide(); if (!menuWasOpen) wrist.OpenInFront(world.cam); }
+                menuTapAt = -1f;
+            }
             if (!input.talkHeld) talkConsumed = false;
         }
 
@@ -403,6 +468,8 @@ namespace VirtualLoft.XR
             DeferSuggestion();
             var route = LoftIntent.Route(resp);
             string transcript = (string)resp?["transcript"], summary = (string)resp?["summary"];
+            var idea = talkIdea; talkIdea = null;
+            if (idea != null && AnswerIdea(idea, transcript)) return IntentRoute.Immediate;
             var intent = resp?["intent"] as JObject;
             switch (route)
             {
@@ -428,7 +495,7 @@ namespace VirtualLoft.XR
         }
 
         // ---- agent suggestions: idea card, trigger on ACCEPT only -------------------------------
-        JObject shownSuggestion;
+        JObject shownSuggestion, talkIdea;
 
         void ShowNextSuggestion()
         {
@@ -445,6 +512,21 @@ namespace VirtualLoft.XR
             card.onSend = () => { shownSuggestion = null; desk.AnswerSuggestion(id, true); };
             card.onCancel = () => { shownSuggestion = null; desk.AnswerSuggestion(id, false); };
             card.ShowSuggestion(AgentName((string)sg["agentId"]), (string)sg["title"], (string)sg["reason"]);
+        }
+
+        // Spoken over an idea card, the bare words answer the idea, not the team. Accept needs the
+        // word itself: a mishear on silence ("yes", "okay") must never queue work.
+        static readonly string[] SayDismiss = { "dismiss", "dismiss it", "dismiss this", "dismiss that", "no", "nope", "no thanks", "skip", "skip it", "ignore it", "tolak" };
+        static readonly string[] SayAccept = { "accept", "accept it", "accept this", "accept that", "terima" };
+
+        bool AnswerIdea(JObject idea, string said)
+        {
+            string w = Regex.Replace((said ?? "").ToLowerInvariant(), @"[^\p{L}\p{N} ]", "").Trim();
+            bool accept = SayAccept.Contains(w);
+            if (!accept && !SayDismiss.Contains(w)) return false;
+            desk.AnswerSuggestion((string)idea["id"], accept);
+            card.ShowResult(accept ? "Idea accepted, queued." : "Idea dismissed.", said);
+            return true;
         }
 
         // Something else needs the card (A pressed, a voice answer): the idea waits its turn instead of being lost.

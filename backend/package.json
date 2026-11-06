@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node --test --test-force-exit",
     "serve": "node src/server.js",
-    "check": "node tools/check-connection.js"
+    "check": "node tools/check-connection.js",
+    "serve:qwen": "STT_PROVIDER=openai STT_BASE_URL=http://127.0.0.1:8124/v1 STT_API_KEY=local STT_MODEL=qwen3-asr node --env-file-if-exists=.env src/server.js"
   },
   "dependencies": {
     "@openai/agents": "^0.21.0",

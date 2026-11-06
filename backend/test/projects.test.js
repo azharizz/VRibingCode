@@ -1,7 +1,7 @@
 // Projects, per-task worktrees and previews against REAL git + REAL Chromium (offline).
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, test } from "node:test";
@@ -89,6 +89,31 @@ test("conflicting edits are detected, main stays clean, agent can resolve in its
   await projects.finish(p, b, "resolve");
   assert.equal((await projects.merge(p, b, "cat, resolved")).ok, true);
   assert.equal(await readFile(path.join(p.path, "index.html"), "utf8"), "<h1>Fox + Cat version</h1>");
+});
+
+test("a pure file move counts as a change, merges, and the site is found in its new folder", async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "loft-move-"));
+  const projects = createProjects({ dataDir: path.join(tmp, "d"), projectsDir: path.join(tmp, "p"), defaultPath: null });
+  const p = await projects.create({ name: "Move", template: "static" });
+  const t = await projects.prepare(p, { taskId: "t1", agent: "Builder" });
+  await mkdir(path.join(t.worktree, "index"));
+  await rename(path.join(t.worktree, "index.html"), path.join(t.worktree, "index/index.html"));
+  const { files } = await projects.finish(p, t, "move");
+  assert.ok(files.includes("index/index.html"), "the move is real work");
+  assert.equal((await projects.merge(p, t, "move")).ok, true);
+  assert.ok(existsSync(path.join(p.path, "index/index.html")) && !existsSync(path.join(p.path, "index.html")));
+  assert.equal(await projects.entry(p), "index/");
+  assert.equal((await projects.summary(p)).site, true);
+});
+
+test("work not committed yet is never thrown away", async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "loft-keep-"));
+  const projects = createProjects({ dataDir: path.join(tmp, "d"), projectsDir: path.join(tmp, "p"), defaultPath: null });
+  const p = await projects.create({ name: "Keep", template: "static" });
+  const t = await projects.prepare(p, { taskId: "t1", agent: "Builder" });
+  await writeFile(path.join(t.worktree, "new.txt"), "work");
+  await assert.rejects(projects.merge(p, t, "x"), /kept for review/);
+  assert.ok(existsSync(path.join(t.worktree, "new.txt")));
 });
 
 test("approve refuses when the CEO has uncommitted changes on main", async () => {

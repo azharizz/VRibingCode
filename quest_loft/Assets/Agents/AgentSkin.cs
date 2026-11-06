@@ -153,6 +153,9 @@ public class AgentSkin : MonoBehaviour
         modelTf.localScale = Vector3.one * 1.25f;
         modelTf.SetParent(transform, false);
         animator = go.GetComponentInChildren<Animator>();
+        Body = GetComponent<LoftBody>();
+        if (Body == null) Body = gameObject.AddComponent<LoftBody>();
+        Body.Bind(modelTf);
         driveAnimator = false;
         if (animator != null)
             foreach (var p in animator.parameters)
@@ -220,7 +223,18 @@ public class AgentSkin : MonoBehaviour
     }
 
     // ---------------- life: where to be, how to get there ----------------
-    enum Want { None, Desk, Ceo, Idle, Party }
+    enum Want { None, Desk, Ceo, Idle, Party, Game }
+
+    // The ball game (LoftKeepUp) borrows idle agents; real work takes them straight back.
+    public LoftBody Body { get; private set; }
+    public AgentState State => sm != null ? sm.CurrentState : AgentState.Idle;
+    public bool Partying => partying;
+    bool inGame;
+    Vector3 gameSpot, gameFace;
+    public void JoinGame(Vector3 spot, Vector3 face) { inGame = true; gameSpot = spot; gameFace = face; }
+    public void LeaveGame() { inGame = false; }
+    public bool AtGameSpot => inGame && !Walking && (transform.position - gameSpot).sqrMagnitude < 0.3f;
+
     Want want = Want.None;
     int wantKey = -1;
     Vector3 target, faceAt;
@@ -253,6 +267,7 @@ public class AgentSkin : MonoBehaviour
               : st == AgentState.Done || st == AgentState.Failed ? Want.Ceo : Want.Idle;
         }
         if (w == Want.None) w = Want.Idle;
+        if (w == Want.Idle && inGame) w = Want.Game;
         int key = w == Want.Desk ? slot : w == Want.Ceo ? (mgr != null ? mgr.CeoRank(this) : 0) : w == Want.Party ? Mathf.RoundToInt(partySpot.x * 50f + partySpot.z * 5000f) : -1;
         bool replan = w != want || key != wantKey;
         if (w == Want.Ceo)
@@ -283,6 +298,9 @@ public class AgentSkin : MonoBehaviour
             case Want.Party:
                 target = partySpot; faceAt = Plan.Ceo;
                 break;
+            case Want.Game:
+                target = Nav.Nearest(gameSpot); faceAt = gameFace;
+                break;
             default:
                 target = PickIdleSpot(mgr, roam);
                 faceAt = target.z < 3f ? target + Vector3.back * 5f : Plan.LoungeCenter;
@@ -312,7 +330,7 @@ public class AgentSkin : MonoBehaviour
         var cp = CeoPos();
         if (Plan.InWalk(cp)) avoid = new Vector2(cp.x, cp.z);
         path.Clear();
-        path.AddRange(Nav.Path(from, to, avoid, 0.9f));
+        path.AddRange(Nav.Path(from, to, avoid, 1.5f));
         pathI = 0; blockedT = 0f;
     }
 
@@ -339,7 +357,7 @@ public class AgentSkin : MonoBehaviour
             // never stand inside the CEO: if they walked up to us, slide aside
             var cp = CeoPos();
             var away = pos - cp; away.y = 0f;
-            if (away.sqrMagnitude < 0.55f * 0.55f && away.sqrMagnitude > 1e-4f)
+            if (away.sqrMagnitude < 1.1f * 1.1f && away.sqrMagnitude > 1e-4f)
             {
                 var np = pos + away.normalized * 0.8f * dt;
                 if (Nav.Free(np)) transform.position = np;
@@ -373,7 +391,7 @@ public class AgentSkin : MonoBehaviour
         var next = pos + dir * speed * dt;
         // the CEO is an obstacle too
         var c2 = CeoPos(); var toC = next - c2; toC.y = 0f;
-        if (toC.sqrMagnitude < 0.7f * 0.7f && Plan.InWalk(c2)) { if (Time.time > repathAt) { repathAt = Time.time + 0.6f; GoTo(target); } next = pos; }
+        if (toC.sqrMagnitude < 1.15f * 1.15f && Plan.InWalk(c2)) { if (Time.time > repathAt) { repathAt = Time.time + 0.6f; GoTo(target); } next = pos; }
         if (Nav.Free(next) || !Nav.Free(pos)) { transform.position = next; stuckT = 0f; return; }
         stuckT += dt; // a wall ahead: plan a new way instead of standing there
         if (stuckT > 1f && Time.time > repathAt) { stuckT = 0f; repathAt = Time.time + 0.6f; GoTo(target); }
@@ -400,8 +418,8 @@ public class AgentSkin : MonoBehaviour
         bool travelling = Walking;
         if (label != null) { label.gameObject.SetActive(!partying); plate.SetActive(!partying); if (partying) bubble.SetActive(false); } // labels off: let the dance floor breathe
         if (driveAnimator && animator != null) animator.SetInteger(StateHash, partying ? PARTY_STATE : travelling ? 0 : (int)sm.CurrentState);
-        if (modelTf != null && travelling && !partying)
-        {   // calm walk: a gentle bob and a slight forward lean (the model has no walk clip)
+        if (modelTf != null && travelling && !partying && (Body == null || !Body.HasLegs))
+        {   // placeholder models have no legs: a gentle bob instead of a walk
             float wt = Time.time * 7f + phase;
             modelTf.localPosition = new Vector3(0f, Mathf.Abs(Mathf.Sin(wt)) * 0.07f, 0f);
             modelTf.localRotation = Quaternion.Euler(6f, Mathf.Sin(wt) * 4f, Mathf.Sin(wt) * 5f);

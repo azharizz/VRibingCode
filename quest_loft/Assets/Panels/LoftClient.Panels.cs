@@ -17,6 +17,7 @@ public partial class LoftClient
     public Task<JObject> AddNote(string text) => Send(HttpMethod.Post, "/notes", new JObject { ["text"] = text });
     public Task<JObject> DeleteNote(string id) => Send(HttpMethod.Delete, $"/notes/{E(id)}", null);
 
+    public Task<JObject> GetProject(string project) => Send(HttpMethod.Get, $"/projects/{E(project)}/summary", null, true);
     public Task<JObject> GetTree(string project, string path) => Send(HttpMethod.Get, $"/projects/{E(project)}/tree?path={E(path)}", null, true);
     public Task<JObject> GetFile(string project, string path) => Send(HttpMethod.Get, $"/projects/{E(project)}/file?path={E(path)}", null, true);
     public Task<JObject> GetDiff(string taskId) => Send(HttpMethod.Get, $"/tasks/{E(taskId)}/diff", null, true);
@@ -25,6 +26,7 @@ public partial class LoftClient
     public Task<JObject> VideoStatus(string id) => Send(HttpMethod.Get, $"/cinema/{E(id)}", null, true);
 
     public Task<JObject> OpenPreview(string taskId) => Send(HttpMethod.Post, "/preview/sessions", new JObject { ["taskId"] = taskId, ["width"] = 1360, ["height"] = 800 }, true);
+    public Task<JObject> OpenLatest(string project) => Send(HttpMethod.Post, "/preview/sessions", new JObject { ["latest"] = true, ["projectId"] = project, ["width"] = 1360, ["height"] = 800 }, true);
     public Task<JObject> OpenWeb(string url) => Send(HttpMethod.Post, "/preview/sessions", new JObject { ["url"] = url, ["width"] = 1360, ["height"] = 800 }, true);
     public Task<JObject> PreviewInfo(string id) => Send(HttpMethod.Get, $"/preview/sessions/{E(id)}", null, true);
     public Task<JObject> PreviewInput(string id, JObject input) => Send(HttpMethod.Post, $"/preview/sessions/{E(id)}/input", input, true);

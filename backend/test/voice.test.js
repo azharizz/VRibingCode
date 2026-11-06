@@ -7,7 +7,7 @@ import path from "node:path";
 import test from "node:test";
 import { PRESET_ROLES } from "../src/agents.js";
 import { cleanTranscript, createStt, inspectWav } from "../src/stt.js";
-import { createVoice, fixCodeWords, normalizeIntent } from "../src/voice.js";
+import { createVoice, fixCodeWords, normalizeIntent, summarize } from "../src/voice.js";
 import { wav } from "./helpers.js";
 import { extractJson } from "../src/llm.js";
 
@@ -172,6 +172,32 @@ test("handleAudio: transcript -> intent, timings; STT errors keep their status",
   assert.deepEqual([r.transcript, r.intent.sceneId, r.sttMs, r.audioSeconds], ["switch to the beach", "beach", 5, 1]);
   await assert.rejects(voiceWith(async () => "{}", { stt: { transcribe: async () => { throw Object.assign(new Error("model missing"), { status: 503 }); } } }).handleAudio(wav(1)), { status: 503 });
   await assert.rejects(voiceWith(async () => "{}").handleAudio(wav(1)), { status: 503 }, "no STT configured");
+});
+
+test("auto-approve by voice: on is spelled out, off is plain", () => {
+  assert.deepEqual(normalizeIntent({ action: "autoApprove", on: true }, ctx()), { action: "autoApprove", on: true });
+  assert.match(summarize({ action: "autoApprove", on: true }, ctx()), /without you/);
+  assert.equal(normalizeIntent({ action: "autoApprove", on: false }, ctx()).on, false);
+});
+
+test("note saves right away; ask goes to the researcher unless someone is pointed at", () => {
+  assert.deepEqual(normalizeIntent({ action: "note", text: "fix the footer" }, ctx()), { action: "note", text: "fix the footer" });
+  assert.equal(normalizeIntent({ action: "note" }, ctx()).action, "none");
+  const ask = normalizeIntent({ action: "ask", text: "what's in index.html?" }, ctx());
+  assert.equal(ask.action, "chat");
+  assert.ok(ctx().agents.some((a) => a.id === ask.agentId));
+  assert.equal(normalizeIntent({ action: "ask", text: "hi" }, ctx({ pointed: "keeper-3" })).agentId, "keeper-3");
+});
+
+test("menu: opens right away", () => {
+  assert.equal(normalizeIntent({ action: "menu" }, ctx()).action, "menu");
+  assert.equal(summarize({ action: "menu" }, ctx()), "Open the menu");
+});
+
+test("preview: shows the latest work right away", () => {
+  const i = normalizeIntent({ action: "preview" }, ctx());
+  assert.equal(i.action, "preview");
+  assert.equal(summarize(i, ctx()), "Show the latest work");
 });
 
 test("browse: opens right away and needs an address", async () => {

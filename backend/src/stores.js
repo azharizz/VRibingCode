@@ -23,7 +23,7 @@ export function jsonFile(file, fallback) {
 }
 
 // ---- boards: [{id,type,pos,rot,size,args}] per scene ----
-export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "files", "diff"];
+export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "project", "files", "diff"];
 const MAX_BOARDS = 60;
 const vec = (v, field, lens = [2, 3, 4]) => {
   const nums = Array.isArray(v) ? v : v && typeof v === "object" ? Object.values(v) : null; // [x,y,z] or {x,y,z[,w]}

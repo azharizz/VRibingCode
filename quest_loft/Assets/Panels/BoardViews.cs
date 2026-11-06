@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +22,7 @@ namespace VirtualLoft.Panels
                 case "review": Review(b, c, w, h); break;
                 case "log": Log(b, c, w, h); break;
                 case "notes": Notes(b, c, w, h); break;
+                case "project": Project(b, c, w, h); break;
                 case "files": Files(b, c, w, h); break;
                 case "diff": Diff(b, c, w, h); break;
                 default: Preview(b, c, w, h); break;
@@ -90,16 +92,24 @@ namespace VirtualLoft.Panels
             else
                 PanelKit.Text(c, t.agentName, x + 104f, by, w - 134f, 64f, PT.Meta, PT.Text2, false, TextAlignmentOptions.Left);
             if (t.status == "review" || t.status == "failed") b.Click(x, y, w, h, () => LoftPanels.Open("review"));
+            else if (t.status == "approved" && !string.IsNullOrEmpty(t.result)) { string id = t.id; b.Click(x, y, w, h, () => LoftPanels.ReadReport(id)); }
         }
 
         // ---- review ----
         static void Review(LoftBoard b, RectTransform c, float w, float h)
         {
             var q = b.state.tasks.Where(t => t.status == "review" || t.status == "conflict").ToList();
-            if (q.Count == 0) { Empty(c, w, h, "Nothing to review", "When an agent finishes, the work shows up here.", PT.Done); return; }
+            var reading = b.readingId == null ? null : b.state.tasks.FirstOrDefault(r => r.id == b.readingId);
+            if (reading != null) { ReadAll(b, c, reading, w, h); return; }
+            float x = PAD, iw = w - PAD * 2, y = 34f;
+            if (q.Count == 0)
+            {
+                Empty(c, w, h, "Nothing to review", "When an agent finishes, the work shows up here.", PT.Done);
+                AutoRow(b, c, x, h - 120f, iw);
+                return;
+            }
             b.page = Mathf.Clamp(b.page, 0, q.Count - 1);
             var t = q[b.page];
-            float x = PAD, iw = w - PAD * 2, y = 34f;
 
             PanelKit.Avatar(c, x + 44f, y + 44f, 88f, t.agentName);
             PanelKit.Text(c, t.agentName, x + 108f, y, iw * 0.5f, 56f, PT.Body, PT.Text, true, TextAlignmentOptions.Left);
@@ -116,33 +126,182 @@ namespace VirtualLoft.Panels
             else PanelKit.PillRight(c, t.status == "conflict" ? "Conflict" : "In review", x + iw, y + 16f, 62f, PT.Review * new Color(1, 1, 1, 0.22f), PT.Review);
             y += 118f;
 
-            PanelKit.Text(c, t.title, x, y, iw, 170f, PT.H1, PT.Text, true, TextAlignmentOptions.TopLeft, 2);
-            y += 176f;
-
-            float tw = (iw - 32f) / 3f;
-            Tile(c, x, y, tw, t.files.ToString(), t.files == 1 ? "file" : "files", PT.Text);
-            Tile(c, x + tw + 16f, y, tw, "+" + t.added, "added", PT.Add);
-            Tile(c, x + (tw + 16f) * 2, y, tw, "-" + t.removed, "removed", PT.Del);
-            y += 186f;
-
-            float sumH = h - y - 320f;
+            // The plain sentence first; the report is one click away.
+            float sumH = h - y - 586f;
             PanelKit.Box(c, x, y, iw, sumH, PT.Column, PT.RCard, "Summary");
-            PanelKit.Text(c, "WHAT THE AGENT SAYS", x + 34f, y + 22f, iw - 68f, 50f, PT.Meta, PT.Muted, true, TextAlignmentOptions.Left);
-            PanelKit.Text(c, t.result, x + 34f, y + 80f, iw - 68f, sumH - 96f, PT.Body, PT.Text2, false, TextAlignmentOptions.TopLeft, Mathf.Max(1, Mathf.FloorToInt((sumH - 96f) / 66f)));
+            PanelKit.Text(c, "WHAT CHANGED", x + 34f, y + 22f, iw - 68f, 50f, PT.Meta, PT.Muted, true, TextAlignmentOptions.Left);
+            PanelKit.PillRight(c, "Read all", x + iw - 24f, y + 14f, 58f, PT.CardHi, PT.Text);
+            string open = t.id;
+            b.Click(x, y, iw, sumH, () => { b.readingId = open; b.scroll = 0; b.Refresh(); });
+            string plain = string.IsNullOrEmpty(t.plain) ? Clean(t.result) : t.plain;
+            PanelKit.Text(c, plain, x + 34f, y + 84f, iw - 68f, sumH - 104f, PT.H1, PT.Text, false, TextAlignmentOptions.TopLeft, Mathf.Max(1, Mathf.FloorToInt((sumH - 104f) / 84f)));
             y += sumH + 24f;
 
-            float bw = (iw - 20f) / 2f;
-            Btn(c, x, y, bw, 116f, "See changes", PT.CardHi, PT.Text);
-            b.Click(x, y, bw, 116f, () => LoftPanels.Open("diff"));
-            Btn(c, x + bw + 20f, y, bw, 116f, "Try it live", PT.CardHi, PT.Text);
-            b.Click(x + bw + 20f, y, bw, 116f, () => LoftPanels.Open("preview"));
-            y += 134f;
+            PanelKit.Text(c, $"{t.files} {(t.files == 1 ? "file" : "files")}", x, y, 300f, 88f, PT.Body, PT.Text2, false, TextAlignmentOptions.Left);
+            PanelKit.Text(c, "+" + t.added, x + 300f, y, 200f, 88f, PT.Body, PT.Add, true, TextAlignmentOptions.Left);
+            PanelKit.Text(c, "-" + t.removed, x + 500f, y, 200f, 88f, PT.Body, PT.Del, true, TextAlignmentOptions.Left);
+            Btn(c, x + iw - 440f, y, 440f, 88f, "See changes", PT.CardHi, PT.Text);
+            b.Click(x + iw - 440f, y, 440f, 88f, () => LoftPanels.Open("diff"));
+            y += 104f;
 
+            Btn(c, x, y, iw, 186f, "Try it", PT.Info * new Color(0.6f, 0.6f, 0.6f, 1f), PT.Text);
+            b.Click(x, y, iw, 186f, LoftPanels.OpenLatest);
+            y += 204f;
+
+            float bw = (iw - 20f) / 2f;
             string tid = t.id;
             Btn(c, x, y, bw, 116f, "Hold to approve", PT.Done * new Color(0.62f, 0.62f, 0.62f, 1f), PT.Text);
             b.Hold(x, y, bw, 116f, 1.2f, PT.Done, () => LoftPanels.Approve(tid));
             Btn(c, x + bw + 20f, y, bw, 116f, "Hold to send back", PT.Bad * new Color(0.55f, 0.55f, 0.55f, 1f), PT.Text);
             b.Hold(x + bw + 20f, y, bw, 116f, 1.2f, PT.Bad, () => LoftPanels.Reject(tid));
+            AutoRow(b, c, x, y + 134f, iw);
+        }
+
+        // ---- project: the site first, files behind it ----
+        static void Project(LoftBoard b, RectTransform c, float w, float h)
+        {
+            var s = b.state;
+            if (b.picking) { PickWorkspace(b, c, w, h); return; }
+            float x = PAD, iw = w - PAD * 2, y = 34f;
+            PanelKit.Text(c, s.project, x, y, iw, 96f, PT.H1, PT.Text, true, TextAlignmentOptions.Left);
+            y += 112f;
+
+            PanelKit.Box(c, x, y, iw, 270f, PT.Column, PT.RCard, "Latest");
+            PanelKit.Text(c, "LATEST CHANGE", x + 34f, y + 22f, iw - 68f, 50f, PT.Meta, PT.Muted, true, TextAlignmentOptions.Left);
+            PanelKit.Text(c, s.latestChange ?? "Nothing merged yet", x + 34f, y + 80f, iw - 68f, 130f, PT.Body, PT.Text, false, TextAlignmentOptions.TopLeft, 2);
+            if (s.latestWhen != null) PanelKit.Text(c, s.latestWhen, x + 34f, y + 208f, iw - 68f, 50f, PT.Meta, PT.Text2, false, TextAlignmentOptions.Left);
+            y += 294f;
+
+            float bottom = h - 388f, boxH = bottom - y - 124f;
+            PanelKit.Box(c, x, y, iw, boxH, PT.Column, PT.RCard, "Working");
+            PanelKit.Text(c, "WORKING NOW", x + 34f, y + 22f, iw - 68f, 50f, PT.Meta, PT.Muted, true, TextAlignmentOptions.Left);
+            var mine = s.tasks.Where(t => s.workspaceId == null || t.projectId == s.workspaceId).ToList();
+            var busy = mine.Where(t => t.status == "running").ToList();
+            if (busy.Count == 0) PanelKit.Text(c, "Nobody is working right now.", x + 34f, y + 84f, iw - 68f, 70f, PT.Body, PT.Text2, false, TextAlignmentOptions.Left);
+            int rows = Mathf.Max(1, Mathf.FloorToInt((boxH - 90f) / 88f));
+            for (int i = 0; i < busy.Count && i < rows; i++)
+            {
+                float ry = y + 84f + i * 88f;
+                PanelKit.Avatar(c, x + 70f, ry + 36f, 68f, busy[i].agentName);
+                PanelKit.Text(c, $"{busy[i].agentName}: {busy[i].title}", x + 124f, ry, iw - 158f, 72f, PT.Body, PT.Text, false, TextAlignmentOptions.Left);
+            }
+            y = bottom - 100f;
+
+            int waiting = mine.Count(t => t.status == "review" || t.status == "conflict");
+            if (waiting > 0)
+            {
+                Btn(c, x, y, iw, 88f, $"{waiting} waiting for your review", PT.Review * new Color(0.55f, 0.55f, 0.55f, 1f), PT.Text);
+                b.Click(x, y, iw, 88f, () => LoftPanels.Open("review"));
+            }
+            y = bottom;
+
+            Btn(c, x, y, iw, 200f, s.projectSite ? "Open site" : "No site yet", s.projectSite ? PT.Done * new Color(0.62f, 0.62f, 0.62f, 1f) : PT.Card, s.projectSite ? PT.Text : PT.Muted);
+            if (s.projectSite) b.Click(x, y, iw, 200f, LoftPanels.OpenLatest);
+            y += 224f;
+            float half = (iw - 20f) / 2f;
+            Btn(c, x, y, half, 96f, "Browse files", PT.CardHi, PT.Text);
+            b.Click(x, y, half, 96f, () => LoftPanels.Open("files"));
+            Btn(c, x + half + 20f, y, half, 96f, "Change workspace", PT.CardHi, PT.Text);
+            b.Click(x + half + 20f, y, half, 96f, () => { b.picking = true; b.Refresh(); });
+        }
+
+        static void PickWorkspace(LoftBoard b, RectTransform c, float w, float h)
+        {
+            var s = b.state;
+            float x = PAD, iw = w - PAD * 2, y = 34f;
+            Btn(c, x, y, 220f, 88f, "Back", PT.CardHi, PT.Text);
+            b.Click(x, y, 220f, 88f, () => { b.picking = false; b.Refresh(); });
+            PanelKit.Text(c, "Change workspace", x + 250f, y, iw - 250f, 88f, PT.H1, PT.Text, true, TextAlignmentOptions.Left);
+            y += 116f;
+
+            int fit = Mathf.Max(1, Mathf.FloorToInt((h - y - 170f) / 124f));
+            foreach (var ws in s.workspaces.Take(fit))
+            {
+                string id = ws.Key;
+                bool here = id == s.workspaceId;
+                Btn(c, x, y, iw, 108f, here ? ws.Value + "  (current)" : ws.Value, here ? PT.Done * new Color(0.62f, 0.62f, 0.62f, 1f) : PT.CardHi, PT.Text);
+                b.Click(x, y, iw, 108f, () => { LoftPanels.SwitchWorkspace(id); b.picking = false; b.Refresh(); });
+                y += 124f;
+            }
+
+            float half = (iw - 20f) / 2f, by = h - 140f;
+            Btn(c, x, by, half, 100f, "Open a folder", PT.Info * new Color(0.6f, 0.6f, 0.6f, 1f), PT.Text);
+            b.Click(x, by, half, 100f, () => { b.picking = false; b.Refresh(); LoftPanels.OpenFolder(); });
+            Btn(c, x + half + 20f, by, half, 100f, "New workspace", PT.Info * new Color(0.6f, 0.6f, 0.6f, 1f), PT.Text);
+            b.Click(x + half + 20f, by, half, 100f, () => { b.picking = false; b.Refresh(); LoftPanels.NewWorkspace(); });
+        }
+
+        // Turning it on merges work unseen, so that takes a hold. Off is one click.
+        static void AutoRow(LoftBoard b, RectTransform c, float x, float y, float w)
+        {
+            bool on = b.state.autoApprove;
+            PanelKit.Box(c, x, y, w, 72f, on ? PT.Done * new Color(0.62f, 0.62f, 0.62f, 1f) : PT.Card, PT.RSmall, "AutoApprove");
+            PanelKit.Text(c, on ? "Auto-approve ON: click to turn off" : "Auto-approve off: hold to turn on", x, y, w, 72f, PT.Meta, on ? PT.Text : PT.Text2, on, TextAlignmentOptions.Center);
+            if (on) b.Click(x, y, w, 72f, () => LoftPanels.SetAutoApprove(false));
+            else b.Hold(x, y, w, 72f, 1.2f, PT.Done, () => LoftPanels.SetAutoApprove(true));
+        }
+
+        // The whole task and report, a page of lines at a time.
+        static void ReadAll(LoftBoard b, RectTransform c, PTask t, float w, float h)
+        {
+            float x = PAD, iw = w - PAD * 2, y = 34f;
+            Btn(c, x, y, 220f, 88f, "Back", PT.CardHi, PT.Text);
+            b.Click(x, y, 220f, 88f, () => { b.readingId = null; b.scroll = 0; b.Refresh(); });
+            PanelKit.Text(c, t.agentName, x + 250f, y, iw - 460f, 88f, PT.Body, PT.Text, true, TextAlignmentOptions.Left);
+
+            float top = y + 112f, boxH = h - top - 170f, lineH = PT.Body * 1.32f;
+            PanelKit.Box(c, x, top, iw, boxH, PT.Column, PT.RCard, "Reading");
+            var lines = Wrap(Clean(t.brief) + "\n\n" + Clean(t.result), iw - 80f, PT.Body);
+            int page = Mathf.Max(1, Mathf.FloorToInt((boxH - 48f) / lineH));
+            int pages = Mathf.Max(1, Mathf.CeilToInt(lines.Count / (float)page));
+            b.scroll = Mathf.Clamp(b.scroll, 0, pages - 1);
+            int first = b.scroll * page;
+            for (int i = 0; i < page && first + i < lines.Count; i++)
+                PanelKit.Text(c, lines[first + i], x + 34f, top + 24f + i * lineH, iw - 68f, lineH, PT.Body, PT.Text, false, TextAlignmentOptions.Left);
+            if (pages == 1) return;
+
+            // Big targets: a laser can't hit small arrows from across the room.
+            float by = top + boxH + 20f, bw = (iw - 20f) / 2f;
+            Btn(c, x, by, bw, 116f, "Previous", PT.CardHi, b.scroll > 0 ? PT.Text : PT.Muted);
+            b.Click(x, by, bw, 116f, () => { b.scroll = Mathf.Max(0, b.scroll - 1); b.Refresh(); });
+            Btn(c, x + bw + 20f, by, bw, 116f, $"Next   ({b.scroll + 1} of {pages})", PT.CardHi, b.scroll < pages - 1 ? PT.Text : PT.Muted);
+            b.Click(x + bw + 20f, by, bw, 116f, () => { b.scroll = Mathf.Min(pages - 1, b.scroll + 1); b.Refresh(); });
+        }
+
+        // Agents answer in markdown; the board shows plain text.
+        static string Clean(string s) => Regex.Replace(s ?? "", @"\*\*|__|^#+\s*", "", RegexOptions.Multiline).Trim();
+
+        static string wrapped;
+        static float wrappedWidth;
+        static List<string> wrappedLines;
+
+        // Lines that fit the width, measured once per text.
+        static List<string> Wrap(string s, float width, float size)
+        {
+            if (s == wrapped && width == wrappedWidth) return wrappedLines;
+            var lines = new List<string>();
+            foreach (var para in s.Split('\n'))
+            {
+                string line = "";
+                foreach (var part in para.Split(' '))
+                {
+                    string word = part;
+                    while (PanelKit.Measure(word, size, false) > width) // a long path or URL: break it
+                    {
+                        if (line.Length > 0) { lines.Add(line); line = ""; }
+                        int n = Mathf.Max(1, Mathf.FloorToInt(word.Length * width / PanelKit.Measure(word, size, false)) - 1);
+                        lines.Add(word.Substring(0, n));
+                        word = word.Substring(n);
+                    }
+                    string next = line.Length == 0 ? word : line + " " + word;
+                    if (PanelKit.Measure(next, size, false) <= width) { line = next; continue; }
+                    lines.Add(line);
+                    line = word;
+                }
+                lines.Add(line);
+            }
+            wrapped = s; wrappedWidth = width; wrappedLines = lines;
+            return lines;
         }
 
         static void Tile(RectTransform c, float x, float y, float w, string big, string label, Color col)
@@ -190,8 +349,8 @@ namespace VirtualLoft.Panels
         {
             const float gap = 26f;
             float nw = (w - PAD * 2 - gap * 2) / 3f, nh = (h - 56f - gap) / 2f;
-            var notes = b.state.notes;
-            int cap = 5;
+            int cap = 5, older = Mathf.Max(0, b.state.notes.Count - cap);
+            var notes = b.state.notes.Skip(older).ToList(); // the newest: a spoken note must show up
             for (int i = 0; i < Mathf.Min(cap, notes.Count); i++)
             {
                 var n = notes[i];
@@ -209,7 +368,7 @@ namespace VirtualLoft.Panels
             PanelKit.Box(c, ax + nw / 2f - 40f, ay + nh / 2f - 90f, 80f, 12f, PT.Text2, -1f, "PlusH");
             PanelKit.Box(c, ax + nw / 2f - 6f, ay + nh / 2f - 124f, 12f, 80f, PT.Text2, -1f, "PlusV");
             PanelKit.Text(c, "New note", ax, ay + nh / 2f - 20f, nw, 70f, PT.Body, PT.Text2, true, TextAlignmentOptions.Center);
-            if (notes.Count > cap) PanelKit.Text(c, $"+{notes.Count - cap} more", ax, ay + nh / 2f + 50f, nw, 60f, PT.Meta, PT.Muted, false, TextAlignmentOptions.Center);
+            PanelKit.Text(c, older > 0 ? $"+{older} older" : "or hold A and say \"note: ...\"", ax + 24f, ay + nh / 2f + 50f, nw - 48f, 60f, PT.Meta, PT.Muted, false, TextAlignmentOptions.Center);
             b.Click(ax, ay, nw, nh, LoftPanels.AddNote);
         }
 

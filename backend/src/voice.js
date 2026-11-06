@@ -8,9 +8,9 @@ import { WRITE_TOOLS } from "./tools.js";
 
 export const SCENES = ["beach", "scenery", "city", "galaxy", "party", "loft", "meadow", "night"];
 const RISKY = new Set(["approve", "reject", "remove"]);
-const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "browse", "watch", "none"]); // needsConfirm false
-export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "browse", "watch", "selectNext", "chat", "board", "none"];
-export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "files", "diff"];
+const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "browse", "preview", "menu", "note", "watch", "none"]); // needsConfirm false
+export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "autoApprove", "menu", "note", "ask", "browse", "preview", "watch", "selectNext", "chat", "board", "none"];
+export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "project", "files", "diff"];
 
 // Spoken code words -> characters ("slash health" -> "/health", "index dot js" -> "index.js").
 export function fixCodeWords(text) {
@@ -115,6 +115,8 @@ export function normalizeIntent(raw, ctx) {
     }
     case "party":
       return { action, on: o.on !== false }; // "stop the party" = on:false
+    case "autoApprove":
+      return { action, on: o.on !== false };
     case "project": {
       const p = findProject(ctx.projects, o.projectId ?? o.project ?? o.name);
       return p ? { action, projectId: p.id } : none(`Which project? I have: ${ctx.projects.map((x) => x.name).join(", ") || "none"}.`);
@@ -129,6 +131,20 @@ export function normalizeIntent(raw, ctx) {
     }
     case "watch":
       return { action: "watch" };
+    case "preview":
+      return { action: "preview" };
+    case "menu":
+      return { action: "menu" };
+    case "note": {
+      const text = clip(o.text ?? o.note, 2000);
+      return text ? { action, text } : none("What should I note?");
+    }
+    case "ask": { // a question about the project: the pointed-at agent, else the researcher answers
+      const text = clip(o.text ?? o.question, 1000);
+      if (!text) return none("What do you want to know?");
+      const a = pointed ?? ctx.agents.find((x) => /research/i.test(x.role?.title ?? "")) ?? ctx.agents[0];
+      return a ? { action: "chat", agentId: a.id, text } : none("There are no agents yet. Say \"add an agent\" first.");
+    }
     case "browse": {
       const url = clip(o.url ?? o.query, 500);
       if (!url) return none("What should I open?");
@@ -163,8 +179,12 @@ export function summarize(i, ctx) {
     party: () => (i.on ? "Start the party" : "Stop the party"),
     project: () => `Switch to project ${ctx.projects.find((p) => p.id === i.projectId)?.name ?? i.projectId}`,
     selectNext: () => "Select the next agent",
+    autoApprove: () => (i.on ? "Turn auto-approve on: finished work merges into main without you" : "Turn auto-approve off"),
     chat: () => `Say to ${name(i.agentId)}: ${q(i.text)}`,
     browse: () => `Open ${i.url}`,
+    preview: () => "Show the latest work",
+    menu: () => "Open the menu",
+    note: () => `Note: ${q(i.text)}`,
     watch: () => "Watch this video in VR",
     board: () => (i.type === "all" ? "Close all boards" : `${i.op === "open" ? "Open" : "Close"} the ${i.type} board`),
     none: () => i.reply,
@@ -192,10 +212,15 @@ export function buildPrompt(ctx, text, scene) {
     `- spawn {name?,roleId?,description?,skin?,model?}: add an agent. For a job with no matching role ("data analyst") put it in description. skin is one of ${SKINS.join(", ")}. roleId must be one listed above, else put the need in description.\n` +
     `- remove {agentId} · stop {agentId?} (no agentId = stop everyone) · approve · reject {feedback?} (about the review queue)\n` +
     `- chat {agentId,text}: the CEO just talks to an agent (greeting, question, small talk, "how is it going"). Not an instruction to do work. Keep their words.\n` +
-    `- board {op:"open"|"close",type}: show or hide a panel in the room. type is one of ${BOARD_TYPES.join(", ")} (close also takes "all"). Hints: tasks/kanban=kanban, "what's waiting"=review, activity=log, website/screen=preview, notes, folders=files, changes=diff.\n` +
+    `- board {op:"open"|"close",type}: show or hide a panel in the room. type is one of ${BOARD_TYPES.join(", ")} (close also takes "all"). Hints: workspace card=project, tasks/kanban=kanban, "what's waiting"=review, activity=log, website/screen=preview, notes, folders=files, changes=diff.\n` +
     `- browse {url}: open a website, video or web search in the room's browser ("open google.com", "search for VR videos", "buka youtube"). url is the address, or the search words. This is the CEO browsing, not work for an agent.\n` +
+    `- autoApprove {on:true|false}: finished work merges by itself, or stops doing so ("turn on auto approve", "matikan auto approve").\n` +
+    `- note {text}: save a sticky note ("note: fix the footer", "remember to call the client", "catat ..."). text is only the note itself.\n` +
+    `- ask {text}: a question about the project or its files, with no agent named ("what's in index.html?", "what does our site do?"). Keep their words.\n` +
+    `- menu: open the CEO's own menu in front of them ("open the menu", "buka menu").\n` +
+    `- preview: show the team's own latest work running, in the room's browser ("preview our latest change", "show me the website we built", "lihat hasilnya"). Use this, not board or browse, for the project's own site.\n` +
     `- watch: play the video on the browser board around the CEO in VR ("watch this in VR", "tonton di VR").\n` +
-    `- scene {sceneId} · party {on:true|false} · project {projectId} · selectNext (next agent)\n` +
+    `- scene {sceneId} · party {on:true|false} · project {projectId} (switch workspace: "go to the shop workspace") · selectNext (next agent)\n` +
     `- none {reply}: not a command or unclear; reply briefly in the CEO's language\n` +
     `Rules: keep task titles/goals as the CEO's own words, in English if mixed. Fix spoken code words: "slash health" means "/health", "dot js" means ".js". ` +
     `Indonesian hints: kucing=cat rubah=fox burung hantu=owl beruang=bear kelinci=rabbit katak=frog; buat/tambah=add; hapus=remove; setuju/terima=approve; tolak=reject; berhenti=stop; pantai=beach; gunung=scenery; kota=city; luar angkasa=galaxy. ` +
@@ -241,7 +266,7 @@ export function createVoice({ snapshot, ask, extract, stt = null, draft = null }
         intent = none("I could not reach my language model just now. Please try again.");
       }
     }
-    const risky = RISKY.has(intent.action) || (intent.action === "stop" && !intent.agentId);
+    const risky = RISKY.has(intent.action) || (intent.action === "stop" && !intent.agentId) || (intent.action === "autoApprove" && intent.on);
     const out = {
       ok: true, transcript: text, summary: summarize(intent, ctx),
       needsConfirm: !IMMEDIATE.has(intent.action), risky, intent, intentMs: Date.now() - t0,
@@ -265,7 +290,7 @@ export function createVoice({ snapshot, ask, extract, stt = null, draft = null }
     if (!stt) throw new HttpError(503, "speech-to-text is not configured");
     const ctx = context({ agentId, projectId });
     const sc = checkScene(scene);
-    const hint = `Virtual Loft. ${ctx.agents.map((a) => a.name).join(", ")}. ${SKINS.join(", ")}. slash health, dot js.`;
+    const hint = `Virtual Loft. ${ctx.agents.map((a) => a.name).join(", ")}. ${SKINS.join(", ")}. spawn, agent, delete, remove, board, scene, website, preview, slash health, dot js.`;
     let heard;
     try {
       heard = await stt.transcribe(wav, { hint });

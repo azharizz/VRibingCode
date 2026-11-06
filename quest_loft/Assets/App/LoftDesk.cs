@@ -24,6 +24,7 @@ public class LoftDesk : MonoBehaviour
     public LoftWorld world;
     public LoftInteraction interaction;
     public LoftParty party;
+    public bool autoApprove;
     public LoftPanels panels;
 
     [Header("Desktop walk")]
@@ -94,6 +95,7 @@ public class LoftDesk : MonoBehaviour
                 SetRoles(e["roles"] as JArray);
                 SetProjects(e["projects"] as JArray);
                 if (party != null) party.SetParty((bool?)e["party"] ?? false); // join a party already going
+                autoApprove = (bool?)e["autoApprove"] ?? false;
                 var ids = new HashSet<string>();
                 foreach (var a in e["agents"] ?? new JArray()) { UpsertAgent((JObject)a); ids.Add((string)a["id"]); }
                 foreach (var a in agents.agents.ToArray())
@@ -101,6 +103,8 @@ public class LoftDesk : MonoBehaviour
                 if (selectedAgentId != null && !ids.Contains(selectedAgentId)) selectedAgentId = null;
                 tasks.Clear();
                 foreach (var t in e["tasks"] ?? new JArray()) UpsertTask((JObject)t, false);
+                foreach (var g in e["suggestions"] ?? new JArray()) // ideas raised before this connection
+                    if (g is JObject idea && !suggestions.Any(x => (string)x["id"] == (string)idea["id"])) suggestions.Add(idea);
                 Note($"Connected — {ids.Count}/{maxAgents} agents");
                 break;
             case "agent":
@@ -136,6 +140,13 @@ public class LoftDesk : MonoBehaviour
                 break;
             case "suggestion":
                 if (e["id"] != null && !suggestions.Any(x => (string)x["id"] == (string)e["id"])) { suggestions.Add(e); Note($"Idea from {AgentName((string)e["agentId"])}: {LoftUtil.Trunc((string)e["title"], 40)}"); }
+                break;
+            case "autoApprove":
+                autoApprove = (bool?)e["on"] ?? false;
+                Note(autoApprove ? "Auto-approve is on." : "Auto-approve is off.");
+                break;
+            case "suggestion.closed":
+                suggestions.RemoveAll(x => (string)x["id"] == (string)e["id"]);
                 break;
             case "goal":
                 Note($"GOAL {(string)e["status"]}: {LoftUtil.Trunc((string)e["goal"], 40)} {(string)e["error"]}");
@@ -222,6 +233,21 @@ public class LoftDesk : MonoBehaviour
         RefreshViews();
     }
 
+    // An existing git folder on the backend's machine becomes a workspace.
+    public void OpenFolder(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        Note($"Opening {path.Trim()} …");
+        client.Then(client.AddProject(path.Trim()), res =>
+        {
+            var id = (string)res?["project"]?["id"];
+            if (id == null) { interaction?.card.ShowError("Couldn't open that folder. It must exist and be the top of a git repo."); return; }
+            projectId = id;
+            PlayerPrefs.SetString("loft.project", id);
+            interaction?.card.ShowResult($"Workspace {(string)res["project"]["name"]} is ready.");
+        });
+    }
+
     public void CreateProject(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return;
@@ -229,10 +255,10 @@ public class LoftDesk : MonoBehaviour
         client.Then(client.CreateProject(name.Trim()), res =>
         {
             var id = (string)res?["project"]?["id"];
-            if (id == null) return;
+            if (id == null) { interaction?.card.ShowError("Couldn't create that workspace."); return; }
             projectId = id;
             PlayerPrefs.SetString("loft.project", id);
-            Note($"Project {(string)res["project"]["name"]} ready — goals go here now");
+            interaction?.card.ShowResult($"Workspace {(string)res["project"]["name"]} is ready.");
         });
     }
 
@@ -430,6 +456,7 @@ public class LoftDesk : MonoBehaviour
     public void AnswerSuggestion(string id, bool accept)
     {
         if (string.IsNullOrEmpty(id)) return;
+        suggestions.RemoveAll(x => (string)x["id"] == id); // a spoken answer finds it requeued
         _ = client.AnswerSuggestion(id, accept);
         Note(accept ? "Idea accepted, queued." : "Idea dismissed.");
     }
@@ -498,6 +525,22 @@ public class LoftDesk : MonoBehaviour
                 if (S("url") == null) return Fail("What should I open?");
                 LoftPanels.OpenWeb(S("url"));
                 return Ok($"Opening {S("url")}.");
+            case "autoApprove":
+            {
+                bool on = (bool?)intent["on"] ?? true;
+                _ = client.AutoApprove(on);
+                return Ok(on ? "Turning auto-approve on." : "Turning auto-approve off.");
+            }
+            case "note":
+                if (S("text") == null) return Fail("What should I note?");
+                _ = client.AddNote(S("text"));
+                return Ok("Noted.");
+            case "menu":
+                interaction?.OpenMenu();
+                return Ok("Here is the menu.");
+            case "preview":
+                LoftPanels.OpenLatest();
+                return Ok("Opening the latest work.");
             case "chat":
             {
                 string id = S("agentId") ?? selectedAgentId;

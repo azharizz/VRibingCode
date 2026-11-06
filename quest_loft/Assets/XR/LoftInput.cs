@@ -29,7 +29,7 @@ namespace VirtualLoft.XR
         public bool triggerDown, triggerHeld, triggerUp;
         public bool talkDown, talkHeld, talkUp;    // A
         public bool cancelDown;                    // B
-        public bool wristDown;                     // X
+        public bool wristDown, wristHeld;          // X
         public int snap;                           // -1 / 0 / +1 this frame
         public bool aimTeleport;                   // right stick pushed forward (desktop: hold G)
         public bool teleportRelease;               // stick let go: go there
@@ -115,7 +115,7 @@ namespace VirtualLoft.XR
             bool b = false; right.TryGetFeatureValue(CommonUsages.secondaryButton, out b);
             cancelDown = b && !bWas; bWas = b;
             bool x = false; left.TryGetFeatureValue(CommonUsages.primaryButton, out x);
-            wristDown = x && !xWas; xWas = x;
+            wristDown = x && !xWas; xWas = x; wristHeld = x;
             right.TryGetFeatureValue(CommonUsages.primary2DAxis, out var stick);
             // Push forward = aim the teleport arc, let go = teleport. Left/right flick (stick near centre on y) = snap turn.
             if (!aiming && stick.y > AimStart) aiming = true;

@@ -20,6 +20,8 @@ namespace VirtualLoft.Panels
         public float W, H;
         public PanelState state;
         public int builtVersion = -1;
+        public bool picking;                   // workspace: choosing another one
+        public string readingId;               // review: the task being read in full
         public int page, sel, scroll;          // per-board view state (review queue, file, scroll line)
         public string previewId, previewUrl, previewError, startUrl;
         public int frameBytes;                 // size of the frame on screen: skip decoding an unchanged one
@@ -50,6 +52,7 @@ namespace VirtualLoft.Panels
                 case "review": return (1760f, 1600f, "Review", PT.Review);
                 case "log": return (1560f, 1560f, "Live log", PT.Doing);
                 case "notes": return (1900f, 1420f, "Notes", PT.Done);
+                case "project": return (1900f, 1560f, "Workspace", PT.Info);
                 case "files": return (2400f, 1500f, "Files", PT.Todo);
                 case "diff": return (2500f, 1560f, "Changes", PT.Add);
                 default: return (2300f, 1600f, "Browser", PT.Info);

@@ -9,7 +9,7 @@ namespace VirtualLoft.Panels
 {
     public class PTask
     {
-        public string id, title, status, agentId, agentName, role, last, result, projectId, stat;
+        public string id, title, brief, plain, status, agentId, agentName, role, last, result, projectId, stat;
         public int files, added, removed;
         public float progress;          // 0..1 for running tasks (estimated)
         public DateTime time = DateTime.Now;
@@ -24,6 +24,11 @@ namespace VirtualLoft.Panels
     {
         public string project = "landing-site";
         public bool connected = true;
+        public bool autoApprove;
+        public bool projectSite;
+        public string workspaceId;
+        public List<KeyValuePair<string, string>> workspaces = new List<KeyValuePair<string, string>>(); // id, name
+        public string latestChange, latestWhen;
         public List<PTask> tasks = new List<PTask>();
         public List<PLog> log = new List<PLog>();
         public List<PNote> notes = new List<PNote>();

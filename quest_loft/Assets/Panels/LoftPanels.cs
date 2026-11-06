@@ -27,6 +27,7 @@ public class LoftPanels : MonoBehaviour
     public readonly List<LoftBoard> boards = new List<LoftBoard>();
 
     string scene, signature = "", reviewId, shownProject;
+    int shownMerged = -1;
     float tick, saveAt = -1f, lastFrame, lastInfo;
     bool loading, layoutLoaded, preparing;
     float retryLoadAt = -1f;
@@ -101,6 +102,7 @@ public class LoftPanels : MonoBehaviour
         Place(b2);
         if (type == "preview") StartPreview(b2);
         if (type == "files") Browse("");
+        if (type == "project") LoadProject();
         Save();
     }
 
@@ -184,6 +186,7 @@ public class LoftPanels : MonoBehaviour
                 b.startUrl = (string)(o["args"] as JObject)?["url"];
                 if (type == "preview") StartPreview(b);
                 if (type == "files") Browse(state.treePath ?? "");
+                if (type == "project") LoadProject();
             }
         });
     }
@@ -215,9 +218,15 @@ public class LoftPanels : MonoBehaviour
     {
         var sig = new StringBuilder();
         state.connected = desk.Connected;
+        state.autoApprove = desk.autoApprove;
+        state.workspaceId = desk.projectId;
+        state.workspaces.Clear();
+        foreach (var w in desk.projects) state.workspaces.Add(new KeyValuePair<string, string>((string)w["id"], (string)w["name"] ?? (string)w["id"]));
+        sig.Append(desk.projectId).Append(desk.projects.Count);
+        sig.Append(desk.autoApprove ? 'a' : 'm');
         var project = desk.ProjectName;
         if (project != state.project) { state.project = project; state.tree.Clear(); state.treePath = ""; state.openFilePath = null; state.openFileText = null; sig.Append('p'); }
-        if (desk.projectId != shownProject) { shownProject = desk.projectId; if (boards.Any(b => b.type == "files")) Browse(""); }
+        if (desk.projectId != shownProject) { shownProject = desk.projectId; if (boards.Any(b => b.type == "files")) Browse(""); if (boards.Any(b => b.type == "project")) LoadProject(); }
 
         state.tasks.Clear();
         foreach (var t in desk.tasks.Values)
@@ -227,12 +236,12 @@ public class LoftPanels : MonoBehaviour
             ParseStat(t.diffStat, out int ins, out int del);
             var row = new PTask
             {
-                id = t.id, title = FirstLine(t.title), status = t.status, agentId = t.agentId, agentName = skin != null ? skin.displayName : t.agentId, role = skin != null ? skin.role : "",
+                id = t.id, title = FirstLine(t.title), brief = t.title, plain = (string)t.raw?["plain"], status = t.status, agentId = t.agentId, agentName = skin != null ? skin.displayName : t.agentId, role = skin != null ? skin.role : "",
                 last = t.last, result = t.result, projectId = t.projectId, stat = t.diffStat,
                 files = (diff?["files"] as JArray)?.Count ?? 0, added = ins, removed = del, progress = t.status == "running" ? Mathf.Repeat(Time.time / 40f, 0.9f) + 0.05f : 0f,
             };
             state.tasks.Add(row);
-            sig.Append(t.id).Append(t.status).Append(t.result?.Length ?? 0).Append(t.diffStat).Append('|');
+            sig.Append(t.id).Append(t.status).Append(t.result?.Length ?? 0).Append(t.diffStat).Append(row.plain?.Length ?? 0).Append('|');
         }
 
         state.log.Clear();
@@ -240,7 +249,17 @@ public class LoftPanels : MonoBehaviour
         sig.Append(desk.eventLog.Count).Append(desk.eventLog.Count > 0 ? desk.eventLog[desk.eventLog.Count - 1] : "");
 
         var s = sig.ToString();
-        if (s != signature) { signature = s; state.Touch(); }
+        if (s != signature)
+        {
+            signature = s; state.Touch();
+            if (boards.Any(b => b.type == "project")) LoadProject();
+        }
+        int merged = state.tasks.Count(t => t.status == "approved");
+        if (merged != shownMerged) // merged work shows up without reopening
+        {
+            shownMerged = merged;
+            if (boards.Any(b => b.type == "files")) Browse(state.treePath ?? "");
+        }
 
         var review = state.tasks.FirstOrDefault(t => t.status == "review");
         if (review?.id != reviewId)
@@ -249,7 +268,7 @@ public class LoftPanels : MonoBehaviour
             if (reviewId != null)
             {
                 LoadDiff(reviewId);
-                if (!boards.Any(b => b.type == "review")) OpenBoard("review"); // finished work comes to you
+                if (!desk.autoApprove && review.files > 0 && !boards.Any(b => b.type == "review")) OpenBoard("review"); // finished work comes to you
             }
             else { state.diff.Clear(); state.Touch(); }
         }
@@ -320,8 +339,42 @@ public class LoftPanels : MonoBehaviour
         if (entry == null || !entry.Request("New note", "", t => { if (!string.IsNullOrWhiteSpace(t)) _ = p.client.AddNote(t.Trim()); }, out string why))
             p.desk?.Note("Can't open the keyboard here.");
     }
+    public static void SwitchWorkspace(string id) => Instance?.desk.SetProject(id);
+    public static void OpenFolder() => AskText("Folder path, like ~/code/site", "~/", t => Instance.desk.OpenFolder(t));
+    public static void NewWorkspace() => AskText("New workspace name", "", t => Instance.desk.CreateProject(t));
+
+    static void AskText(string hint, string start, Action<string> done)
+    {
+        var entry = FindFirstObjectByType<LoftTextEntry>();
+        if (Instance == null || entry == null) return;
+        if (!entry.Request(hint, start, t => { if (!string.IsNullOrWhiteSpace(t)) done(t); }, out string why)) Instance.desk?.Note(why);
+    }
+
+    // A finished task's whole report, on the Review board.
+    public static void ReadReport(string taskId)
+    {
+        Open("review");
+        var b = Instance?.boards.LastOrDefault(x => x.type == "review");
+        if (b == null) return;
+        b.readingId = taskId; b.scroll = 0; b.Refresh();
+    }
+
+    void LoadProject()
+    {
+        if (string.IsNullOrEmpty(desk?.projectId)) return;
+        client.Then(client.GetProject(desk.projectId), res =>
+        {
+            if (res == null) return;
+            state.projectSite = (bool?)res["site"] ?? false;
+            state.latestChange = (string)res["latest"]?["title"];
+            state.latestWhen = (string)res["latest"]?["when"];
+            state.Touch();
+        });
+    }
+
     public static void DeleteNote(string id) { if (Instance != null) _ = Instance.client.DeleteNote(id); }
     public static void Approve(string taskId) { if (Instance != null) { _ = Instance.client.Approve(taskId); LoftAudio.Play("sfx_approve"); } }
+    public static void SetAutoApprove(bool on) { if (Instance != null) _ = Instance.client.AutoApprove(on); }
     public static void Reject(string taskId) { if (Instance != null) _ = Instance.client.Reject(taskId, null); }
 
     void LoadDiff(string taskId)
@@ -423,11 +476,28 @@ public class LoftPanels : MonoBehaviour
         p.Save();
     }
 
+    // Voice "preview our latest work": the task in review if there is one, else what is merged.
+    public static void OpenLatest()
+    {
+        var p = Instance; if (p == null) return;
+        var b = p.boards.FirstOrDefault(x => x.type == "preview");
+        if (b == null)
+        {
+            b = p.Spawn($"b{p.nextId++}_{DateTime.Now.Ticks % 100000}", "preview");
+            p.Place(b);
+        }
+        b.startUrl = null;
+        if (p.reviewId != null) p.Connect(b, p.client.OpenPreview(p.reviewId), "Task preview");
+        else p.Connect(b, p.client.OpenLatest(p.desk?.projectId), "Latest work");
+        p.Save();
+    }
+
     static void Go(LoftBoard b, string url)
     {
         var p = Instance; if (p == null) return;
+        bool locked = string.IsNullOrEmpty(b.startUrl); // a task or latest preview can't leave its page: new session
         b.startUrl = url;
-        if (string.IsNullOrEmpty(b.previewId)) { p.StartPreview(b); return; }
+        if (locked || string.IsNullOrEmpty(b.previewId)) { p.StartPreview(b); return; }
         _ = p.client.PreviewInput(b.previewId, new JObject { ["type"] = "goto", ["url"] = url });
         SaveSoon();
     }

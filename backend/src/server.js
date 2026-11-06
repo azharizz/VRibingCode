@@ -25,7 +25,9 @@
 //   POST /voice?agentId=&projectId=&scene=  raw 16 kHz mono WAV (max 10 MB) -> {transcript,summary,needsConfirm,risky,intent}
 //   POST /voice/text {text,agentId?,projectId?,scene?}  same, no audio (STT_PROVIDER=local|openai, see src/stt.js)
 //   POST /party {on}              -> party mode on/off for every connected headset
+//   POST /auto-approve {on}       -> finished work merges without the CEO (off by default)
 //   GET /projects · POST /projects {name,path,dev?,setup?,url?,kind?,init?} (register a repo)
+//   GET /projects/:id/summary     -> name, latest change, whether there is a site to open
 //   POST /projects/new {name, template: empty|static} · DELETE /projects/:id (unregister)
 //   POST /cinema {url} -> prepare a video for VR · GET /cinema/:id -> progress · GET /cinema/:id/video.mp4
 //   GET /previews/<task>-desktop.png|-mobile.png -> screenshots of a task in review
@@ -40,7 +42,7 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { llmConfig, llmProblems } from "./env.js";
-import { chatReply, draftRole, planGoal, priceOf, runTask, suggestNext } from "./agents.js";
+import { chatReply, draftRole, planGoal, priceOf, runTask, suggestNext, plainSummary } from "./agents.js";
 import { askJson, extractJson } from "./llm.js";
 import { createBoards, createNotes, jsonFile } from "./stores.js";
 import { createStt, MAX_AUDIO } from "./stt.js";
@@ -103,9 +105,21 @@ for (const sig of ["SIGINT", "SIGTERM"]) {
   });
 }
 
+// Files an agent can see while chatting: the top folder, and any file the CEO names.
+async function peekFiles(projectId, text) {
+  const project = projects.get(projectId ?? undefined);
+  const { entries } = await tree(project.path, "");
+  const parts = [`Project files: ${entries.map((e) => e.name).join(", ") || "(empty)"}`];
+  for (const name of [...new Set(String(text).match(/[\w./-]+\.[a-z0-9]{1,6}\b/gi) ?? [])].slice(0, 2)) {
+    const f = await readFile(project.path, name).catch(() => null);
+    if (f && !f.binary) parts.push(`${f.path}:\n${f.content.slice(0, 24000)}`);
+  }
+  return parts.join("\n\n");
+}
+
 const loft = createOrchestrator({
   runTask, planGoal, draftRole, priceOf, workspace: WORKSPACE, roles: savedRoles, projects, previews,
-  chat: chatReply, suggest: suggestNext, state: stateFile.read(), saveState: (st) => stateFile.write(st),
+  chat: chatReply, suggest: suggestNext, describe: plainSummary, getNotes: () => notes.list(), peek: peekFiles, state: stateFile.read(), saveState: (st) => stateFile.write(st),
   saveRoles: (list) => {
     fs.mkdirSync(path.dirname(ROLES_FILE), { recursive: true });
     fs.writeFileSync(ROLES_FILE, JSON.stringify(list, null, 2));
@@ -264,9 +278,14 @@ async function route(req, res) {
     if (b.taskId) {
       const t = loft.getTask(String(b.taskId));
       if (t.status !== "review" || !t.worktree) throw new HttpError(409, "only a task in review has a live preview");
-      target = { url: (await previews.serve(t.id, projects.get(t.projectId), t.worktree)).url, lockOrigin: true, taskId: t.id };
+      const start = (await projects.entry(projects.get(t.projectId), t.worktree)) ?? "";
+      target = { url: new URL(start, (await previews.serve(t.id, projects.get(t.projectId), t.worktree)).url).href, lockOrigin: true, taskId: t.id };
+    } else if (b.latest) {
+      const project = projects.get(b.projectId ? String(b.projectId) : undefined); // main, everything merged so far
+      const start = (await projects.entry(project)) ?? "";
+      target = { url: new URL(start, (await previews.serve(`main:${project.id}`, project, project.path)).url).href, lockOrigin: true };
     } else if (typeof b.url === "string") target = { url: b.url };
-    else throw new HttpError(400, "send taskId or url");
+    else throw new HttpError(400, "send taskId, latest or url");
     return send(res, 201, { ok: true, ...(await sessions.open({ ...target, width: b.width, height: b.height })) });
   }
   if (m === "POST" && p === "/cinema") return send(res, 202, await cinema.prepare((await readBody(req)).url));
@@ -283,6 +302,7 @@ async function route(req, res) {
     if (!(await sessions.close(g[1]))) throw new HttpError(404, "no such preview session");
     return send(res, 200, { ok: true });
   }
+  if (m === "GET" && (g = p.match(/^\/projects\/([^/]+)\/summary$/))) return send(res, 200, await projects.summary(projects.get(decodeURIComponent(g[1]))));
   if (m === "GET" && p === "/projects") return send(res, 200, { projects: projects.list(), templates: projects.templates });
   if (m === "POST" && p === "/projects") {
     const project = await projects.add(await readBody(req));
@@ -314,6 +334,10 @@ async function route(req, res) {
   if (m === "POST" && p === "/party") {
     const { on } = await readBody(req);
     return send(res, 200, { ok: true, on: loft.setParty(on) });
+  }
+  if (m === "POST" && p === "/auto-approve") {
+    const { on } = await readBody(req);
+    return send(res, 200, { ok: true, on: loft.setAutoApprove(on) });
   }
   if (m === "GET" && p === "/roles") return send(res, 200, { roles: loft.snapshot().roles });
   if (m === "POST" && p === "/roles/draft") {

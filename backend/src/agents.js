@@ -54,11 +54,11 @@ function failNoModel() {
 }
 
 // One task for one agent. -> { text, usage: {requests, inputTokens, outputTokens} }
-export async function runTask({ agent, title, workspace, abortController, onProgress = () => {}, checkPage = null }) {
+export async function runTask({ agent, title, notes = "", workspace, abortController, onProgress = () => {}, checkPage = null }) {
   const signal = abortController?.signal;
   const a = new Agent({
     name: agent.name,
-    instructions: SYSTEM(agent),
+    instructions: SYSTEM(agent) + (notes ? `\nThe CEO's notes, for context (not tasks unless the task says so):\n${notes}` : ""),
     model: new OpenAIChatCompletionsModel(llm(), agent.model || defaultModel() || failNoModel()),
     tools: makeTools(workspace, agent.role.tools, { signal, onProgress, checkPage }),
   });
@@ -128,6 +128,7 @@ export async function chatReply({ agent, history, text, context }) {
     `You are ${agent.name}, the ${agent.role.title} on a small AI team. The CEO is talking to you in VR, face to face.\n${agent.role.instructions}\n` +
     `Reply in 1-3 short spoken sentences, in the CEO's language (English, Indonesian or mixed), in character. ` +
     `Only mention work that is in your task notes; never claim you did or will do something that is not there. If asked to do real work, say it needs to be given as a task.\n` +
+    `If project files are shown below, answer questions about them in plain words, not code: the gist, still at most 3 short sentences, in one paragraph.\n` +
     `Your task notes:\n${context || "(no tasks yet)"}`;
   const model = agent.model || defaultModel() || failNoModel();
   const res = await llm().chat.completions.create({
@@ -151,6 +152,20 @@ export async function suggestNext({ agent, task }) {
   );
   const j = extractJson(text, "{");
   return j && j.suggest === true && typeof j.title === "string" && j.title.trim() ? { title: j.title.trim(), reason: String(j.reason ?? "") } : null;
+}
+
+// Finished work in one plain sentence for a CEO who doesn't read code, or null. One LLM call.
+export async function plainSummary({ agent, task }) {
+  const text = await askJson(
+    process.env.LOFT_PLANNER_MODEL || defaultModel(),
+    "You explain finished work to a busy non-programmer. You only output JSON.",
+    `${agent.name} finished this task:\nTask: ${String(task.title).slice(0, 400)}\nChanges: ${task.diff?.stat ?? "none"}\nReport: ${String(task.result).slice(0, 2000)}\n\n` +
+      `In ONE short plain sentence, say what changed or what was found. No code, no markdown, no line numbers. Use the language of the task.\n` +
+      `Reply ONLY with JSON: {"sentence":"..."}`,
+    { temperature: 0.2, maxTokens: 1500 },
+  );
+  const j = extractJson(text, "{");
+  return typeof j?.sentence === "string" && j.sentence.trim() ? j.sentence.trim() : null;
 }
 
 // $ per token for a model id, from OpenRouter's public catalogue (cached).

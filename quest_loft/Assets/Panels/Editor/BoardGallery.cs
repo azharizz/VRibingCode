@@ -30,7 +30,7 @@ public static class BoardGallery
         cam.nearClipPlane = 0.05f;
 
         var state = PanelSample.Make();
-        foreach (var type in new[] { "kanban", "review", "log", "notes", "files", "diff", "preview" })
+        foreach (var type in new[] { "kanban", "review", "log", "notes", "project", "files", "diff", "preview" })
         {
             var b = LoftBoard.Create("g", type, state);
             if (type == "preview") { b.previewError = null; b.Refresh(); }

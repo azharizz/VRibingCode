@@ -30,6 +30,7 @@ namespace VirtualLoft.XR
         Transform root;
         TMP_Text title, heard, body, hint;
         LoftButton send, cancel, riskyBtn, close;
+        public LoftButton RiskyButton => riskyBtn;
         Transform levelBar, levelBack;
         float hideAt, anchorYaw;
         float level;
@@ -89,7 +90,7 @@ namespace VirtualLoft.XR
             Begin(CardState.Proposal, risky ? "CONFIRM  (changes things)" : "SEND THIS?", risky);
             heard.text = string.IsNullOrWhiteSpace(transcript) ? "" : "You said: \"" + LoftUtil.Trunc(transcript, 110) + "\"";
             body.text = string.IsNullOrWhiteSpace(summary) ? "(no summary)" : LoftUtil.Trunc(summary, 140);
-            hint.text = risky ? "Point at the red button and hold the trigger. A will not confirm this." : "A or trigger sends. B cancels.";
+            hint.text = risky ? "Hold the trigger to confirm (T in the Simulator). A will not confirm this." : "A or trigger sends. B cancels.";
             ShowLevel(false);
             if (risky)
             {

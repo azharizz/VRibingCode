@@ -162,6 +162,90 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createPreviews } from "../src/previews.js";
 import { createProjects, git } from "../src/projects.js";
 
+test("auto-approve: off by default, only new work merges, a failed merge waits for a person, survives restart", async () => {
+  let saved = null;
+  const merged = [];
+  let refuse = false;
+  const projects = {
+    get: () => ({ id: "p", main: "main", path: "/x" }), list: () => [{ id: "p" }],
+    prepare: async () => ({ worktree: "/wt", branch: "b" }), finish: async () => ({ files: ["a.html"] }),
+    merge: async (_p, t) => {
+      if (refuse) throw Object.assign(new Error("uncommitted changes"), { status: 409 });
+      merged.push(t.branch);
+      return { ok: true, sha: "abc" };
+    },
+  };
+  const loft = make({ projects, saveState: (s) => (saved = s), saveDelayMs: 0 });
+  const id = loft.snapshot().agents[1].id;
+  const settle = async () => { for (let i = 0; i < 40; i++) await tick(); };
+  const status = (t) => loft.snapshot().tasks.find((x) => x.id === t.id);
+
+  assert.equal(loft.snapshot().autoApprove, false);
+  const waiting = loft.assign(id, "before");
+  await settle();
+  assert.equal(status(waiting).status, "review", "off: work waits for the CEO");
+
+  assert.equal(loft.setAutoApprove("true"), false, "only a real true turns it on");
+  assert.equal(loft.setAutoApprove(true), true);
+  const auto = loft.assign(id, "after");
+  await settle();
+  assert.equal(status(auto).status, "approved", "on: finished work merges");
+  assert.equal(status(waiting).status, "review", "work already waiting stays with the CEO");
+
+  refuse = true;
+  const stuck = loft.assign(id, "refused");
+  await settle();
+  assert.equal(status(stuck).status, "review", "a merge that can't run stays in review");
+  assert.match(status(stuck).last, /auto-approve failed/);
+
+  await new Promise((r) => setTimeout(r, 5));
+  assert.equal(saved.autoApprove, true);
+  assert.equal(make({ projects, state: saved }).snapshot().autoApprove, true);
+});
+
+test("work with no changes closes itself and is said aloud; changed work gets a plain sentence", async () => {
+  const projects = {
+    get: () => ({ id: "p", main: "main", path: "/x" }), list: () => [{ id: "p" }],
+    prepare: async () => ({ worktree: "/wt", branch: "b" }), merge: async () => ({ ok: true, sha: null }),
+    finish: async (_p, t) => ({ files: /edit/.test(t.title) ? ["a.html"] : [] }),
+  };
+  const said = [];
+  const loft = make({ projects, runTask: async () => ({ text: "**Found** three things. More detail here." }), describe: async ({ task }) => (/edit/.test(task.title) ? "The header is blue now." : null) });
+  loft.events.on("event", (e) => e.type === "say" && said.push(e.text));
+  const id = loft.snapshot().agents[0].id;
+  const settle = async () => { for (let i = 0; i < 40; i++) await tick(); };
+  const status = (t) => loft.snapshot().tasks.find((x) => x.id === t.id);
+
+  const look = loft.assign(id, "look around");
+  await settle();
+  assert.equal(status(look).status, "approved", "nothing to decide");
+  assert.equal(status(look).plain, "Found three things.", "falls back to the report's first sentence, no markdown");
+  assert.deepEqual(said, ["Found three things."]);
+
+  const edit = loft.assign(id, "edit the header");
+  await settle();
+  assert.equal(status(edit).status, "review");
+  assert.equal(status(edit).plain, "The header is blue now.");
+  assert.equal(said.length, 1, "changed work waits on the board instead");
+});
+
+test("agents get the CEO's notes in tasks and chat, and files named in chat", async () => {
+  const seen = {};
+  const loft = make({
+    getNotes: () => [{ title: "", text: "fix the footer" }],
+    peek: async (_id, text) => `saw ${text}`,
+    runTask: async ({ notes }) => { seen.task = notes; return { text: "ok" }; },
+    chat: async ({ context }) => { seen.chat = context; return "hi"; },
+  });
+  const id = loft.snapshot().agents[0].id;
+  loft.assign(id, "work");
+  await tick(); await tick();
+  await loft.chat(id, "what is in index.html?");
+  assert.match(seen.task, /fix the footer/);
+  assert.match(seen.chat, /fix the footer/);
+  assert.match(seen.chat, /saw what is in index\.html/);
+});
+
 test("e2e: tasks in worktrees -> diff + preview in review -> approve merges, conflict -> fix task, reject keeps worktree", { timeout: 180_000 }, async () => {
   const tmp = await mkdtemp(path.join(os.tmpdir(), "loft-e2e-"));
   const projects = createProjects({ dataDir: path.join(tmp, "data"), projectsDir: path.join(tmp, "p"), defaultPath: null });

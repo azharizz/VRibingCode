@@ -43,7 +43,7 @@ const blankUsage = () => ({ requests: 0, inputTokens: 0, outputTokens: 0, costUs
 export function createOrchestrator({
   runTask, planGoal, draftRole = null, priceOf = async () => null, workspace, projects = null, previews = null,
   maxAgents = MAX_AGENTS, defaults = DEFAULT_AGENTS, roles: savedRoles = [], saveRoles = () => {},
-  chat = null, suggest = null, state = null, saveState = null, saveDelayMs = 400,
+  chat = null, suggest = null, describe = null, getNotes = () => [], peek = async () => "", state = null, saveState = null, saveDelayMs = 400,
 }) {
   const events = new EventEmitter();
   events.setMaxListeners(100); // one listener per connected headset/viewer
@@ -56,7 +56,9 @@ export function createOrchestrator({
   const chats = new Map(); // agentId -> [{role:"user"|"assistant", content}] (the agent's memory of the CEO)
   const suggestions = new Map(); // id -> {id, agentId, taskId, projectId, title, reason}
   let saveTimer = null;
-  const PERSISTED = new Set(["agent", "agent.removed", "task", "say", "suggestion", "suggestion.closed"]);
+  let autoApprove = state?.autoApprove === true;
+  let merging = Promise.resolve();
+  const PERSISTED = new Set(["agent", "agent.removed", "task", "say", "suggestion", "suggestion.closed", "autoApprove"]);
 
   function exportState() {
     return {
@@ -65,6 +67,7 @@ export function createOrchestrator({
       tasks: [...tasks.values()],
       chats: Object.fromEntries(chats),
       suggestions: [...suggestions.values()],
+      autoApprove,
     };
   }
   function save() {
@@ -220,6 +223,7 @@ export function createOrchestrator({
       const out = await runTask({
         agent: a,
         title: t.title,
+        notes: ceoNotes(),
         workspace: here,
         abortController: ac,
         checkPage: previews && project ? (p) => previews.checkPage(`check:${t.id}`, project, here, p) : null,
@@ -233,6 +237,7 @@ export function createOrchestrator({
         const diff = project ? await projects.finish(project, t, `loft: ${firstLine(t.title)} (${a.name})`) : null;
         setTask(t, { status: "review", result: String(text).slice(0, 8000), usage, diff });
         if (previews && project && diff?.files.length) capturePreview(t, project);
+        explain(a, t);
         raiseSuggestion(a, t);
       }
     } catch (err) {
@@ -243,6 +248,7 @@ export function createOrchestrator({
       if (agents.has(a.id)) {
         const state = t.status === "review" ? "done" : t.status === "failed" ? "failed" : "idle";
         setAgent(a, { state, taskId: null });
+        if (t.status === "review" && (autoApprove || t.diff?.files.length === 0)) autoMerge(t); // nothing changed: nothing to decide
         pump(a);
       }
     }
@@ -270,11 +276,29 @@ export function createOrchestrator({
     const history = chats.get(a.id) ?? [];
     const mine = [...tasks.values()].filter((t) => t.agentId === a.id).slice(-3);
     const context = mine.map((t) => `task "${firstLine(t.title)}": ${t.status}${t.status === "review" || t.status === "approved" ? ` — ${String(t.result).slice(0, 200)}` : ""}`).join("\n");
-    const reply = String(await chat({ agent: { ...a }, history: [...history], text: msg, context })).trim().slice(0, 600);
+    const files = await peek(mine.at(-1)?.projectId ?? null, msg).catch(() => "");
+    const notes = ceoNotes();
+    const known = [context, notes && `The CEO's notes:\n${notes}`, files].filter(Boolean).join("\n\n");
+    const reply = String(await chat({ agent: { ...a }, history: [...history], text: msg, context: known })).trim().slice(0, 600);
     if (!reply) throw new HttpError(502, "the agent had nothing to say");
     chats.set(a.id, [...history, { role: "user", content: msg }, { role: "assistant", content: reply }].slice(-CHAT_KEEP));
     emit({ type: "say", agentId: a.id, text: reply });
     return { reply };
+  }
+
+  // The CEO's sticky notes, newest last, as context for agents.
+  function ceoNotes() {
+    return getNotes().slice(-20).map((n) => `- ${[n.title, n.text].filter(Boolean).join(": ")}`.slice(0, 300)).join("\n");
+  }
+
+  // One plain sentence for the Review board. Work with no changes closes by itself, so the agent says it aloud.
+  const firstSentence = (s) => String(s ?? "").replace(/[*#`]+/g, "").trim().split(/(?<=[.!?])\s|\n/)[0].slice(0, 200);
+  async function explain(a, t) {
+    const said = await Promise.resolve(describe?.({ agent: { ...a }, task: pub(t) })).catch(() => null);
+    const plain = String(said || firstSentence(t.result)).trim().slice(0, 240);
+    if (!plain) return;
+    setTask(t, { plain });
+    if (t.diff?.files.length === 0 && agents.has(a.id)) emit({ type: "say", agentId: a.id, text: plain });
   }
 
   // ---- suggestions: an agent may raise at most one after finished work; it never acts alone ----
@@ -287,7 +311,7 @@ export function createOrchestrator({
     try {
       const got = await suggest({ agent: { ...a }, task: { ...t, worktree: undefined } });
       const title = String(got?.title ?? "").trim().slice(0, 300);
-      if (!title || !agents.has(a.id) || t.status !== "review" || [...suggestions.values()].some((g) => g.taskId === t.id)) return;
+      if (!title || !agents.has(a.id) || !["review", "approved"].includes(t.status) || [...suggestions.values()].some((g) => g.taskId === t.id)) return;
       const g = { id: `s${++seq}`, agentId: a.id, taskId: t.id, projectId: t.projectId, title, reason: String(got.reason ?? "").trim().slice(0, 300) };
       suggestions.set(g.id, g);
       emit({ type: "suggestion", ...g });
@@ -341,6 +365,19 @@ export function createOrchestrator({
   }
 
   // Approve = squash-merge the task's branch into the project's main branch.
+  // Opt-in: finished work merges without the CEO. One merge at a time, they share a checkout.
+  // A merge that can't run leaves the task in review for a person.
+  function autoMerge(t) {
+    merging = merging.then(() => (t.status === "review" ? approve(t.id) : null)).catch((err) => {
+      setTask(t, { last: `auto-approve failed: ${errText(err)}`.slice(0, 200) });
+    });
+  }
+  function setAutoApprove(on) {
+    autoApprove = on === true;
+    emit({ type: "autoApprove", on: autoApprove });
+    return autoApprove;
+  }
+
   async function approve(taskId) {
     const t = needTask(taskId);
     if (t.status !== "review") throw new HttpError(409, `task '${taskId}' is ${t.status}, not in review`);
@@ -435,6 +472,7 @@ export function createOrchestrator({
       agents: [...agents.values()].map((a) => ({ ...a })),
       tasks: [...tasks.values()].slice(-100).map((t) => ({ ...t, worktree: undefined })),
       suggestions: [...suggestions.values()],
+      autoApprove,
       projects: projects ? projects.list() : [],
       templates: projects ? projects.templates : [],
     };
@@ -456,5 +494,5 @@ export function createOrchestrator({
     for (const [id, h] of Object.entries(state.chats ?? {})) if (agents.has(id) && Array.isArray(h)) chats.set(id, h.slice(-CHAT_KEEP));
     for (const g of state.suggestions ?? []) if (agents.has(g.agentId)) suggestions.set(g.id, g);
   } else for (const d of defaults) spawn(d);
-  return { events, spawn, remove, assign, goal, approve, reject, stop, snapshot, saveRole, deleteRole, draft, setParty, projectsChanged, chat: talk, acceptSuggestion, dismissSuggestion, getTask: needTask, flush: () => saveState?.(exportState()) };
+  return { events, spawn, remove, assign, goal, approve, reject, stop, snapshot, saveRole, deleteRole, draft, setParty, setAutoApprove, projectsChanged, chat: talk, acceptSuggestion, dismissSuggestion, getTask: needTask, flush: () => saveState?.(exportState()) };
 }

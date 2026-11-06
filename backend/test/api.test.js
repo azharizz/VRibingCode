@@ -173,6 +173,27 @@ test("preview sessions refuse metadata, file URLs and unknown tasks", async () =
   assert.equal((await (await call("GET", "/preview/sessions")).json()).sessions.length, 0);
 });
 
+test("project summary: name, latest change, and files named in chat stay inside the project", async () => {
+  const list = await (await call("GET", "/projects")).json();
+  const id = list.projects[0].id;
+  const s = await (await call("GET", `/projects/${id}/summary`)).json();
+  assert.equal(s.id, id);
+  assert.equal(typeof s.site, "boolean");
+  assert.equal((await call("GET", "/projects/nope/summary")).status, 404);
+});
+
+test("latest preview: serves the project's merged files, and stays on them", async () => {
+  fs.writeFileSync(path.join(ws, "index.html"), "<title>Merged site</title><h1>hi</h1>");
+  const open = await call("POST", "/preview/sessions", { latest: true });
+  assert.equal(open.status, 201);
+  const s = await open.json();
+  const info = await (await call("GET", `/preview/sessions/${s.id}`)).json();
+  assert.equal(info.title, "Merged site");
+  assert.equal((await call("POST", `/preview/sessions/${s.id}/input`, { type: "goto", url: "https://example.com" })).status, 403);
+  assert.equal((await call("DELETE", `/preview/sessions/${s.id}`)).status, 200);
+  assert.equal((await call("POST", "/preview/sessions", { latest: true, projectId: "nope" })).status, 404);
+});
+
 test("browser: words become addresses, and public pages cannot reach this machine", async () => {
   const { toUrl, isPrivate } = await import("../src/preview-sessions.js");
   assert.equal(toUrl("google.com"), "https://google.com");

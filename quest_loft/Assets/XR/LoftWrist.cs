@@ -50,11 +50,23 @@ namespace VirtualLoft.XR
             EnsureRoot();
             IsOpen = open;
             pinned = open && pin;
+            floating = false;
             root.gameObject.SetActive(open);
             if (open) { page = Page.Main; Rebuild(); }
         }
 
         public void Toggle() => SetOpen(!(IsOpen && pinned), true);
+
+        // Stays where it opened, in plain view: the hand may be anywhere when asked by voice or tap.
+        bool floating;
+        Vector3 floatAt;
+        public void OpenInFront(Camera cam)
+        {
+            SetOpen(true, true);
+            var f = cam.transform.forward; f.y = 0f;
+            floatAt = cam.transform.position + (f.sqrMagnitude > 1e-4f ? f.normalized : Vector3.forward) * 0.75f - Vector3.up * 0.1f;
+            floating = true;
+        }
 
         // B: Keys page -> main -> closed.
         public bool Back()
@@ -71,7 +83,7 @@ namespace VirtualLoft.XR
             EnsureRoot();
             if (cam == null) return;
             var head = cam.transform;
-            Vector3 anchor = hasHand && xrDevice
+            Vector3 anchor = floating ? floatAt : hasHand && xrDevice
                 ? handPos + Vector3.up * 0.2f
                 : head.position + head.forward * 0.8f - head.right * 0.22f - head.up * 0.05f;
             if (xrDevice && hasHand && !pinned && !suppressed)
@@ -156,13 +168,16 @@ namespace VirtualLoft.XR
                 Row(row);
             }
 
-            Header("PROJECT");
-            if (desk.projects.Count == 0) Note("No projects yet (backend offline?)", new Color(0.7f, 0.76f, 0.86f));
+            Header("WORKSPACE");
+            if (desk.projects.Count == 0) Note("No workspaces yet (backend offline?)", new Color(0.7f, 0.76f, 0.86f));
             foreach (var p in desk.projects.Take(5))
             {
                 var pid = (string)p["id"];
                 Row(("proj_" + pid, LoftUtil.Trunc((string)p["name"] ?? pid, 30), LoftUi.Neutral, () => desk.SetProject(pid), 0f, pid == desk.projectId));
             }
+
+            Row(("ws_open", "OPEN FOLDER...", LoftUi.Neutral, () => Ask("Folder path, like ~/code/site", "~/", t => desk.OpenFolder(t)), 0f, false),
+                ("ws_new", "NEW WORKSPACE...", LoftUi.Neutral, () => Ask("New workspace name", "", t => desk.CreateProject(t)), 0f, false));
 
             Header("NEW AGENT");
             Note("Point at nothing, hold A and say:\n\"add a designer, make it a panda\"", new Color(0.8f, 0.86f, 0.95f), 0.019f, 2);
@@ -221,6 +236,6 @@ namespace VirtualLoft.XR
             if (!entry.Request(hint, initial, t => { if (!string.IsNullOrWhiteSpace(t)) done(t); }, out var why)) say(why);
         }
 
-        static string Cap(string id) => string.IsNullOrEmpty(id) ? id : char.ToUpperInvariant(id[0]) + id.Substring(1);
+        static string Cap(string id) => id == "project" ? "Workspace" : string.IsNullOrEmpty(id) ? id : char.ToUpperInvariant(id[0]) + id.Substring(1);
     }
 }

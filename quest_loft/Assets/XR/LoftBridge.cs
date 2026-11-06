@@ -22,6 +22,6 @@ namespace VirtualLoft.XR
             }
         }
 
-        public static readonly string[] BoardTypes = { "kanban", "review", "log", "preview", "notes", "files", "diff" };
+        public static readonly string[] BoardTypes = { "kanban", "review", "log", "preview", "notes", "files", "project", "diff" };
     }
 }

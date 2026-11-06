@@ -177,12 +177,29 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
   // Commit whatever the agent changed; report what differs from main.
   async function finish(project, { worktree }, message) {
     await git(worktree, ["add", "-A", "--", ".", ":!node_modules"]);
-    if ((await git(worktree, ["diff", "--cached", "--quiet"], { ok: true })) === null) {
+    // --no-renames: with rename detection --quiet calls a pure file move "no changes"
+    if ((await git(worktree, ["diff", "--cached", "--quiet", "--no-renames"], { ok: true })) === null) {
       await git(worktree, ["commit", "-q", "-m", message]);
     }
     const files = (await git(worktree, ["diff", "--name-only", `${project.main}...HEAD`])).split("\n").filter(Boolean);
     const stat = (await git(worktree, ["diff", "--shortstat", `${project.main}...HEAD`])) || "no file changes";
     return { files, stat };
+  }
+
+  // Where the site starts: "" (top), "index/" (one folder down), or null when there is no page.
+  async function entry(project, dir = project.path) {
+    if (project.dev || (await exists(path.join(dir, "index.html")))) return "";
+    const all = await fs.readdir(dir, { withFileTypes: true });
+    for (const d of all) if (d.isDirectory() && !d.name.startsWith(".") && d.name !== "node_modules" && (await exists(path.join(dir, d.name, "index.html")))) return `${d.name}/`;
+    return null;
+  }
+
+  // What the project card shows.
+  async function summary(project) {
+    const log = await git(project.path, ["log", "-1", "--format=%s%x00%cr", project.main], { ok: true });
+    const [title, when] = (log ?? "").split("\0");
+    const site = (await entry(project)) !== null;
+    return { id: project.id, name: project.name, site, latest: title ? { title: title.split(" — ")[0], when } : null };
   }
 
   // Squash-merge the task branch into main in the project's own checkout.
@@ -193,6 +210,9 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
       throw new ProjectError(409, `${project.name}: you have uncommitted changes on ${project.main}; commit or stash them, then approve again`);
     }
     if (!(await git(project.path, ["diff", "--name-only", `${project.main}...${branch}`]))) {
+      if (worktree && (await git(worktree, ["status", "--porcelain"], { ok: true }))) {
+        throw new ProjectError(409, `${project.name}: this task has uncommitted work, so it was kept for review`);
+      }
       await discard(project, { branch, worktree });
       return { ok: true, sha: null, note: "nothing to merge" };
     }
@@ -213,5 +233,5 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
     await git(project.path, ["worktree", "prune"], { ok: true });
   }
 
-  return { load, list, get, add, create, remove, prepare, finish, merge, discard, templates: Object.keys(STARTERS) };
+  return { load, list, get, add, create, remove, prepare, finish, merge, summary, entry, discard, templates: Object.keys(STARTERS) };
 }
