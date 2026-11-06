@@ -35,11 +35,15 @@ function cleanText(s, max, field) {
 }
 
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32) || "role";
+const CHAT_KEEP = 24; // messages of memory per agent
 const blankUsage = () => ({ requests: 0, inputTokens: 0, outputTokens: 0, costUsd: null });
 
+// chat({agent, history, text, context}) -> reply string; suggest({agent, task}) -> {title, reason} | null.
+// state = what saveState() last got (team, tasks, chat memory, suggestions): restored on start.
 export function createOrchestrator({
   runTask, planGoal, draftRole = null, priceOf = async () => null, workspace, projects = null, previews = null,
   maxAgents = MAX_AGENTS, defaults = DEFAULT_AGENTS, roles: savedRoles = [], saveRoles = () => {},
+  chat = null, suggest = null, state = null, saveState = null, saveDelayMs = 400,
 }) {
   const events = new EventEmitter();
   events.setMaxListeners(100); // one listener per connected headset/viewer
@@ -49,7 +53,30 @@ export function createOrchestrator({
   const roles = new Map([...PRESET_ROLES, ...savedRoles].map((r) => [r.id, { ...r }]));
   let seq = 0;
 
-  const emit = (e) => events.emit("event", e);
+  const chats = new Map(); // agentId -> [{role:"user"|"assistant", content}] (the agent's memory of the CEO)
+  const suggestions = new Map(); // id -> {id, agentId, taskId, projectId, title, reason}
+  let saveTimer = null;
+  const PERSISTED = new Set(["agent", "agent.removed", "task", "say", "suggestion", "suggestion.closed"]);
+
+  function exportState() {
+    return {
+      v: 1, seq,
+      agents: [...agents.values()],
+      tasks: [...tasks.values()],
+      chats: Object.fromEntries(chats),
+      suggestions: [...suggestions.values()],
+    };
+  }
+  function save() {
+    if (!saveState) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => Promise.resolve(saveState(exportState())).catch(() => {}), saveDelayMs);
+    saveTimer.unref?.();
+  }
+  const emit = (e) => {
+    events.emit("event", e);
+    if (PERSISTED.has(e.type)) save();
+  };
   const setAgent = (a, patch) => {
     Object.assign(a, patch);
     emit({ type: "agent", agent: { ...a } });
@@ -141,6 +168,8 @@ export function createOrchestrator({
     needAgent(id);
     stop(id);
     agents.delete(id);
+    chats.delete(id);
+    for (const g of [...suggestions.values()]) if (g.agentId === id) dropSuggestion(g.id);
     emit({ type: "agent.removed", id });
   }
 
@@ -204,6 +233,7 @@ export function createOrchestrator({
         const diff = project ? await projects.finish(project, t, `loft: ${firstLine(t.title)} (${a.name})`) : null;
         setTask(t, { status: "review", result: String(text).slice(0, 8000), usage, diff });
         if (previews && project && diff?.files.length) capturePreview(t, project);
+        raiseSuggestion(a, t);
       }
     } catch (err) {
       if (!ac.signal.aborted) setTask(t, { status: "failed", result: errText(err) });
@@ -230,6 +260,59 @@ export function createOrchestrator({
     } catch (err) {
       if (t.status === "review") setTask(t, { preview: { status: "error", error: errText(err).slice(0, 400) } });
     }
+  }
+
+  // ---- chat: short, in role, with memory ----
+  async function talk(agentId, text) {
+    const a = needAgent(agentId);
+    const msg = cleanText(text, 1000, "text");
+    if (!chat) throw new HttpError(501, "chat not configured");
+    const history = chats.get(a.id) ?? [];
+    const mine = [...tasks.values()].filter((t) => t.agentId === a.id).slice(-3);
+    const context = mine.map((t) => `task "${firstLine(t.title)}": ${t.status}${t.status === "review" || t.status === "approved" ? ` — ${String(t.result).slice(0, 200)}` : ""}`).join("\n");
+    const reply = String(await chat({ agent: { ...a }, history: [...history], text: msg, context })).trim().slice(0, 600);
+    if (!reply) throw new HttpError(502, "the agent had nothing to say");
+    chats.set(a.id, [...history, { role: "user", content: msg }, { role: "assistant", content: reply }].slice(-CHAT_KEEP));
+    emit({ type: "say", agentId: a.id, text: reply });
+    return { reply };
+  }
+
+  // ---- suggestions: an agent may raise at most one after finished work; it never acts alone ----
+  const MAX_OPEN_SUGGESTIONS = 5;
+  function dropSuggestion(id) {
+    if (suggestions.delete(id)) emit({ type: "suggestion.closed", id });
+  }
+  async function raiseSuggestion(a, t) {
+    if (!suggest || process.env.LOFT_SUGGESTIONS === "0" || suggestions.size >= MAX_OPEN_SUGGESTIONS) return;
+    try {
+      const got = await suggest({ agent: { ...a }, task: { ...t, worktree: undefined } });
+      const title = String(got?.title ?? "").trim().slice(0, 300);
+      if (!title || !agents.has(a.id) || t.status !== "review" || [...suggestions.values()].some((g) => g.taskId === t.id)) return;
+      const g = { id: `s${++seq}`, agentId: a.id, taskId: t.id, projectId: t.projectId, title, reason: String(got.reason ?? "").trim().slice(0, 300) };
+      suggestions.set(g.id, g);
+      emit({ type: "suggestion", ...g });
+    } catch {
+      /* a suggestion is a nicety: never let it disturb the work */
+    }
+  }
+  function takeSuggestion(id) {
+    const g = suggestions.get(id);
+    if (!g) throw new HttpError(404, `no suggestion '${id}'`);
+    return g;
+  }
+  function acceptSuggestion(id) {
+    const g = takeSuggestion(id);
+    if (!agents.has(g.agentId)) {
+      dropSuggestion(id);
+      throw new HttpError(409, "that agent is gone");
+    }
+    const task = assign(g.agentId, g.title, g.projectId);
+    dropSuggestion(id);
+    return task;
+  }
+  function dismissSuggestion(id) {
+    takeSuggestion(id);
+    dropSuggestion(id);
   }
 
   const firstLine = (s) => String(s).split("\n")[0].slice(0, 72);
@@ -351,11 +434,27 @@ export function createOrchestrator({
       roles: [...roles.values()],
       agents: [...agents.values()].map((a) => ({ ...a })),
       tasks: [...tasks.values()].slice(-100).map((t) => ({ ...t, worktree: undefined })),
+      suggestions: [...suggestions.values()],
       projects: projects ? projects.list() : [],
       templates: projects ? projects.templates : [],
     };
   }
 
-  for (const d of defaults) spawn(d);
-  return { events, spawn, remove, assign, goal, approve, reject, stop, snapshot, saveRole, deleteRole, draft, setParty, projectsChanged };
+  // Restart: bring the team back. Work that was running or queued did not finish.
+  const restored = state && Array.isArray(state.agents);
+  if (restored) {
+    seq = Math.max(seq, Number(state.seq) || 0);
+    for (const a of state.agents) agents.set(a.id, { ...a, state: a.state === "working" ? "idle" : a.state, taskId: null, usage: { ...blankUsage(), ...a.usage } });
+    for (const t of state.tasks ?? []) {
+      const lost = t.status === "queued" || t.status === "running";
+      tasks.set(t.id, {
+        ...t,
+        ...(lost && { status: "stopped", result: t.result || "Interrupted by a server restart.", last: "interrupted by restart" }),
+        ...(t.preview?.status === "loading" && { preview: null }),
+      });
+    }
+    for (const [id, h] of Object.entries(state.chats ?? {})) if (agents.has(id) && Array.isArray(h)) chats.set(id, h.slice(-CHAT_KEEP));
+    for (const g of state.suggestions ?? []) if (agents.has(g.agentId)) suggestions.set(g.id, g);
+  } else for (const d of defaults) spawn(d);
+  return { events, spawn, remove, assign, goal, approve, reject, stop, snapshot, saveRole, deleteRole, draft, setParty, projectsChanged, chat: talk, acceptSuggestion, dismissSuggestion, getTask: needTask, flush: () => saveState?.(exportState()) };
 }

@@ -39,12 +39,15 @@ import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { llmConfig, llmProblems } from "./env.js";
-import { draftRole, planGoal, priceOf, runTask } from "./agents.js";
+import { chatReply, draftRole, planGoal, priceOf, runTask, suggestNext } from "./agents.js";
 import { askJson, extractJson } from "./llm.js";
+import { createBoards, createNotes, jsonFile } from "./stores.js";
 import { createStt, MAX_AUDIO } from "./stt.js";
 import { createVoice } from "./voice.js";
 import { blankLoft, loadLoft, saveLoft, validateLoft } from "./loftStore.js";
 import { createOrchestrator, HttpError } from "./orchestrator.js";
+import { readFile, taskDiff, tree } from "./files.js";
+import { createPreviewSessions } from "./preview-sessions.js";
 import { createPreviews } from "./previews.js";
 import { createProjects } from "./projects.js";
 
@@ -84,16 +87,31 @@ const projects = createProjects({
 });
 await projects.load();
 const previews = createPreviews({ dir: PREVIEW_DIR });
-for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => previews.close().finally(() => process.exit(0)));
+const stateFile = jsonFile(path.join(DATA, "state.json"), null); // team, tasks, chat memory, suggestions survive restarts
+const sessions = createPreviewSessions({ browser: () => previews.browser() });
+for (const sig of ["SIGINT", "SIGTERM"]) {
+  process.on(sig, () => {
+    try {
+      loft.flush();
+    } catch {
+      /* best effort */
+    }
+    sessions.closeAll().then(() => previews.close()).finally(() => process.exit(0));
+  });
+}
 
 const loft = createOrchestrator({
   runTask, planGoal, draftRole, priceOf, workspace: WORKSPACE, roles: savedRoles, projects, previews,
+  chat: chatReply, suggest: suggestNext, state: stateFile.read(), saveState: (st) => stateFile.write(st),
   saveRoles: (list) => {
     fs.mkdirSync(path.dirname(ROLES_FILE), { recursive: true });
     fs.writeFileSync(ROLES_FILE, JSON.stringify(list, null, 2));
   },
 });
+const boards = createBoards(path.join(DATA, "boards.json"));
+const notes = createNotes(path.join(DATA, "notes.json"), { emit: (e) => loft.events.emit("event", e) });
 const voice = createVoice({
+  draft: (d) => loft.draft(d),
   snapshot: () => loft.snapshot(),
   ask: (system, prompt) => askJson(process.env.LOFT_VOICE_MODEL || llmConfig().model, system, prompt, { temperature: 0, maxTokens: 2000 }),
   extract: (t) => extractJson(t, "{"),
@@ -103,7 +121,7 @@ const storeOpts = { localOnly: !process.env.SUPABASE_URL };
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
@@ -177,7 +195,16 @@ async function route(req, res) {
   if (m === "POST" && p === "/voice/text") return send(res, 200, await voice.handleText(await readBody(req)));
   if (m === "GET" && p === "/events") return openEvents(req, res);
   if (m === "GET" && p === "/state") return send(res, 200, loft.snapshot());
-  if (m === "POST" && p === "/agents") return send(res, 201, { ok: true, agent: loft.spawn(await readBody(req)) });
+  if (m === "POST" && p === "/agents") {
+    const b = await readBody(req);
+    // Voice sends "spawn a data analyst" as a description: write the role here when none was given.
+    if (!b.role && !b.roleId && typeof b.description === "string" && b.description.trim()) {
+      const { writes, ...role } = await loft.draft(b.description);
+      b.role = role;
+    }
+    return send(res, 201, { ok: true, agent: loft.spawn(b) });
+  }
+  if (m === "POST" && (g = p.match(/^\/agents\/([^/]+)\/chat$/))) return send(res, 200, { ok: true, ...(await loft.chat(decodeURIComponent(g[1]), (await readBody(req)).text)) });
   if (m === "DELETE" && (g = p.match(/^\/agents\/([^/]+)$/))) {
     loft.remove(decodeURIComponent(g[1]));
     return send(res, 200, { ok: true });
@@ -189,6 +216,63 @@ async function route(req, res) {
   if (m === "POST" && p === "/goal") {
     const { goal, projectId } = await readBody(req);
     return send(res, 201, { ok: true, tasks: await loft.goal(goal, projectId || null) });
+  }
+  if (m === "GET" && p === "/boards") return send(res, 200, boards.get(url.searchParams.get("scene")));
+  if (m === "PUT" && p === "/boards") {
+    const b = await readBody(req);
+    return send(res, 200, boards.put(url.searchParams.get("scene"), Array.isArray(b) ? b : b.boards));
+  }
+  if (m === "GET" && p === "/notes") return send(res, 200, { notes: notes.list() });
+  if (m === "POST" && p === "/notes") return send(res, 201, { ok: true, note: notes.create(await readBody(req)) });
+  if (m === "PATCH" && (g = p.match(/^\/notes\/([^/]+)$/))) return send(res, 200, { ok: true, note: notes.update(decodeURIComponent(g[1]), await readBody(req)) });
+  if (m === "DELETE" && (g = p.match(/^\/notes\/([^/]+)$/))) {
+    notes.remove(decodeURIComponent(g[1]));
+    return send(res, 200, { ok: true });
+  }
+  if (m === "GET" && (g = p.match(/^\/projects\/([^/]+)\/(tree|file)$/))) {
+    const project = projects.get(decodeURIComponent(g[1]));
+    let root = project.path;
+    const taskId = url.searchParams.get("taskId"); // look inside a task in review instead of main
+    if (taskId) {
+      const t = loft.getTask(taskId);
+      if (t.projectId !== project.id || !t.worktree) throw new HttpError(404, "that task has no folder to browse");
+      root = t.worktree;
+    }
+    const rel = url.searchParams.get("path") ?? "";
+    return send(res, 200, g[2] === "tree" ? await tree(root, rel) : await readFile(root, rel));
+  }
+  if (m === "GET" && (g = p.match(/^\/tasks\/([^/]+)\/diff$/))) {
+    const t = loft.getTask(decodeURIComponent(g[1]));
+    return send(res, 200, await taskDiff(projects.get(t.projectId), t));
+  }
+  if (m === "GET" && p === "/suggestions") return send(res, 200, { suggestions: loft.snapshot().suggestions });
+  if (m === "POST" && (g = p.match(/^\/suggestions\/([^/]+)\/(accept|dismiss)$/))) {
+    const id = decodeURIComponent(g[1]);
+    if (g[2] === "accept") return send(res, 201, { ok: true, task: loft.acceptSuggestion(id) });
+    loft.dismissSuggestion(id);
+    return send(res, 200, { ok: true });
+  }
+  if (m === "POST" && p === "/preview/sessions") {
+    const b = await readBody(req);
+    let target;
+    if (b.taskId) {
+      const t = loft.getTask(String(b.taskId));
+      if (t.status !== "review" || !t.worktree) throw new HttpError(409, "only a task in review has a live preview");
+      target = { url: (await previews.serve(t.id, projects.get(t.projectId), t.worktree)).url, lockOrigin: true, taskId: t.id };
+    } else if (typeof b.url === "string") target = { url: b.url };
+    else throw new HttpError(400, "send taskId or url");
+    return send(res, 201, { ok: true, ...(await sessions.open({ ...target, width: b.width, height: b.height })) });
+  }
+  if (m === "GET" && p === "/preview/sessions") return send(res, 200, { sessions: sessions.list() });
+  if (m === "GET" && (g = p.match(/^\/preview\/sessions\/(\w+)\/frame$/))) {
+    const jpg = await sessions.frame(g[1]);
+    res.writeHead(200, { "Content-Type": "image/jpeg", "Cache-Control": "no-store", ...CORS });
+    return res.end(jpg);
+  }
+  if (m === "POST" && (g = p.match(/^\/preview\/sessions\/(\w+)\/input$/))) return send(res, 200, await sessions.input(g[1], await readBody(req)));
+  if (m === "DELETE" && (g = p.match(/^\/preview\/sessions\/(\w+)$/))) {
+    if (!(await sessions.close(g[1]))) throw new HttpError(404, "no such preview session");
+    return send(res, 200, { ok: true });
   }
   if (m === "GET" && p === "/projects") return send(res, 200, { projects: projects.list(), templates: projects.templates });
   if (m === "POST" && p === "/projects") {

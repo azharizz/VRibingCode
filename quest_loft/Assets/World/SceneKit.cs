@@ -89,27 +89,41 @@ public static class SceneKit
         }
     }
 
-    // One roof plane from an eave line (at x=0) up to a ridge line: underlay, rafters, overlapping rows
-    // (scalloped thatch when `teeth`, plain shingles otherwise).
+    // One roof plane from an eave line (at x=0) up to a ridge line. Seen from below (that is where
+    // the CEO is): stepped rows of bundles, each row hanging a little lower than the one above,
+    // with real teeth along the eave (`teeth`: thatch; plain shingle edge otherwise). The outer
+    // face is one cheap golden sheet because nobody ever looks at it.
     public static void Roof(Mk m, Vector3 eave, Vector3 ridge, Color lo, Color hi, Color under0, Color under1, Color rafter, bool teeth, float hx = 7.8f)
     {
         var up = (ridge - eave).normalized; float len = (ridge - eave).magnitude;
-        var nrm = Vector3.Cross(up, Vector3.right); if (nrm.y < 0) nrm = -nrm;
+        var nrm = Vector3.Cross(up, Vector3.right); if (nrm.y < 0) nrm = -nrm;   // outward (up and away)
         Vector3 P(float px, float s, float off) => eave + Vector3.right * px + up * s + nrm * off;
-        m.Quad2(P(-hx, 0, -0.07f), P(hx, 0, -0.07f), P(hx, len, -0.07f), P(-hx, len, -0.07f), under0, under1);
-        for (float rx = -hx + 0.6f; rx <= hx - 0.5f; rx += 0.9f) m.Beam(P(rx, -0.25f, -0.15f), P(rx, len, -0.15f), 0.09f, 0.16f, rafter, 0.04f);
-        int rows = Mathf.CeilToInt(len / 0.5f);
+        // outer sheet
+        m.Quad2(P(-hx, -0.1f, 0.12f), P(hx, -0.1f, 0.12f), P(hx, len, 0.12f), P(-hx, len, 0.12f), hi, hi);
+        float row = 0.62f; int rows = Mathf.CeilToInt(len / row);
+        float bw = teeth ? 0.3f : 0.45f;
         for (int k = 0; k < rows; k++)
         {
-            float s0 = k * 0.5f, s1 = Mathf.Min(len, s0 + 0.78f), off = (rows - k) * 0.011f;
-            for (float px = -hx; px < hx - 0.01f; px += 0.4f)
+            float s0 = k * row, s1 = Mathf.Min(len, s0 + row + 0.05f);
+            float sag = -0.05f * (rows - k) / rows - 0.02f;     // lower rows hang lower: steps catch the light
+            for (float px = -hx; px < hx - 0.01f; px += bw)
             {
-                var c0 = m.Jit(lo, 0.1f); var c1 = m.Jit(hi, 0.07f);
-                var a = P(px, s0, off); var b = P(px + 0.4f, s0, off);
-                m.Quad2(a, b, P(px + 0.4f, s1, off), P(px, s1, off), c0, c1);
-                if (teeth) m.Tri2(a, P(px + 0.2f, s0 - 0.17f, off), b, c0, c0, c0);
+                var cA = m.Jit(Color.Lerp(under0, lo, 0.35f), 0.12f); var cB = m.Jit(Color.Lerp(under1, hi, 0.1f), 0.1f);
+                float jig = (m.R() - 0.5f) * 0.12f;
+                var a = P(px, s0, sag); var b = P(px + bw, s0, sag); var c = P(px + bw, s1, sag - 0.04f); var d = P(px, s1, sag - 0.04f);
+                // facing down/in: lower edge cA (shadowed), upper edge cB
+                m.QuadFacing(a, b, c, d, cA, cB, -nrm);
+                if (teeth && k < 3)
+                    for (int t = 0; t < 2; t++)
+                    {
+                        float tx = px + bw * (0.25f + 0.5f * t) + jig, tl = 0.1f + m.R() * 0.22f;
+                        var tc = m.Jit(lo, 0.15f);
+                        m.Tri2(P(tx - 0.07f, s0, sag), P(tx + 0.07f, s0, sag), P(tx + (m.R() - 0.5f) * 0.05f, s0 - tl, sag - 0.03f), tc, tc, m.Jit(under0, 0.1f));
+                    }
             }
         }
+        for (float rx = -hx + 0.6f; rx <= hx - 0.5f; rx += 1.0f) m.Beam(P(rx, -0.3f, -0.2f), P(rx, len, -0.2f), 0.1f, 0.17f, rafter, 0.04f);
+        for (float s = 1.4f; s < len; s += 1.7f) m.Beam(P(-hx, s, -0.14f), P(hx, s, -0.14f), 0.07f, 0.09f, rafter, 0.04f); // purlins
     }
 
     // Smooth value noise 0..1 and a few octaves of it.
@@ -171,6 +185,106 @@ public static class SceneKit
             float r0 = Mathf.Max(0.3f, r);
             var c = m.Jit(Color.Lerp(dark, light, u), 0.08f);
             m.Prism(new Vector3(b.x, y0, b.z), new Vector3(b.x, y0 + h * 0.4f, b.z), r0, 0.02f, 7, c, true, false, 0.04f, 1f - u * 0.2f - 0.1f, 0.15f);
+        }
+    }
+
+    // ---------- shared hall: same roof line in every scene ----------
+    public const float EAVE_Y = 4.4f, RIDGE_Y = 7.6f, EAVE_FRONT = 2.8f, EAVE_BACK = 18.6f, RIDGE_Z = 10.4f, POST_H = 4.5f, ROOF_HX = 13.9f;
+
+    // Checkered tiles over the whole deck.
+    public static void Tiles(Mk m, Color a, Color b, float size = 1.3f)
+    {
+        int nx = Mathf.CeilToInt((Plan.X1 - Plan.X0) / size), nz = Mathf.CeilToInt((Plan.Z1 - Plan.Z0) / size);
+        for (int ix = 0; ix < nx; ix++)
+            for (int iz = 0; iz < nz; iz++)
+                m.Box(new Vector3(Plan.X0 + (ix + 0.5f) * size, -0.015f, Plan.Z0 + (iz + 0.5f) * size), new Vector3(size - 0.03f, 0.03f, size - 0.03f), m.Jit(((ix + iz) & 1) == 0 ? a : b, 0.03f), 0f);
+    }
+
+    // The CEO's own spot: round rug + lounger.
+    public static void Seat(Mk m, Color[] rug)
+    {
+        Rug(m, new Vector3(0, 0, 6.6f), 1.35f, rug);
+        BeachSc.Lounger(m, new Vector3(0f, 0f, 6.9f));
+    }
+
+    // ---------- shared furniture: same plan in every scene, restyled ----------
+    public struct Style
+    {
+        public Color wood, wood2, fabric, fabric2, metal, accent, plant, screen, pot;
+        public bool holo; // desks built as glowing slabs (galaxy)
+    }
+
+    public static void Furniture(Mk m, Mk glow, Style st)
+    {
+        // standing desks (agents stand on the -X side facing +X)
+        foreach (var d in Plan.DeskPos)
+        {
+            m.Box(d + new Vector3(0, 0.74f, 0), new Vector3(0.95f, 0.06f, 1.75f), m.Jit(st.wood, 0.05f), 0.02f);
+            if (st.holo) glow.Box(d + new Vector3(0, 0.705f, 0), new Vector3(0.97f, 0.01f, 1.77f), st.accent, 0f);
+            foreach (float sz in new[] { -0.8f, 0.8f }) m.Box(d + new Vector3(0, 0.36f, sz), new Vector3(0.85f, 0.72f, 0.06f), st.wood2, 0.02f);
+            m.Box(d + new Vector3(0.12f, 0.98f, 0), new Vector3(0.04f, 0.42f, 0.78f), Quaternion.Euler(0, 0, 0), st.metal, 0.02f);
+            glow.Box(d + new Vector3(0.095f, 0.98f, 0), new Vector3(0.012f, 0.36f, 0.7f), st.screen, 0.05f);
+            m.Box(d + new Vector3(0.12f, 0.8f, 0), new Vector3(0.06f, 0.1f, 0.2f), st.metal, 0f);
+            m.Box(d + new Vector3(-0.22f, 0.785f, 0.1f), new Vector3(0.22f, 0.02f, 0.5f), st.metal, 0f);       // keyboard
+            m.Prism(d + new Vector3(-0.12f, 0.77f, -0.62f), d + new Vector3(-0.12f, 0.87f, -0.62f), 0.04f, 0.04f, 6, st.accent, false, true);   // mug
+        }
+        // lounge: two sofas facing a low table, an armchair, a rug, a lamp
+        RectRug(m, new Vector3(-8.5f, 0f, 10f), new Vector2(5.4f, 5.4f), st.fabric2, Color.Lerp(st.fabric2, Color.white, 0.55f), st.accent);
+        Sofa(m, new Vector3(-8.5f, 0f, 7.2f), 0f, st);
+        Sofa(m, new Vector3(-8.5f, 0f, 12.8f), 180f, st);
+        Armchair(m, new Vector3(-11.6f, 0f, 10f), 90f, st);
+        m.Box(new Vector3(-8.5f, 0.38f, 10f), new Vector3(1.7f, 0.07f, 0.95f), st.wood, 0.03f);
+        foreach (float tx in new[] { -0.7f, 0.7f }) foreach (float tz in new[] { -0.35f, 0.35f }) m.Prism(new Vector3(-8.5f + tx, 0, 10f + tz), new Vector3(-8.5f + tx, 0.38f, 10f + tz), 0.04f, 0.04f, 5, st.wood2, false, false);
+        m.Prism(new Vector3(-8.3f, 0.41f, 10f), new Vector3(-8.3f, 0.5f, 10f), 0.07f, 0.06f, 6, st.accent, false, true);
+        m.Prism(new Vector3(-8.8f, 0.41f, 10.1f), new Vector3(-8.8f, 0.49f, 10.1f), 0.05f, 0.05f, 6, st.fabric, false, true);
+        // plants
+        foreach (var b in Plan.Blocks) if (b.kind == "plant") Plant(m, new Vector3(b.c.x, 0, b.c.y), st);
+        // back bar with stools
+        foreach (var b in Plan.Blocks)
+            if (b.kind == "bar")
+            {
+                m.Box(new Vector3(b.c.x, 0.52f, b.c.y), new Vector3(b.half.x * 2, 1.04f, b.half.y * 2), st.wood2, 0.03f);
+                m.Box(new Vector3(b.c.x, 1.07f, b.c.y), new Vector3(b.half.x * 2 + 0.1f, 0.07f, b.half.y * 2 + 0.12f), st.wood, 0.03f);
+                for (float sx = -b.half.x + 0.8f; sx < b.half.x; sx += 1.5f)
+                {
+                    m.Prism(new Vector3(b.c.x + sx, 0, b.c.y - 0.95f), new Vector3(b.c.x + sx, 0.62f, b.c.y - 0.95f), 0.05f, 0.04f, 6, st.metal, false, false);
+                    m.Prism(new Vector3(b.c.x + sx, 0.62f, b.c.y - 0.95f), new Vector3(b.c.x + sx, 0.68f, b.c.y - 0.95f), 0.2f, 0.2f, 8, st.fabric, true, true);
+                }
+            }
+    }
+
+    static void Sofa(Mk m, Vector3 c, float yaw, Style st)
+    {
+        var q = Quaternion.Euler(0, yaw, 0);
+        Vector3 W(float x, float y, float z) => c + q * new Vector3(x, y, z);
+        m.Box(W(0, 0.2f, 0), new Vector3(3.2f, 0.36f, 1.05f), q, st.wood2, 0.03f);
+        m.Box(W(-0.8f, 0.5f, 0.04f), new Vector3(1.5f, 0.2f, 0.85f), q, st.fabric, 0.03f);
+        m.Box(W(0.8f, 0.5f, 0.04f), new Vector3(1.5f, 0.2f, 0.85f), q, st.fabric, 0.03f);
+        m.Box(W(0, 0.78f, -0.45f), new Vector3(3.2f, 0.7f, 0.2f), q, st.fabric, 0.03f);
+        foreach (float sx in new[] { -1.55f, 1.55f }) m.Box(W(sx, 0.55f, 0), new Vector3(0.2f, 0.5f, 1.05f), q, st.fabric, 0.03f);
+        m.Box(W(-1.1f, 0.78f, -0.15f), new Vector3(0.5f, 0.45f, 0.14f), q * Quaternion.Euler(-14, 0, 0), st.accent, 0.03f);
+    }
+
+    static void Armchair(Mk m, Vector3 c, float yaw, Style st)
+    {
+        var q = Quaternion.Euler(0, yaw, 0);
+        Vector3 W(float x, float y, float z) => c + q * new Vector3(x, y, z);
+        m.Box(W(0, 0.2f, 0), new Vector3(1.0f, 0.36f, 1.0f), q, st.wood2, 0.03f);
+        m.Box(W(0, 0.46f, 0.05f), new Vector3(0.8f, 0.16f, 0.8f), q, st.fabric, 0.03f);
+        m.Box(W(0, 0.75f, -0.42f), new Vector3(1.0f, 0.7f, 0.16f), q, st.fabric, 0.03f);
+        foreach (float sx in new[] { -0.46f, 0.46f }) m.Box(W(sx, 0.5f, 0), new Vector3(0.14f, 0.4f, 0.95f), q, st.fabric, 0.03f);
+    }
+
+    static void Plant(Mk m, Vector3 c, Style st)
+    {
+        m.Prism(c, c + Vector3.up * 0.5f, 0.3f, 0.36f, 8, st.pot, false, true, 0.04f);
+        for (int i = 0; i < 7; i++)
+        {
+            float a = i * 0.9f + m.R() * 0.4f;
+            var tip = c + new Vector3(Mathf.Cos(a) * 0.55f, 1.2f + m.R() * 0.7f, Mathf.Sin(a) * 0.55f);
+            var s = new Vector3(-Mathf.Sin(a), 0, Mathf.Cos(a)) * 0.13f;
+            var g = m.Jit(st.plant, 0.15f);
+            m.Tri2(c + Vector3.up * 0.5f - s, c + Vector3.up * 0.5f + s, tip, Mk.Rig(g, 1f), Mk.Rig(g, 1f), Color.Lerp(g, Color.white, 0.2f));
         }
     }
 }

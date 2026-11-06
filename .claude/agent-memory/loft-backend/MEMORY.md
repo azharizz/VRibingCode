@@ -26,3 +26,13 @@
 ## Integration lessons (lead, 2026-11-06)
 - Docker image built and run: auth, DeepSeek, /voice/text and a real agent task pass. /voice in the container needs STT_* (managed provider), still untested for real.
 - Fixed: `backend/workspace` sat inside the vr_games repo, so tasks branched and would merge into the user's real main. Projects must now be the root of their own repo (`isRepoRoot`), `prepare` refuses otherwise.
+
+## Round 2 (stopped early: quota). npm test = 61 pass.
+DONE + tested (test/state.test.js, test/api.test.js, real Chromium for previews):
+- Spawn fix: POST /agents {description} drafts a role server-side; voice spawn intent carries `role` + `writes`; unknown roleId text becomes description.
+- Persistence: data/state.json (team, tasks, chat memory, suggestions); running/queued tasks become "stopped" after restart.
+- Chat: POST /agents/:id/chat (+SSE say), memory 24 msgs. Voice actions `chat`, `board`.
+- Endpoints: /boards?scene, /notes CRUD, /projects/:id/tree|file (traversal/symlink/.env blocked, optional ?taskId), /tasks/:id/diff, /suggestions (+accept/dismiss, LOFT_SUGGESTIONS=0), /preview/sessions (cap 3, idle 120s, metadata/file URLs blocked, task previews origin-locked).
+- New files: src/stores.js, files.js, preview-sessions.js. Tests that spawn the server must pass PLAYWRIGHT_BROWSERS_PATH when overriding HOME.
+NOT STARTED: STT work: large-v3-turbo download, faster-whisper Docker server, tools/stt-compare, STT_SAVE_SAMPLES, accuracy/latency comparison. Docker image never built. README/DEPLOY not updated for Round 2 endpoints. Not tested against the real LLM (only fake LLM): suggestions, chat, new voice actions.
+NEXT: STT items above, then README endpoint table, then live check of chat/suggestions on a non-4101 port.

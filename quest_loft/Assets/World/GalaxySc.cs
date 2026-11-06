@@ -12,42 +12,38 @@ public static class GalaxySc
         var m = new Mk(71); var glow = new Mk(72);
         var floorA = H("#12162B"); var floorB = H("#181D3A"); var rib = H("#8E9BC9"); var ribD = H("#4A557F");
 
-        m.Box(new Vector3(0, -0.04f, 5.2f), new Vector3(LoftWorld.DECK_HALF * 2, 0.04f, 10.4f), H("#07091A"), 0f);
-        for (int ix = 0; ix < 12; ix++)
-            for (int iz = 0; iz < 9; iz++)
-                m.Box(new Vector3(-LoftWorld.DECK_HALF + 0.6f + ix * 1.23f, -0.015f, 0.62f + iz * 1.2f), new Vector3(1.2f, 0.03f, 1.17f), m.Jit(((ix + iz) & 1) == 0 ? floorA : floorB, 0.05f), 0f);
-        // glowing seams + front edge light
-        for (int i = 0; i <= 12; i++) glow.Box(new Vector3(-LoftWorld.DECK_HALF + i * 1.233f, 0.002f, 5.2f), new Vector3(0.014f, 0.004f, 10.4f), H("#3E6BFF"), 0f);
-        glow.Box(new Vector3(0, 0.01f, 0.06f), new Vector3(LoftWorld.DECK_HALF * 2, 0.02f, 0.07f), H("#7FD4FF"), 0f);
-        m.Beam(new Vector3(-LoftWorld.DECK_HALF, -0.15f, 0f), new Vector3(LoftWorld.DECK_HALF, -0.15f, 0f), 0.2f, 0.3f, ribD, 0.02f);
+        m.Box(new Vector3(0, -0.04f, 9f), new Vector3(26f, 0.04f, 18f), H("#07091A"), 0f);
+        SceneKit.Tiles(m, floorA, floorB);
+        // glowing seams + edge light
+        for (float sx = Plan.X0; sx <= Plan.X1 + 0.01f; sx += 2.6f) glow.Box(new Vector3(sx, 0.002f, 9f), new Vector3(0.014f, 0.004f, 18f), H("#3E6BFF"), 0f);
+        glow.Box(new Vector3(0, 0.01f, 0.06f), new Vector3(26f, 0.02f, 0.07f), H("#7FD4FF"), 0f);
+        foreach (float sx in new[] { -12.97f, 12.97f }) glow.Box(new Vector3(sx, 0.01f, 9f), new Vector3(0.07f, 0.02f, 18f), H("#7FD4FF"), 0f);
+        m.Beam(new Vector3(Plan.X0, -0.15f, 0f), new Vector3(Plan.X1, -0.15f, 0f), 0.2f, 0.3f, ribD, 0.02f);
 
-        // curved ribs: arches over the deck, front ones high so the view stays open
-        var zs = new[] { 5.4f, 7.4f, 9.4f, 10.5f };
+        // curved ribs: tall arches over the deck, front ones far ahead so the view stays open
+        const float RX = 13f, RH = 8.2f;
+        var zs = new[] { 4f, 8.6f, 13.2f, 17.8f };
         foreach (float rz in zs)
         {
             var pts = new System.Collections.Generic.List<Vector3>();
-            for (int i = 0; i <= 18; i++)
+            for (int i = 0; i <= 22; i++)
             {
-                float a = Mathf.PI * i / 18f; // 0 right wall -> pi left wall
-                pts.Add(new Vector3(Mathf.Cos(a) * 7.4f, 0.1f + Mathf.Sin(a) * 4.6f * (1f - (rz - 5.4f) * 0.01f), rz));
+                float a = Mathf.PI * i / 22f; // 0 right wall -> pi left wall
+                pts.Add(new Vector3(Mathf.Cos(a) * RX, 0.1f + Mathf.Sin(a) * RH, rz));
             }
-            m.Tube(pts, t => 0.08f + 0.05f * Mathf.Sin(t * Mathf.PI), 6, t => Color.Lerp(ribD, rib, Mathf.Sin(t * Mathf.PI)), null);
-            for (int i = 2; i < 17; i += 3) glow.Box(pts[i] + Vector3.down * 0.1f, new Vector3(0.1f, 0.025f, 0.1f), H("#9FD0FF"), 0f);
+            m.Tube(pts, t => 0.11f + 0.06f * Mathf.Sin(t * Mathf.PI), 6, t => Color.Lerp(ribD, rib, Mathf.Sin(t * Mathf.PI)), null);
+            for (int i = 2; i < 21; i += 3) glow.Box(pts[i] + Vector3.down * 0.14f, new Vector3(0.14f, 0.03f, 0.14f), H("#9FD0FF"), 0f);
         }
         for (int k = 0; k < 7; k++)
         {   // longitudinal ties between the ribs
             float a = Mathf.PI * (1 + k * 2) / 14f;
-            var p0 = new Vector3(Mathf.Cos(a) * 7.4f, 0.1f + Mathf.Sin(a) * 4.6f, 5.4f); var p1 = new Vector3(Mathf.Cos(a) * 7.4f, 0.1f + Mathf.Sin(a) * 4.6f * 0.95f, 10.5f);
-            m.Beam(p0, p1, 0.06f, 0.06f, ribD, 0.02f);
+            var p = new Vector3(Mathf.Cos(a) * RX, 0.1f + Mathf.Sin(a) * RH, 0f);
+            m.Beam(p + Vector3.forward * 4f, p + Vector3.forward * 17.8f, 0.08f, 0.08f, ribD, 0.02f);
         }
-        foreach (float sx in new[] { -7.4f, 7.4f }) m.Beam(new Vector3(sx, 0f, 5.4f), new Vector3(sx, 0f, 10.5f), 0.16f, 0.2f, ribD, 0.02f);
-        glow.Box(new Vector3(0, 4.6f, 7.95f), new Vector3(0.04f, 0.04f, 5.2f), H("#8FB8FF"), 0f);
-        // seat + agents' pad
-        SceneKit.Rug(m, new Vector3(0, 0, 6.6f), 1.35f, new[] { H("#222850"), H("#4C6BFF"), H("#222850") });
-        BeachSc.Lounger(m, new Vector3(0f, 0f, 6.9f));
-        SceneKit.RectRug(m, new Vector3(0, 0, 3.2f), new Vector2(6.4f, 2.6f), H("#3E5BEA"), H("#222A58"), H("#34428C"));
-        glow.Box(new Vector3(0, 0.03f, 1.92f), new Vector3(7.2f, 0.01f, 0.04f), H("#7FD4FF"), 0f);
-        glow.Box(new Vector3(0, 0.03f, 5.28f), new Vector3(7.2f, 0.01f, 0.04f), H("#7FD4FF"), 0f);
+        foreach (float sx in new[] { -RX, RX }) m.Beam(new Vector3(sx, 0f, 4f), new Vector3(sx, 0f, 17.8f), 0.18f, 0.22f, ribD, 0.02f);
+        glow.Box(new Vector3(0, RH - 0.1f, 10.9f), new Vector3(0.05f, 0.05f, 13.8f), H("#8FB8FF"), 0f);
+        SceneKit.Seat(m, new[] { H("#222850"), H("#4C6BFF"), H("#222850") });
+        SceneKit.Furniture(m, glow, new SceneKit.Style { wood = H("#1C2244"), wood2 = H("#12162B"), fabric = H("#3A4A9A"), fabric2 = H("#222A58"), metal = H("#8E9BC9"), accent = H("#7FD4FF"), plant = H("#4C7BE0"), screen = H("#7FD4FF"), pot = H("#222850"), holo = true });
         x.Mesh(m, "Shell", x.Lit());
         x.Mesh(glow, "Glow", x.Unlit(null, 1.5f));
 

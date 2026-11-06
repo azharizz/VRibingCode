@@ -4,6 +4,8 @@
 //   STT_PROVIDER=openai  any OpenAI-compatible POST {STT_BASE_URL}/audio/transcriptions
 //                        STT_BASE_URL, STT_API_KEY, STT_MODEL (e.g. whisper-1)
 // Optional for both: STT_LANGUAGE (default "auto": mixed English/Indonesian gets a fair chance).
+//                    STT_SAVE_SAMPLES=1 keeps recordings in data/stt/samples (off by default) so
+//                    tools/stt-compare.js can run on your own voice. They never leave this machine.
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -88,6 +90,13 @@ async function runOpenAi({ baseUrl, apiKey, model, language, prompt, wav, fetchF
   return String(j.text ?? "");
 }
 
+function saveSample(dir, wav, text) {
+  fs.mkdirSync(dir, { recursive: true });
+  const name = new Date().toISOString().replace(/[:.]/g, "-");
+  fs.writeFileSync(path.join(dir, `${name}.wav`), wav);
+  fs.writeFileSync(path.join(dir, `${name}.txt`), `${text}\n`); // what was heard: correct it to use as the expected text
+}
+
 // env, spawnFn and fetchFn are injectable for tests.
 export function createStt({ env = process.env, spawnFn = spawn, fetchFn = fetch } = {}) {
   const provider = (env.STT_PROVIDER || "local").toLowerCase();
@@ -103,7 +112,7 @@ export function createStt({ env = process.env, spawnFn = spawn, fetchFn = fetch 
     if (provider === "local") {
       raw = await runLocal({
         bin: env.WHISPER_BIN || (fs.existsSync(LOCAL_BIN) ? LOCAL_BIN : "whisper-cli"),
-        modelPath: env.STT_MODEL_PATH || path.join(here, "../data/stt/ggml-small.bin"),
+        modelPath: env.STT_MODEL_PATH || path.join(here, "../data/stt/ggml-small.bin"), // beat large-v3-turbo on speed and accuracy in tools/stt-compare
         language, prompt: hint, wav, spawnFn,
       });
     } else {
@@ -111,7 +120,9 @@ export function createStt({ env = process.env, spawnFn = spawn, fetchFn = fetch 
       if (missing.length) throw new SttError(503, `STT_PROVIDER=openai needs ${missing.join(", ")}`);
       raw = await runOpenAi({ baseUrl: env.STT_BASE_URL, apiKey: env.STT_API_KEY, model: env.STT_MODEL, language, prompt: hint, wav, fetchFn });
     }
-    return { text: cleanTranscript(raw), ms: Date.now() - t0, seconds };
+    const text = cleanTranscript(raw);
+    if (env.STT_SAVE_SAMPLES === "1") saveSample(env.STT_SAMPLE_DIR || path.join(here, "../data/stt/samples"), wav, text);
+    return { text, ms: Date.now() - t0, seconds };
   }
   return { provider, transcribe };
 }

@@ -31,7 +31,7 @@ export function safePath(workspace, rel = ".") {
 }
 
 // Symlinks could still point out of the workspace: check the real path too.
-async function realInside(workspace, p) {
+export async function realInside(workspace, p) {
   const root = await fs.realpath(path.resolve(workspace));
   let real;
   try {

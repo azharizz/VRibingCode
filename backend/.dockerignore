@@ -8,3 +8,4 @@ projects
 test
 *.md
 supabase
+stt-server

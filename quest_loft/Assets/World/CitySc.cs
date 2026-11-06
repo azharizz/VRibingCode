@@ -14,33 +14,36 @@ public static class CitySc
         var tileA = H("#2A2D37"); var tileB = H("#323644"); var steel = H("#9AA3B2"); var darkSteel = H("#3A404C");
 
         // floor: stone tiles + glowing seam at the edge
-        m.Box(new Vector3(0, -0.04f, (LoftWorld.DECK_FRONT + LoftWorld.DECK_BACK) / 2), new Vector3(LoftWorld.DECK_HALF * 2, 0.04f, LoftWorld.DECK_BACK - LoftWorld.DECK_FRONT), H("#14161C"), 0f);
-        for (int ix = 0; ix < 12; ix++)
-            for (int iz = 0; iz < 9; iz++)
-                m.Box(new Vector3(-LoftWorld.DECK_HALF + 0.6f + ix * 1.23f, -0.015f, 0.62f + iz * 1.2f), new Vector3(1.2f, 0.03f, 1.17f), m.Jit(((ix + iz) & 1) == 0 ? tileA : tileB, 0.04f), 0f);
-        m.Beam(new Vector3(-LoftWorld.DECK_HALF, -0.18f, 0f), new Vector3(LoftWorld.DECK_HALF, -0.18f, 0f), 0.3f, 0.42f, darkSteel, 0.02f);
-        glow.Box(new Vector3(0, 0.005f, 0.1f), new Vector3(LoftWorld.DECK_HALF * 2, 0.012f, 0.06f), H("#5FE6FF"), 0f);
-        glow.Box(new Vector3(0, 0.005f, 8.0f), new Vector3(LoftWorld.DECK_HALF * 2, 0.012f, 0.04f), H("#FF7AC8"), 0f);
+        m.Box(new Vector3(0, -0.04f, 9f), new Vector3(26f, 0.04f, 18f), darkSteel, 0f);
+        SceneKit.Tiles(m, tileA, tileB);
+        m.Beam(new Vector3(Plan.X0, -0.18f, 0f), new Vector3(Plan.X1, -0.18f, 0f), 0.3f, 0.42f, darkSteel, 0.02f);
+        glow.Box(new Vector3(0, 0.005f, 0.1f), new Vector3(26f, 0.012f, 0.06f), H("#5FE6FF"), 0f);
+        foreach (float sx in new[] { -12.9f, 12.9f }) glow.Box(new Vector3(sx, 0.005f, 9f), new Vector3(0.05f, 0.012f, 17.8f), H("#FF7AC8"), 0f);
 
-        // glass wall frame: slim mullions + transoms (no glass, nothing in the way)
-        foreach (float mx in new[] { -7.4f, -6f, -4f, -2f, 2f, 4f, 6f, 7.4f })
-            m.Box(new Vector3(mx, 2.4f, 0.35f), new Vector3(0.07f, 4.8f, 0.1f), steel, 0.02f);
-        m.Box(new Vector3(0, 3.9f, 0.35f), new Vector3(15.2f, 0.07f, 0.1f), steel, 0.02f);
-        m.Box(new Vector3(0, 0.08f, 0.35f), new Vector3(15.2f, 0.16f, 0.12f), darkSteel, 0.02f);
-        // roof slab with light panels, side and back walls, slim columns
-        m.Box(new Vector3(0, 4.95f, 5.7f), new Vector3(15.6f, 0.28f, 11.4f), H("#20232C"), 0.02f);
-        m.Box(new Vector3(0, 4.7f, 0.3f), new Vector3(15.6f, 0.3f, 0.25f), steel, 0.01f);
+        // glass walls front and sides: slim mullions and transoms only, nothing in the way
+        const float CEIL = 5.8f;
+        foreach (float mx in new[] { -12.9f, -9.6f, -6.4f, -3.2f, 3.2f, 6.4f, 9.6f, 12.9f })
+            m.Box(new Vector3(mx, CEIL / 2, 0.35f), new Vector3(0.07f, CEIL, 0.1f), steel, 0.02f);
+        foreach (float sx in new[] { -12.95f, 12.95f })
+        {
+            for (float mz = 3.5f; mz < 18f; mz += 3.5f) m.Box(new Vector3(sx, CEIL / 2, mz), new Vector3(0.1f, CEIL, 0.07f), steel, 0.02f);
+            m.Box(new Vector3(sx, 4.6f, 9f), new Vector3(0.1f, 0.07f, 17.6f), steel, 0.02f);
+            m.Box(new Vector3(sx, 0.08f, 9f), new Vector3(0.12f, 0.16f, 17.6f), darkSteel, 0.02f);
+        }
+        m.Box(new Vector3(0, 4.6f, 0.35f), new Vector3(26f, 0.07f, 0.1f), steel, 0.02f);
+        m.Box(new Vector3(0, 0.08f, 0.35f), new Vector3(26f, 0.16f, 0.12f), darkSteel, 0.02f);
+        // roof slab with light panels, back wall, columns
+        m.Box(new Vector3(0, CEIL + 0.15f, 9f), new Vector3(26.4f, 0.28f, 18.2f), H("#20232C"), 0.02f);
+        m.Box(new Vector3(0, CEIL - 0.1f, 0.3f), new Vector3(26.4f, 0.3f, 0.25f), steel, 0.01f);
         var ceil = new Mk(50);
-        ceil.QuadFacing(new Vector3(-7.8f, 4.8f, 0.2f), new Vector3(7.8f, 4.8f, 0.2f), new Vector3(7.8f, 4.8f, 11.4f), new Vector3(-7.8f, 4.8f, 11.4f), H("#4B3F5C"), H("#2E2840"), Vector3.down);
-        for (int i = 0; i < 4; i++) glow.Box(new Vector3(0, 4.79f, 2.0f + i * 2.5f), new Vector3(10.4f, 0.015f, 0.1f), H("#E8C9A0"), 0f);
-        m.Box(new Vector3(0, 2.4f, 10.55f), new Vector3(15.4f, 4.8f, 0.2f), H("#2A2630"), 0.02f);
-        for (int i = 0; i < 14; i++) m.Box(new Vector3(-6.6f + i * 1.0f, 2.4f, 10.42f), new Vector3(0.5f, 4.4f, 0.04f), m.Jit(H("#5A4636"), 0.12f), 0f);
-        glow.Box(new Vector3(0, 0.25f, 10.4f), new Vector3(14.6f, 0.03f, 0.03f), H("#FFB27A"), 0f);
-        foreach (float sx in new[] { -7.6f, 7.6f }) m.Box(new Vector3(sx, 2.4f, 5.5f), new Vector3(0.12f, 4.8f, 10.4f), H("#242832"), 0.02f);
-        // seat, rugs
-        SceneKit.Rug(m, new Vector3(0, 0, 6.6f), 1.35f, new[] { H("#3A3F52"), H("#FF7AC8"), H("#3A3F52") });
-        BeachSc.Lounger(m, new Vector3(0f, 0f, 6.9f));
-        SceneKit.RectRug(m, new Vector3(0, 0, 3.2f), new Vector2(6.4f, 2.6f), H("#5FE6FF"), H("#3A3550"), H("#4A4466"));
+        ceil.QuadFacing(new Vector3(-13f, CEIL, 0.2f), new Vector3(13f, CEIL, 0.2f), new Vector3(13f, CEIL, 18f), new Vector3(-13f, CEIL, 18f), H("#4B3F44"), H("#5C4D52"), Vector3.down);
+        for (int i = 0; i < 6; i++) glow.Box(new Vector3(0, CEIL - 0.01f, 2.4f + i * 2.8f), new Vector3(20f, 0.015f, 0.1f), H("#E8C9A0"), 0f);
+        foreach (var pp in Plan.Posts) if (Mathf.Abs(pp.x) < 12f) m.Box(new Vector3(pp.x, CEIL / 2, pp.y), new Vector3(0.3f, CEIL, 0.3f), H("#2F3440"), 0.02f);
+        m.Box(new Vector3(0, CEIL / 2, 18f), new Vector3(26f, CEIL, 0.2f), H("#2A2630"), 0.02f);
+        for (int i = 0; i < 24; i++) m.Box(new Vector3(-11.9f + i * 1.03f, CEIL / 2, 17.87f), new Vector3(0.55f, CEIL - 0.4f, 0.04f), m.Jit(H("#5A4636"), 0.12f), 0f);
+        glow.Box(new Vector3(0, 0.25f, 17.84f), new Vector3(25.6f, 0.03f, 0.03f), H("#FFB27A"), 0f);
+        SceneKit.Seat(m, new[] { H("#3A3F52"), H("#FF7AC8"), H("#3A3F52") });
+        SceneKit.Furniture(m, glow, new SceneKit.Style { wood = H("#3A3442"), wood2 = H("#23252E"), fabric = H("#6A6480"), fabric2 = H("#3A3550"), metal = H("#9AA3B2"), accent = H("#FF7AC8"), plant = H("#3C8A6A"), screen = H("#5FE6FF"), pot = H("#2F3440") });
 
         // ---- skyline ----
         var bld = new Mk(53); var win = new Mk(54);

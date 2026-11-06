@@ -18,9 +18,13 @@ public static class LoftBuilder
             scenes = scenes,
             locationPathName = "Builds/Loft.app",
             target = BuildTarget.StandaloneOSX,
-            options = BuildOptions.None,
+            options = System.Environment.GetEnvironmentVariable("LOFT_DEV_BUILD") == "1" ? BuildOptions.Development : BuildOptions.None,
         };
         var report = BuildPipeline.BuildPlayer(opts);
+        // OpenXR looks for openxr_loader next to its plugin; the build only ships ARM64/libopenxr_loader.
+        var plugins = "Builds/Loft.app/Contents/PlugIns";
+        if (System.IO.File.Exists(plugins + "/ARM64/libopenxr_loader.dylib"))
+            System.IO.File.Copy(plugins + "/ARM64/libopenxr_loader.dylib", plugins + "/openxr_loader.dylib", true);
         Debug.Log($"[BUILD] macOS player: {report.summary.result} in {report.summary.totalTime.TotalSeconds:F0}s -> Builds/Loft.app");
         EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
     }

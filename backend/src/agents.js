@@ -8,7 +8,7 @@
 
 import { Agent, OpenAIChatCompletionsModel, run, setTracingDisabled } from "@openai/agents";
 import { llmConfig } from "./env.js";
-import { askJson, extractJson, llm } from "./llm.js";
+import { askJson, extractJson, llm, stripThink } from "./llm.js";
 import { makeTools, TOOL_NAMES } from "./tools.js";
 
 setTracingDisabled(true); // tracing would upload runs to OpenAI; not wanted with a third-party endpoint
@@ -120,6 +120,37 @@ export function normalizeRole(raw, fallbackTitle = "Assistant") {
     instructions: String(r.instructions ?? "").trim().slice(0, 2000) || `Help the CEO with: ${fallbackTitle}`,
     tools: tools.length ? tools : ["read_file", "list_files", "search_files"],
   };
+}
+
+// A short in-role chat turn with memory. -> plain text (1-3 sentences).
+export async function chatReply({ agent, history, text, context }) {
+  const system =
+    `You are ${agent.name}, the ${agent.role.title} on a small AI team. The CEO is talking to you in VR, face to face.\n${agent.role.instructions}\n` +
+    `Reply in 1-3 short spoken sentences, in the CEO's language (English, Indonesian or mixed), in character. ` +
+    `Only mention work that is in your task notes; never claim you did or will do something that is not there. If asked to do real work, say it needs to be given as a task.\n` +
+    `Your task notes:\n${context || "(no tasks yet)"}`;
+  const model = agent.model || defaultModel() || failNoModel();
+  const res = await llm().chat.completions.create({
+    model,
+    messages: [{ role: "system", content: system }, ...history.slice(-16), { role: "user", content: text }],
+    temperature: 0.7,
+    max_tokens: 1500,
+  });
+  return stripThink(res.choices?.[0]?.message?.content);
+}
+
+// After finished work: one optional follow-up the agent would suggest, or null. One LLM call.
+export async function suggestNext({ agent, task }) {
+  const text = await askJson(
+    process.env.LOFT_PLANNER_MODEL || defaultModel(),
+    "You are a careful teammate. You only output JSON.",
+    `You are ${agent.name}, the ${agent.role.title}. You just finished this task:\nTask: ${String(task.title).slice(0, 400)}\nResult: ${String(task.result).slice(0, 1200)}\n\n` +
+      `Is there ONE clearly worthwhile follow-up task for yourself (a real gap, bug, or missing check you saw)? Most of the time the answer is no.\n` +
+      `Reply ONLY with JSON: {"suggest":false} or {"suggest":true,"title":"<the follow-up task, as an instruction>","reason":"<one short sentence why>"}`,
+    { temperature: 0.2, maxTokens: 1500 },
+  );
+  const j = extractJson(text, "{");
+  return j && j.suggest === true && typeof j.title === "string" && j.title.trim() ? { title: j.title.trim(), reason: String(j.reason ?? "") } : null;
 }
 
 // $ per token for a model id, from OpenRouter's public catalogue (cached).

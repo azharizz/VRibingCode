@@ -178,5 +178,5 @@ export function createPreviews({ dir, browserLauncher = null }) {
     browser = null;
   }
 
-  return { serve, stop, capture, checkPage, close, url: (key) => servers.get(key)?.url ?? null };
+  return { serve, stop, capture, checkPage, close, browser: getBrowser, url: (key) => servers.get(key)?.url ?? null };
 }

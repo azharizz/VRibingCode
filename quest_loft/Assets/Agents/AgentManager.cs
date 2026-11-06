@@ -8,14 +8,15 @@ using UnityEngine;
 
 public class AgentManager : MonoBehaviour
 {
+    public static AgentManager Instance { get; private set; }
     public const int MAX_AGENTS = 20;
-    const int PER_ROW = 10;
-    const float SPACING = 1.3f, FRONT_Z = 3.0f, ROW_GAP = 1.3f;
+    float awakeAt;
+    
 
     public List<AgentStateMachine> agents = new List<AgentStateMachine>();
     public event Action<string> OnAgentDone; // fires when an agent's task reaches review
 
-    void Awake() => Clear();
+    void Awake() { Instance = this; awakeAt = Time.time; Clear(); }
 
     // Drops every agent (also the capsules baked into pre-runtime-spawn scenes).
     public void Clear()
@@ -38,6 +39,7 @@ public class AgentManager : MonoBehaviour
     public AgentStateMachine Upsert(string id, string displayName, string role, string skin, AgentState state)
     {
         if (string.IsNullOrEmpty(id)) return null;
+        if (Instance == null) Instance = this;
         var a = Find(id);
         if (a == null)
         {
@@ -46,9 +48,12 @@ public class AgentManager : MonoBehaviour
             a = go.AddComponent<AgentStateMachine>();
             a.agentId = id;
             a.OnStateChanged += HandleState;
-            go.AddComponent<AgentSkin>();
+            var sk = go.AddComponent<AgentSkin>();
+            sk.slot = FreeSlot();
             agents.Add(a);
             Layout(true);
+            // the team that is already here when we connect stands at its place; later hires walk in
+            go.transform.position = Time.time - awakeAt < 4f ? Plan.LoungeSpots[sk.slot % Plan.LoungeSpots.Length] : Plan.Spawn + new Vector3((agents.Count % 5 - 2) * 0.5f, 0f, 0f);
             if (Partying) SetParty(true); // late arrivals join the party
         }
         a.GetComponent<AgentSkin>().Apply(skin, displayName, role);
@@ -68,19 +73,43 @@ public class AgentManager : MonoBehaviour
         return true;
     }
 
-    // ponytail: fixed 2-row grid in front of the wall; fine up to 20, swap for
-    // themed desk anchors if a scene needs custom seating.
+    // Every agent owns a stable slot: desk `slot` to work at, lounge spot `slot` to idle at.
+    // Where it actually is comes from its real state (AgentSkin): desk, the CEO, or the lounge.
     void Layout(bool snapNewest)
     {
-        for (int i = 0; i < agents.Count; i++)
+        foreach (var a in agents)
         {
-            int row = i / PER_ROW, col = i % PER_ROW;
-            int inRow = Mathf.Min(PER_ROW, agents.Count - row * PER_ROW);
-            var home = new Vector3((col - (inRow - 1) / 2f) * SPACING, 0f, FRONT_Z + row * ROW_GAP);
-            var skin = agents[i].GetComponent<AgentSkin>();
-            skin.home = home;
-            if (snapNewest && i == agents.Count - 1) agents[i].transform.position = home;
+            var skin = a.GetComponent<AgentSkin>();
+            int n = Plan.LoungeSpots.Length, ring = skin.slot / n;
+            var around = Quaternion.Euler(0f, ring * 97f + skin.slot * 40f, 0f) * Vector3.forward * (0.8f * ring); // later arrivals stand nearby
+            skin.home = Plan.ClampToWalk(Plan.LoungeSpots[skin.slot % n] + around);
         }
+    }
+
+    int FreeSlot()
+    {
+        for (int s = 0; ; s++) if (!agents.Exists(a => a != null && a.GetComponent<AgentSkin>().slot == s)) return s;
+    }
+
+    public int CeoWaiting() => agents.FindAll(a => a != null && IsWaiting(a)).Count;
+    static bool IsWaiting(AgentStateMachine a) => !a.GetComponent<AgentSkin>().partying && (a.CurrentState == AgentState.Done || a.CurrentState == AgentState.Failed);
+    // Order among the agents waiting on the CEO (stable by slot).
+    public int CeoRank(AgentSkin me)
+    {
+        int r = 0;
+        foreach (var a in agents)
+            if (a != null && IsWaiting(a) && a.GetComponent<AgentSkin>() != me && a.GetComponent<AgentSkin>().slot < me.slot) r++;
+        return r;
+    }
+    public bool IsTaken(Vector3 spot, AgentSkin except)
+    {
+        foreach (var a in agents)
+        {
+            if (a == null) continue;
+            var s = a.GetComponent<AgentSkin>();
+            if (s != except && ((s.Target - spot).sqrMagnitude < 0.6f || (s.transform.position - spot).sqrMagnitude < 0.6f)) return true;
+        }
+        return false;
     }
 
     // ---- party: everyone gathers on the dance floor ----

@@ -10,6 +10,17 @@ using UnityEngine.XR;
 
 namespace VirtualLoft.XR
 {
+    // Anything pointable that wants raw trigger events (boards: grab, resize, scroll).
+    // Put it on a MonoBehaviour on or above the collider. LoftInteraction calls it
+    // BEFORE its own click logic; a target that was hit on press swallows the click.
+    public interface IPointerTarget
+    {
+        void OnHover(bool on);
+        void OnPress(Ray r, RaycastHit h);
+        void OnDrag(Ray r);     // every frame while the trigger is held after a press, even off the collider
+        void OnRelease();
+    }
+
     public abstract class LoftInput
     {
         public bool hasRay;
@@ -20,6 +31,10 @@ namespace VirtualLoft.XR
         public bool cancelDown;                    // B
         public bool wristDown;                     // X
         public int snap;                           // -1 / 0 / +1 this frame
+        public bool aimTeleport;                   // right stick pushed forward (desktop: hold G)
+        public bool teleportRelease;               // stick let go: go there
+        public bool directAim;                     // desktop: land where the mouse ray meets the floor (no arc)
+        public Vector2 walk;                       // left stick (smooth walk, if enabled)
         public bool hasLeftHand;
         public Vector3 leftPos;                    // world space
         public Quaternion leftRot = Quaternion.identity;
@@ -29,7 +44,7 @@ namespace VirtualLoft.XR
 
         protected void ClearEdges()
         {
-            triggerDown = triggerUp = talkDown = talkUp = cancelDown = wristDown = false;
+            triggerDown = triggerUp = talkDown = talkUp = cancelDown = wristDown = teleportRelease = false;
             snap = 0;
         }
     }
@@ -59,9 +74,12 @@ namespace VirtualLoft.XR
     {
         // Unverified on hardware: if the ray points below where the controller points, set this (degrees, + = up).
         public static float aimPitchDegrees = 0f;
+        static readonly InputFeatureUsage<Vector3> PointerPosition = new InputFeatureUsage<Vector3>("PointerPosition");
+        static readonly InputFeatureUsage<Quaternion> PointerRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
 
-        bool trigWas, aWas, bWas, xWas;
+        bool trigWas, aWas, bWas, xWas, aiming;
         SnapGate gate;
+        public const float AimStart = 0.7f, AimEnd = 0.3f;
 
         public override void Poll(LoftWorld world)
         {
@@ -70,18 +88,21 @@ namespace VirtualLoft.XR
             var right = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
             var left = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
             hasRay = false;
-            if (rig != null && right.isValid
+            if (rig != null && right.isValid && Tracked(right)
                 && right.TryGetFeatureValue(CommonUsages.devicePosition, out var pos)
                 && right.TryGetFeatureValue(CommonUsages.deviceRotation, out var rot))
             {
-                // Tracking space = CameraRig local space.
-                rayOrigin = rig.TransformPoint(pos);
-                rayDir = rig.rotation * rot * Quaternion.Euler(-aimPitchDegrees, 0f, 0f) * Vector3.forward;
-                handPos = rayOrigin;
+                // Tracking space = CameraRig local space. devicePosition/Rotation is the GRIP pose, which
+                // points far above where a person aims: the ray must use the pointer (aim) pose.
+                handPos = rig.TransformPoint(pos);
+                var aimPos = right.TryGetFeatureValue(PointerPosition, out var pp) ? pp : pos;
+                var aimRot = right.TryGetFeatureValue(PointerRotation, out var pr) ? pr : rot;
+                rayOrigin = rig.TransformPoint(aimPos);
+                rayDir = rig.rotation * aimRot * Quaternion.Euler(-aimPitchDegrees, 0f, 0f) * Vector3.forward;
                 hasRay = true;
             }
             hasLeftHand = false;
-            if (rig != null && left.isValid
+            if (rig != null && left.isValid && Tracked(left)
                 && left.TryGetFeatureValue(CommonUsages.devicePosition, out var lp)
                 && left.TryGetFeatureValue(CommonUsages.deviceRotation, out var lr))
             {
@@ -95,8 +116,17 @@ namespace VirtualLoft.XR
             cancelDown = b && !bWas; bWas = b;
             bool x = false; left.TryGetFeatureValue(CommonUsages.primaryButton, out x);
             wristDown = x && !xWas; xWas = x;
-            snap = right.TryGetFeatureValue(CommonUsages.primary2DAxis, out var stick) ? gate.Step(stick.x) : 0;
+            right.TryGetFeatureValue(CommonUsages.primary2DAxis, out var stick);
+            // Push forward = aim the teleport arc, let go = teleport. Left/right flick (stick near centre on y) = snap turn.
+            if (!aiming && stick.y > AimStart) aiming = true;
+            else if (aiming && stick.y < AimEnd) { aiming = false; teleportRelease = true; }
+            aimTeleport = aiming;
+            snap = !aiming && Mathf.Abs(stick.y) < 0.5f ? gate.Step(stick.x) : 0;
+            left.TryGetFeatureValue(CommonUsages.primary2DAxis, out walk);
         }
+
+        // A controller that lost tracking reports a zero pose: ignore it instead of pointing from the floor.
+        static bool Tracked(InputDevice d) => !d.TryGetFeatureValue(CommonUsages.isTracked, out bool t) || t;
 
         static void Edge(InputDevice d, InputFeatureUsage<bool> usage, ref bool was, ref bool down, ref bool up, out bool held)
         {
@@ -123,6 +153,8 @@ namespace VirtualLoft.XR
             var cam = world != null ? world.cam : null;
             hasRay = false;
             hasLeftHand = false;
+            directAim = true;
+            walk = Vector2.zero;
             if (cam == null) return;
             var ray = cam.ScreenPointToRay(Input.mousePosition);
             rayOrigin = ray.origin;
@@ -136,7 +168,9 @@ namespace VirtualLoft.XR
             triggerDown = Input.GetMouseButtonDown(0);
             triggerHeld = Input.GetMouseButton(0);
             triggerUp = Input.GetMouseButtonUp(0);
-            if (typing) return;
+            if (typing) { aimTeleport = false; return; }
+            aimTeleport = Input.GetKey(KeyCode.G);
+            teleportRelease = Input.GetKeyUp(KeyCode.G);
             talkDown = Input.GetKeyDown(KeyCode.V);
             talkHeld = Input.GetKey(KeyCode.V);
             talkUp = Input.GetKeyUp(KeyCode.V);

@@ -36,7 +36,7 @@ public static class LoftBootstrap
         loft.AddComponent<Comfort>();
         var world = loft.AddComponent<LoftWorld>();
         loft.AddComponent<LoftParty>();
-        loft.AddComponent<LoftPreviewScreen>();
+        loft.AddComponent<LoftPanels>();
         loft.AddComponent<LoftDesk>();
         loft.AddComponent<LoftInteraction>();
 
@@ -60,10 +60,9 @@ public static class LoftBootstrap
         if (AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/LoftUnlitKeep.mat") == null)
             AssetDatabase.CreateAsset(new Material(Shader.Find("Unlit/Texture")), "Assets/Resources/LoftUnlitKeep.mat");
 
-        world.Build();               // floor, wall, 4 boards, CameraRig
-        world.ApplyTheme(world.Resolve(world.defaultTheme));
-        loft.GetComponent<LoftInteraction>().EnsureBuilt();
-        loft.GetComponent<LoftPreviewScreen>().EnsureBuilt();
+        // Only the rig and light are saved: world, card and menus are generated in Awake, so a
+        // player build never has to read generated UI back from the scene file.
+        world.Build();
 
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Loft.unity");
         Debug.Log("[LoftBootstrap] Saved Assets/Scenes/Loft.unity — start backend/ (npm run serve), then press Play.");

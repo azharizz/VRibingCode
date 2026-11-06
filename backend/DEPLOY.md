@@ -89,3 +89,26 @@ HOST=0.0.0.0 LOFT_TOKEN=$(openssl rand -hex 24) npm run serve
 The Quest reaches `http://<mac-lan-ip>:4101` over Wi-Fi. Same network, firewall
 allowing Node. This is plain HTTP on your LAN: fine at home, never on a public
 network. Local whisper keeps working here (`STT_PROVIDER=local`).
+
+## Speech-to-text in the cloud
+
+`stt-server/` is faster-whisper behind the OpenAI transcription API. Run it next to the backend, then set
+`STT_PROVIDER=openai`, `STT_BASE_URL=http://<host>:8000/v1`, `STT_API_KEY=<same as the server>`, `STT_MODEL=large-v3-turbo`.
+
+Use a GPU host. Measured on a Mac in Docker with CPU only: about 20 s per short clip, too slow for voice.
+For a GPU, change the Dockerfile base to an `nvidia/cuda` runtime image, then set `WHISPER_DEVICE=cuda` and
+`WHISPER_COMPUTE=float16`. GPU latency has not been measured yet. A hosted speech API needs no server at all.
+
+## Comparing speech models
+
+`STT_SAVE_SAMPLES=1` keeps recordings in `data/stt/samples` (local only, off by default). Correct each `.txt`, then run
+`node tools/stt-compare.js`. Add `--url http://host:8000/v1` to include a server.
+
+Synthetic clips, 2026-11-06, M2 Mac: whisper.cpp `small` 7.6% word error at 1.1 s, `large-v3-turbo` 9.2% at 3.8 s.
+Real voices may rank differently.
+
+## New endpoints
+
+Boards `GET/PUT /boards?scene=`, notes `/notes`, files `/projects/:id/tree` and `/file`, `GET /tasks/:id/diff`,
+`POST /agents/:id/chat`, `/suggestions`, and clickable previews `/preview/sessions`. All need `LOFT_TOKEN` when set.
+Clickable previews need Playwright: build with `--build-arg PREVIEWS=1`.

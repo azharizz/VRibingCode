@@ -19,18 +19,12 @@ namespace VirtualLoft.XR
     [DisallowMultipleComponent]
     public class LoftInteraction : MonoBehaviour
     {
-        public static readonly Vector3[] PadPos =
-        {
-            new Vector3(-3f, 0.03f, 4.6f),
-            new Vector3(0f, 0.03f, 5.2f),
-            new Vector3(3f, 0.03f, 4.6f),
-        };
-
         public LoftInput inputOverride;          // tests / tools
         public LoftVoice voice;
         public LoftCard card;
         public LoftWrist wrist;
         public LoftTextEntry entry;
+        public LoftMove move;
 
         public string HoveredAgentId { get; private set; }
         public LoftButton HoveredButton { get; private set; }
@@ -44,16 +38,19 @@ namespace VirtualLoft.XR
         readonly XrInput xr = new XrInput();
         readonly DesktopInput desktop = new DesktopInput();
         LoftInput input;
+        public static LoftInteraction Current { get; private set; }
+        public bool TryRay(out Ray r) { r = default; if (input == null || !input.hasRay) return false; r = new Ray(input.rayOrigin, input.rayDir); return true; }
         GameObject cursor, ringHover, ringSel;
         LineRenderer laser;
         Renderer hoverPadRenderer;
         LoftButton holding;
+        IPointerTarget ptrHover, ptrGrab;
         float holdTime;
         bool talkConsumed;
         string talkAgentId;
         int reqId;
 
-        void Awake() { Wire(); EnsureBuilt(); }
+        void Awake() { Current = this; Wire(); EnsureBuilt(); }
 
         void Wire()
         {
@@ -71,20 +68,17 @@ namespace VirtualLoft.XR
             card = Need(card);
             wrist = Need(wrist);
             entry = Need(entry);
+            move = Need(move);
             card.world = world;
-            wrist.desk = desk; wrist.world = world; wrist.entry = entry;
+            wrist.desk = desk; wrist.world = world; wrist.entry = entry; wrist.move = move;
             wrist.voiceStatus = VoiceStatus;
             wrist.say = Say;
             card.Build();
-            for (int i = 0; i < PadPos.Length; i++)
+            // Teleport works anywhere now: the old fixed pads go.
+            for (int i = 0; i < 3; i++)
             {
                 var pad = GameObject.Find($"TelePad_{i}");
-                if (pad != null && (pad.transform.Find("Disk") == null || pad.transform.Find("Label") != null)) { LoftUtil.Kill(pad); pad = null; }
-                if (pad != null) continue;
-                pad = new GameObject($"TelePad_{i}");
-                pad.transform.position = PadPos[i];
-                // Subtle floor marker: no label.
-                LoftUtil.Prim(PrimitiveType.Cylinder, "Disk", pad.transform, Vector3.zero, new Vector3(0.7f, 0.015f, 0.7f), new Color(0.35f, 0.55f, 0.65f), keepCollider: true);
+                if (pad != null) { pad.name = "dead"; LoftUtil.Kill(pad); } // (renamed first: Destroy is deferred in Play)
             }
         }
 
@@ -117,8 +111,10 @@ namespace VirtualLoft.XR
             wrist.Track(world.cam, input.hasLeftHand, input.leftPos, input.leftRot, xrOn);
             if (input.cancelDown) Cancel();
 
+            move.Tick(input, world, comfort, dt);
             Point(dt);
             Talk();
+            ShowNextSuggestion();
             if (voice.Recording) card.SetLevel(voice.Level);
         }
 
@@ -126,6 +122,7 @@ namespace VirtualLoft.XR
         public void Cancel()
         {
             if (entry != null && entry.Active) { entry.Cancel(); return; }
+            if (move.Aiming) { move.AbortAim(); return; }
             if (voice.Recording) { voice.Cancel(); Talking = false; talkConsumed = true; card.Hide(); return; }
             if (card.Visible) { reqId++; card.PressCancel(); return; } // also drops an in-flight request
             if (wrist.IsOpen) { wrist.Back(); return; }
@@ -148,8 +145,33 @@ namespace VirtualLoft.XR
                     if (b != null) { newBtn = b; break; }
                     var a = t.GetComponent<AgentStateMachine>();
                     if (a != null) { newAgent = a.agentId; break; }
-                    if (t.name.StartsWith("TelePad_")) { newPad = t.GetComponentInChildren<Renderer>(); break; }
                 }
+
+            // IPointerTarget first: boards and such get raw trigger events.
+            IPointerTarget newPt = null;
+            if (hitSomething)
+                for (var t = hit.collider.transform; t != null && newPt == null; t = t.parent) newPt = t.GetComponent<IPointerTarget>();
+            if (!(newPt as Object)) newPt = null; // destroyed targets compare equal to null
+            if (newPt != ptrHover)
+            {
+                if (ptrHover as Object != null) ptrHover.OnHover(false);
+                ptrHover = newPt;
+                if (ptrHover != null) { ptrHover.OnHover(true); input.Haptic(0.12f, 0.02f); }
+            }
+            var ray = new Ray(input.rayOrigin, input.rayDir);
+            if (input.triggerDown && newPt != null && !BlockedByGui())
+            {
+                ptrGrab = newPt;
+                ptrGrab.OnPress(ray, hit);
+                input.Haptic(0.4f, 0.04f);
+            }
+            if (ptrGrab != null)
+            {
+                if (!(ptrGrab as Object)) ptrGrab = null;
+                else if (input.triggerHeld && !input.triggerUp) ptrGrab.OnDrag(ray);
+                else { ptrGrab.OnRelease(); ptrGrab = null; }
+            }
+            bool grabbing = ptrGrab != null || (input.triggerDown && newPt != null);
 
             bool changed = newBtn != HoveredButton || newAgent != HoveredAgentId || newPad != hoverPadRenderer;
             if (changed)
@@ -167,7 +189,7 @@ namespace VirtualLoft.XR
             UpdateRings();
 
             // Click
-            if (input.triggerDown && hitSomething && !BlockedByGui())
+            if (input.triggerDown && hitSomething && !grabbing && !BlockedByGui())
             {
                 if (HoveredButton != null && HoveredButton.holdSeconds > 0f) { holding = HoveredButton; holdTime = 0f; input.Haptic(0.15f, 0.02f); }
                 else if (Click(hit.collider.gameObject)) input.Haptic(0.5f, 0.05f);
@@ -206,22 +228,16 @@ namespace VirtualLoft.XR
             {
                 var b = t.GetComponent<LoftButton>();
                 if (b != null) { if (!b.Enabled) return false; LoftAudio.Play("sfx_click", 0.8f); b.Press(); return true; }
-                if (t.name.StartsWith("TelePad_") && int.TryParse(t.name.Substring(8), out int pad)) { TeleportTo(pad); return true; }
                 var agent = t.GetComponent<AgentStateMachine>();
                 if (agent != null) { desk?.Select(agent.agentId); return true; }
             }
             return false;
         }
 
-        public void TeleportTo(int i)
+        public void TeleportTo(Vector3 ground)
         {
             Wire();
-            if (world == null || world.rig == null || i < 0 || i >= PadPos.Length) return;
-            if (comfort != null) comfort.BeginTeleport();
-            var rig = world.rig;
-            rig.SetPositionAndRotation(new Vector3(PadPos[i].x, rig.position.y, PadPos[i].z), Quaternion.Euler(0f, 180f, 0f));
-            if (comfort != null) comfort.EndTeleport();
-            LoftAudio.PlayAt("sfx_teleport", PadPos[i] + Vector3.up * 1.2f, 0.8f);
+            move?.TeleportTo(world, comfort, ground);
         }
 
         // ---- cursor, laser, rings ----------------------------------------------------------
@@ -291,7 +307,8 @@ namespace VirtualLoft.XR
         {
             if (input.talkDown)
             {
-                if (card.State == LoftCard.CardState.Proposal && !card.Risky) { talkConsumed = true; if (card.PressSend()) input.Haptic(0.5f, 0.05f); }
+                if (card.IsSuggestion) { DeferSuggestion(); StartTalk(); }
+                else if (card.State == LoftCard.CardState.Proposal && !card.Risky) { talkConsumed = true; if (card.PressSend()) input.Haptic(0.5f, 0.05f); }
                 else if (card.State == LoftCard.CardState.Proposal) { talkConsumed = true; Say("This one needs the red button. A can't confirm it."); }
                 else if (card.State == LoftCard.CardState.Thinking) talkConsumed = true;
                 else StartTalk();
@@ -360,6 +377,7 @@ namespace VirtualLoft.XR
         // The backend's answer -> immediate action, or the card. Public for tests.
         public IntentRoute HandleResponse(JObject resp)
         {
+            DeferSuggestion();
             var route = LoftIntent.Route(resp);
             string transcript = (string)resp?["transcript"], summary = (string)resp?["summary"];
             var intent = resp?["intent"] as JObject;
@@ -385,6 +403,37 @@ namespace VirtualLoft.XR
             }
             return route;
         }
+
+        // ---- agent suggestions: idea card, trigger on ACCEPT only -------------------------------
+        JObject shownSuggestion;
+
+        void ShowNextSuggestion()
+        {
+            if (desk == null || card.Visible || Talking || voice.Recording || reqPending) return;
+            var sg = desk.TakeSuggestion();
+            if (sg == null) return;
+            ShowSuggestion(sg);
+        }
+
+        public void ShowSuggestion(JObject sg)
+        {
+            shownSuggestion = sg;
+            string id = (string)sg["id"];
+            card.onSend = () => { shownSuggestion = null; desk.AnswerSuggestion(id, true); };
+            card.onCancel = () => { shownSuggestion = null; desk.AnswerSuggestion(id, false); };
+            card.ShowSuggestion(AgentName((string)sg["agentId"]), (string)sg["title"], (string)sg["reason"]);
+        }
+
+        // Something else needs the card (A pressed, a voice answer): the idea waits its turn instead of being lost.
+        void DeferSuggestion()
+        {
+            if (shownSuggestion == null || !card.IsSuggestion) return;
+            desk.RequeueSuggestion(shownSuggestion);
+            shownSuggestion = null;
+            card.Hide();
+        }
+
+        bool reqPending => card.State == LoftCard.CardState.Thinking;
 
         void Say(string s) { desk?.Note(s); if (card != null && !card.Visible) card.ShowResult(s); }
         string AgentName(string id) => desk?.agents?.Find(id)?.GetComponent<AgentSkin>()?.displayName ?? id;

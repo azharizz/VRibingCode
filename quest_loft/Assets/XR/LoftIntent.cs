@@ -12,10 +12,10 @@ namespace VirtualLoft.XR
     public static class LoftIntent
     {
         public static readonly string[] Actions =
-            { "goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "selectNext", "none" };
+            { "goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "selectNext", "chat", "board", "none" };
 
         // Safe to run with no confirmation at all.
-        static readonly string[] Harmless = { "scene", "party", "selectNext", "none" };
+        static readonly string[] Harmless = { "scene", "party", "selectNext", "chat", "board", "none" };
 
         public static string Action(JObject intent) => (string)intent?["action"];
 

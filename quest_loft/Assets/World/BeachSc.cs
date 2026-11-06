@@ -7,15 +7,14 @@ using UnityEngine;
 public static class BeachSc
 {
     const float WATER_Y = -0.55f;
-    const float FRONT_Z = 4.5f, BACK_Z = 10.8f, RIDGE_Z = 7.65f, EAVE_Y = 3.1f, RIDGE_Y = 5.6f, POST_H = 3.15f;
     static Color H(string s) => Mk.Hex(s);
 
     public static float SandY(float x, float z)
     {
-        float baseY = z > 0f ? -0.18f : Mathf.Max(-1.6f, -0.18f + z * 0.075f);
-        float side = Mathf.SmoothStep(0f, 1f, (Mathf.Abs(x) - 8f) / 9f);
+        float baseY = z > 2f ? -0.18f : Mathf.Max(-1.6f, -0.18f + (z - 2f) * 0.16f); // the sea comes up under the deck
+        float side = Mathf.SmoothStep(0f, 1f, (Mathf.Abs(x) - 12f) / 8f);
         float near = Mathf.SmoothStep(0f, 1f, (z + 9f) / 5f) * Mathf.SmoothStep(1f, 0f, (z - 2f) / 6f);
-        float bump = side * near * (1.1f + 0.7f * Mathf.Sin(x * 0.33f + 1f) + 0.45f * Mathf.Sin(z * 0.55f + x * 0.21f));
+        float bump = side * near * (1.6f + 0.7f * Mathf.Sin(x * 0.33f + 1f) + 0.45f * Mathf.Sin(z * 0.55f + x * 0.21f));
         return baseY + Mathf.Max(0f, bump);
     }
 
@@ -27,57 +26,56 @@ public static class BeachSc
         var wood = new[] { H("#B07A4A"), H("#A06B3F"), H("#B98558"), H("#94613A") };
         var dark = H("#6E4528"); var mid = H("#8B5A33");
 
-        // ---------- deck ----------
-        SceneKit.Planks(m, -LoftWorld.DECK_HALF, LoftWorld.DECK_HALF, LoftWorld.DECK_FRONT, LoftWorld.DECK_BACK, 0f, 0.23f, 0.012f, wood);
-        m.Beam(new Vector3(-LoftWorld.DECK_HALF, -0.14f, 0f), new Vector3(LoftWorld.DECK_HALF, -0.14f, 0f), 0.16f, 0.26f, dark, 0.03f);
-        for (float px = -6.8f; px <= 6.9f; px += 2.27f)
-            m.Prism(new Vector3(px, -1.4f, 0.1f), new Vector3(px, -0.1f, 0.1f), 0.1f, 0.1f, 6, mid, false, true);
-        // side rails
-        foreach (float sx in new[] { -LoftWorld.DECK_HALF + 0.05f, LoftWorld.DECK_HALF - 0.05f })
+        // ---------- deck on stilts ----------
+        SceneKit.Planks(m, Plan.X0, Plan.X1, Plan.Z0, Plan.Z1, 0f, 0.23f, 0.012f, wood);
+        m.Beam(new Vector3(Plan.X0, -0.14f, 0f), new Vector3(Plan.X1, -0.14f, 0f), 0.16f, 0.26f, dark, 0.03f);
+        for (float px = Plan.X0 + 0.2f; px <= Plan.X1; px += 2.55f)
+            m.Prism(new Vector3(px, -1.8f, 0.1f), new Vector3(px, -0.1f, 0.1f), 0.11f, 0.11f, 6, mid, false, true);
+        foreach (float sx in new[] { Plan.X0 + 0.05f, Plan.X1 - 0.05f })
         {
-            m.Beam(new Vector3(sx, 1.0f, 0.2f), new Vector3(sx, 1.0f, 10.3f), 0.07f, 0.09f, dark);
-            m.Beam(new Vector3(sx, 0.5f, 0.2f), new Vector3(sx, 0.5f, 10.3f), 0.05f, 0.06f, mid);
-            for (float pz = 0.2f; pz <= 10.3f; pz += 1.7f) SceneKit.Post(m, new Vector3(sx, 0f, pz), 1.05f, 0.11f, dark);
+            m.Beam(new Vector3(sx, 1.0f, 0.2f), new Vector3(sx, 1.0f, 17.8f), 0.07f, 0.09f, dark);
+            m.Beam(new Vector3(sx, 0.5f, 0.2f), new Vector3(sx, 0.5f, 17.8f), 0.05f, 0.06f, mid);
+            for (float pz = 0.2f; pz <= 17.9f; pz += 2.2f) SceneKit.Post(m, new Vector3(sx, 0f, pz), 1.05f, 0.11f, dark);
         }
-        // low corner bollards at the front edge
-        foreach (float bx in new[] { -6.9f, 6.9f, -2.4f, 2.4f })
+        foreach (float bx in new[] { -12.6f, -7f, -2.4f, 2.4f, 7f, 12.6f })
             SceneKit.Post(m, new Vector3(bx, 0f, 0.1f), 0.55f, 0.16f, mid);
 
         // ---------- cabana frame ----------
-        foreach (float px in new[] { -6.6f, 6.6f })
-            foreach (float pz in new[] { 5.2f, RIDGE_Z, 10.1f })
-            {
-                SceneKit.Post(m, new Vector3(px, 0f, pz), POST_H, 0.24f, dark);
-                m.Box(new Vector3(px, 0.1f, pz), new Vector3(0.42f, 0.2f, 0.42f), H("#9A9588"), 0.06f); // stone foot
-                float side = Mathf.Sign(-px);
-                m.Beam(new Vector3(px, POST_H - 0.75f, pz), new Vector3(px + side * 0.7f, POST_H, pz), 0.1f, 0.1f, mid); // braces
-            }
-        foreach (float bz in new[] { 5.2f, RIDGE_Z, 10.1f })
-            m.Beam(new Vector3(-7.1f, POST_H - 0.1f, bz), new Vector3(7.1f, POST_H - 0.1f, bz), 0.2f, 0.26f, dark);
-        foreach (float px in new[] { -6.6f, 6.6f })
-            m.Beam(new Vector3(px, POST_H - 0.1f, 3.8f), new Vector3(px, POST_H - 0.1f, 10.1f), 0.2f, 0.24f, dark);
+        foreach (var pp in Plan.Posts)
+        {
+            SceneKit.Post(m, new Vector3(pp.x, 0f, pp.y), SceneKit.POST_H, 0.3f, dark);
+            m.Box(new Vector3(pp.x, 0.12f, pp.y), new Vector3(0.52f, 0.24f, 0.52f), H("#9A9588"), 0.06f);
+        }
+        foreach (float bz in new[] { 4f, 10.3f, 16.6f })
+        {
+            m.Beam(new Vector3(-13.2f, SceneKit.POST_H - 0.1f, bz), new Vector3(13.2f, SceneKit.POST_H - 0.1f, bz), 0.22f, 0.3f, dark);
+            foreach (float px in new[] { -12.5f, -5f, 5f, 12.5f })
+                foreach (float sgn in new[] { -1f, 1f })
+                    if (Mathf.Abs(px + sgn * 0.9f) < 13f)
+                        m.Beam(new Vector3(px, SceneKit.POST_H - 1f, bz), new Vector3(px + sgn * 0.9f, SceneKit.POST_H - 0.12f, bz), 0.1f, 0.1f, mid);
+        }
+        foreach (float px in new[] { -12.5f, -5f, 5f, 12.5f })
+            m.Beam(new Vector3(px, SceneKit.POST_H - 0.1f, 2.9f), new Vector3(px, SceneKit.POST_H - 0.1f, 17.5f), 0.2f, 0.26f, dark);
 
         // ---------- thatched roof ----------
-        var front = new Vector3(0, EAVE_Y, FRONT_Z); var back = new Vector3(0, EAVE_Y, BACK_Z); var ridge = new Vector3(0, RIDGE_Y, RIDGE_Z);
-        SceneKit.Roof(m, front, ridge, H("#A9792F"), H("#DDB65E"), H("#B98A43"), H("#D3A956"), H("#6E4528"), true);
-        SceneKit.Roof(m, back, ridge, H("#A9792F"), H("#DDB65E"), H("#B98A43"), H("#D3A956"), H("#6E4528"), true);
-        m.Prism(new Vector3(-7.7f, RIDGE_Y + 0.05f, RIDGE_Z), new Vector3(7.7f, RIDGE_Y + 0.05f, RIDGE_Z), 0.34f, 0.34f, 7, H("#C99A45"), true, true, 0.06f);
-        m.Beam(new Vector3(-7.4f, RIDGE_Y - 0.1f, RIDGE_Z), new Vector3(7.4f, RIDGE_Y - 0.1f, RIDGE_Z), 0.18f, 0.22f, dark);
+        var front = new Vector3(0, SceneKit.EAVE_Y, SceneKit.EAVE_FRONT); var back = new Vector3(0, SceneKit.EAVE_Y, SceneKit.EAVE_BACK); var ridge = new Vector3(0, SceneKit.RIDGE_Y, SceneKit.RIDGE_Z);
+        SceneKit.Roof(m, front, ridge, H("#A9792F"), H("#DDB65E"), H("#B98A43"), H("#D3A956"), H("#6E4528"), true, SceneKit.ROOF_HX);
+        SceneKit.Roof(m, back, ridge, H("#A9792F"), H("#DDB65E"), H("#B98A43"), H("#D3A956"), H("#6E4528"), true, SceneKit.ROOF_HX);
+        m.Prism(new Vector3(-14f, SceneKit.RIDGE_Y + 0.05f, SceneKit.RIDGE_Z), new Vector3(14f, SceneKit.RIDGE_Y + 0.05f, SceneKit.RIDGE_Z), 0.36f, 0.36f, 7, H("#C99A45"), true, true, 0.06f);
+        m.Beam(new Vector3(-13.7f, SceneKit.RIDGE_Y - 0.1f, SceneKit.RIDGE_Z), new Vector3(13.7f, SceneKit.RIDGE_Y - 0.1f, SceneKit.RIDGE_Z), 0.2f, 0.24f, dark);
 
         // ---------- back wall: bamboo slats ----------
-        for (float bx = -7.3f; bx <= 7.3f; bx += 0.16f)
-            m.Prism(new Vector3(bx, 0f, 10.5f), new Vector3(bx, 2.85f + m.R(-0.05f, 0.05f), 10.5f), 0.045f, 0.04f, 5, m.Jit(H("#CDB36F"), 0.1f), false, true, 0f);
-        foreach (float ry in new[] { 0.35f, 1.4f, 2.45f }) m.Beam(new Vector3(-7.4f, ry, 10.42f), new Vector3(7.4f, ry, 10.42f), 0.09f, 0.1f, dark);
+        for (float bx = -12.9f; bx <= 12.9f; bx += 0.22f)
+            m.Prism(new Vector3(bx, 0f, 17.9f), new Vector3(bx, 4.1f + m.R(-0.06f, 0.06f), 17.9f), 0.06f, 0.05f, 5, m.Jit(H("#CDB36F"), 0.1f), false, true, 0f);
+        foreach (float ry in new[] { 0.4f, 2f, 3.6f }) m.Beam(new Vector3(-13f, ry, 17.8f), new Vector3(13f, ry, 17.8f), 0.09f, 0.1f, dark);
 
-        // ---------- the seat, rug, side table ----------
-        SceneKit.Rug(m, new Vector3(0, 0, 6.6f), 1.35f, new[] { H("#E9D9B8"), H("#C98A5B"), H("#E9D9B8") });
-        Lounger(m, new Vector3(0f, 0f, 6.9f));
+        // ---------- the seat, side table, furniture ----------
+        SceneKit.Seat(m, new[] { H("#E9D9B8"), H("#C98A5B"), H("#E9D9B8") });
         m.Prism(new Vector3(-1.25f, 0, 6.3f), new Vector3(-1.25f, 0.5f, 6.3f), 0.05f, 0.05f, 6, dark, false, false);
         m.Prism(new Vector3(-1.25f, 0.5f, 6.3f), new Vector3(-1.25f, 0.53f, 6.3f), 0.3f, 0.3f, 10, H("#B98558"), false, true);
         m.Blob(new Vector3(-1.25f, 0.66f, 6.3f), new Vector3(0.1f, 0.11f, 0.1f), H("#8A5B35"), H("#B58A58"), 3, 6, 0.04f); // coconut drink
         m.Beam(new Vector3(-1.25f, 0.7f, 6.3f), new Vector3(-1.2f, 0.9f, 6.28f), 0.012f, 0.012f, H("#F2735A"), 0f);
-        // a mat under the agents so animals pop off the planks
-        SceneKit.RectRug(m, new Vector3(0, 0, 3.2f), new Vector2(6.4f, 2.6f), H("#2F8F8A"), H("#D8C497"), H("#C9B282"));
+        SceneKit.Furniture(m, glow, new SceneKit.Style { wood = H("#B98558"), wood2 = H("#8B5A33"), fabric = H("#F0E4CB"), fabric2 = H("#2F8F8A"), metal = H("#4A3A2C"), accent = H("#F2735A"), plant = H("#4C9A4A"), screen = H("#9FE3DA"), pot = H("#C98A5B") });
 
         // ---------- boardwalk + jetty ----------
         SceneKit.CrossPlanks(m, 0f, 2.1f, 0f, -17f, -0.05f, 0.22f, 0.02f, wood);
@@ -98,25 +96,25 @@ public static class BeachSc
             if (py < WATER_Y + 0.35f) return m.Jit(H("#D6C08B"), 0.05f);
             return m.Jit(Color.Lerp(H("#EBD7A3"), H("#F3E4B8"), Mathf.Clamp01(py * 0.7f)), 0.05f);
         });
-        // beach props (left = +X)
-        Umbrella(m, new Vector3(3.9f, SandY(3.9f, -2.7f), -2.7f), H("#F2735A"));
-        Lounger2(m, new Vector3(3.2f, SandY(3.2f, -3.3f) + 0.0f, -3.3f), 20f, H("#2BA7A3"));
-        Lounger2(m, new Vector3(4.5f, SandY(4.5f, -3.0f), -3.0f), -10f, H("#F7F1DD"));
-        Surfboard(m, new Vector3(-4.4f, SandY(-4.4f, -1.8f), -1.8f), -8f, 14f, H("#F7C948"));
-        Surfboard(m, new Vector3(-5.0f, SandY(-5.0f, -2.0f), -2.0f), 6f, -18f, H("#2BA7A3"));
-        Surfboard(m, new Vector3(-3.85f, SandY(-3.85f, -2.1f), -2.1f), 12f, 4f, H("#F2735A"));
+        // beach props on the sand either side of the deck
+        Umbrella(m, new Vector3(16.5f, SandY(16.5f, 1.5f), 1.5f), H("#F2735A"));
+        Lounger2(m, new Vector3(15.6f, SandY(15.6f, 0.9f), 0.9f), 20f, H("#2BA7A3"));
+        Lounger2(m, new Vector3(17.3f, SandY(17.3f, 1.1f), 1.1f), -10f, H("#F7F1DD"));
+        Surfboard(m, new Vector3(-15.2f, SandY(-15.2f, 2.2f), 2.2f), -8f, 14f, H("#F7C948"));
+        Surfboard(m, new Vector3(-15.8f, SandY(-15.8f, 2f), 2f), 6f, -18f, H("#2BA7A3"));
+        Surfboard(m, new Vector3(-14.65f, SandY(-14.65f, 1.9f), 1.9f), 12f, 4f, H("#F2735A"));
         for (int i = 0; i < 6; i++)
         {
-            float sx = (i < 3 ? 1 : -1) * (6f + i % 3 * 2.4f);
-            Rock(m, new Vector3(sx + m.R(-1, 1), SandY(sx, -3f - i % 3), -3f - i % 3 - m.R(0, 2)), m.R(0.25f, 0.55f));
+            float sx = (i < 3 ? 1 : -1) * (14f + i % 3 * 2.8f);
+            Rock(m, new Vector3(sx + m.R(-1, 1), SandY(sx, -2f - i % 3), -2f - i % 3 - m.R(0, 2)), m.R(0.25f, 0.55f));
         }
 
         // ---------- palms + grass (sway) ----------
-        var palms = new[] { (7.2f, -3.6f, 4.6f, -1.2f, 0.2f), (-8.4f, -2.6f, 4.9f, 1.3f, -0.3f), (-9.8f, -6.4f, 5.4f, 1.6f, 0.4f), (9.2f, -6.0f, 5.0f, -1.2f, 0f), (13.5f, -3f, 4.2f, -1.0f, 0.2f) };
+        var palms = new[] { (15.2f, -1.2f, 8.2f, -1.4f, -0.3f), (-15.6f, -0.6f, 8.8f, 1.5f, -0.2f), (-19.5f, -4.2f, 7.4f, 1.2f, 0.3f), (20f, -3.6f, 7.8f, -1.2f, 0.2f), (-17f, 6.5f, 9f, 0.6f, -0.8f), (17.4f, 7f, 8.6f, -0.7f, -0.7f), (24f, 1.5f, 7f, -1f, 0.4f), (-24.5f, 2f, 7.4f, 1f, 0.2f) };
         foreach (var (px, pz, h, lx, lz) in palms) Palm(leaf, new Vector3(px, SandY(px, pz) - 0.1f, pz), h, new Vector2(lx, lz));
         for (int i = 0; i < 34; i++)
         {
-            float gx = (m.R() < 0.5f ? -1 : 1) * m.R(6.5f, 22f), gz = m.R(-7f, 0.5f);
+            float gx = (m.R() < 0.5f ? -1 : 1) * m.R(13.6f, 28f), gz = m.R(-4f, 10f);
             if (SandY(gx, gz) < WATER_Y + 0.5f) continue;
             Grass(leaf, new Vector3(gx, SandY(gx, gz) - 0.03f, gz));
         }
@@ -124,18 +122,20 @@ public static class BeachSc
         // ---------- lights ----------
         var wire = m;
         var bulb = night ? H("#FFE7A8") : H("#FFF0CE");
-        SceneKit.StringLights(wire, glow, new Vector3(-6.7f, 3.0f, 5.3f), new Vector3(-2.2f, 3.0f, 5.3f), 0.35f, 0.5f, bulb, H("#3A2A1C"));
-        SceneKit.StringLights(wire, glow, new Vector3(-2.2f, 3.0f, 5.3f), new Vector3(2.2f, 3.0f, 5.3f), 0.35f, 0.5f, bulb, H("#3A2A1C"));
-        SceneKit.StringLights(wire, glow, new Vector3(2.2f, 3.0f, 5.3f), new Vector3(6.7f, 3.0f, 5.3f), 0.35f, 0.5f, bulb, H("#3A2A1C"));
-        SceneKit.StringLights(wire, glow, new Vector3(-6.7f, 3.0f, 5.3f), new Vector3(-6.7f, 2.85f, 10.1f), 0.4f, 0.55f, bulb, H("#3A2A1C"));
-        SceneKit.StringLights(wire, glow, new Vector3(6.7f, 3.0f, 5.3f), new Vector3(6.7f, 2.85f, 10.1f), 0.4f, 0.55f, bulb, H("#3A2A1C"));
-        foreach (float lx in new[] { -4.2f, 4.2f })
+        var cord = H("#3A2A1C");
+        float ly = SceneKit.POST_H - 0.2f;
+        foreach (var (a, b) in new[] { (-12.5f, -5f), (-5f, 5f), (5f, 12.5f) })
         {
-            m.Beam(new Vector3(lx, POST_H - 0.1f, 5.4f), new Vector3(lx, POST_H - 0.65f, 5.4f), 0.015f, 0.015f, dark, 0f);
-            glow.Blob(new Vector3(lx, POST_H - 0.85f, 5.4f), new Vector3(0.16f, 0.24f, 0.16f), H("#FF9F5A"), H("#FFD27A"), 3, 6, 0.02f);
+            SceneKit.StringLights(wire, glow, new Vector3(a, ly, 4.1f), new Vector3(b, ly, 4.1f), 0.5f, 0.75f, bulb, cord);
+            SceneKit.StringLights(wire, glow, new Vector3(a, ly, 10.3f), new Vector3(b, ly, 10.3f), 0.5f, 0.75f, bulb, cord);
+        }
+        foreach (float lx in new[] { -9f, 0f, 9f })
+        {
+            m.Beam(new Vector3(lx, SceneKit.POST_H, 10.3f), new Vector3(lx, SceneKit.POST_H - 0.7f, 10.3f), 0.015f, 0.015f, dark, 0f);
+            glow.Blob(new Vector3(lx, SceneKit.POST_H - 0.92f, 10.3f), new Vector3(0.2f, 0.28f, 0.2f), H("#FF9F5A"), H("#FFD27A"), 3, 6, 0.02f);
         }
         if (night)
-            foreach (var tp in new[] { new Vector3(-2.6f, 0f, -2.2f), new Vector3(2.6f, 0f, -2.4f), new Vector3(-7f, 0f, -1f), new Vector3(7f, 0f, -1.2f) })
+            foreach (var tp in new[] { new Vector3(-14.5f, 0f, 3.5f), new Vector3(14.5f, 0f, 3.5f), new Vector3(-17f, 0f, 0.6f), new Vector3(17f, 0f, 0.4f) })
             {
                 var b = new Vector3(tp.x, SandY(tp.x, tp.z), tp.z);
                 m.Prism(b, b + Vector3.up * 1.5f, 0.05f, 0.04f, 5, mid, false, true);
@@ -154,23 +154,54 @@ public static class BeachSc
 
     static void Palm(Mk m, Vector3 bs, float height, Vector2 lean)
     {
-        int n = 9;
+        int n = 11;
         var pts = new List<Vector3>();
         for (int i = 0; i <= n; i++)
         {
             float t = (float)i / n;
-            pts.Add(bs + new Vector3(lean.x * t * t * height * 0.55f, height * t, lean.y * t * t * height * 0.55f));
+            pts.Add(bs + new Vector3(lean.x * t * t * height * 0.42f, height * t, lean.y * t * t * height * 0.42f));
         }
-        m.Tube(pts, t => Mathf.Lerp(0.2f, 0.11f, t), 6, t => ((int)(t * n) & 1) == 0 ? H("#8F6A45") : H("#78553A"), null);
+        m.Tube(pts, t => Mathf.Lerp(0.27f, 0.12f, Mathf.Sqrt(t)), 7, t => ((int)(t * n * 2.2f) & 1) == 0 ? H("#8F6A45") : H("#6F4F35"), null);
         var top = pts[n];
-        for (int i = 0; i < 10; i++)
+        // three tiers: spears up, a wide arch, then old fronds hanging down
+        var tiers = new[] { (5, 1.05f, 2.7f), (7, 0.62f, 3.6f), (6, 0.2f, 3.3f) };
+        int k = 0;
+        foreach (var (count, lift, len) in tiers)
         {
-            float a = i * 36f * Mathf.Deg2Rad + m.R(-0.2f, 0.2f);
-            var dir = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a));
-            m.Frond(top, dir, m.R(2.4f, 3.1f), m.R(1.0f, 1.5f), 0.5f, H("#2F7E3F"), H("#86CF5C"));
+            for (int i = 0; i < count; i++, k++)
+            {
+                float a = (i + k * 0.37f) * Mathf.PI * 2f / count + m.R(-0.15f, 0.15f);
+                PalmFrond(m, top, new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)), len * m.R(0.92f, 1.1f), lift, H("#1F6B38"), H("#7CC653"));
+            }
         }
-        for (int i = 0; i < 3; i++)
-            m.Blob(top + new Vector3(Mathf.Cos(i * 2.1f) * 0.2f, -0.28f, Mathf.Sin(i * 2.1f) * 0.2f), Vector3.one * 0.13f, H("#4A3320"), H("#6B4A2C"), 2, 5, 0f);
+        for (int i = 0; i < 4; i++)
+            m.Blob(top + new Vector3(Mathf.Cos(i * 1.6f) * 0.24f, -0.3f, Mathf.Sin(i * 1.6f) * 0.24f), Vector3.one * 0.16f, H("#4A3320"), H("#6B4A2C"), 2, 5, 0f);
+    }
+
+    // A long arching stem with narrow leaflets combed outward: the shape that says "palm".
+    static void PalmFrond(Mk m, Vector3 top, Vector3 dir, float len, float lift, Color c0, Color c1)
+    {
+        var side = Vector3.Cross(Vector3.up, dir);
+        const int n = 15;
+        var shade = m.R(0.85f, 1.1f);
+        Vector3 At(float u) => top + dir * (len * u * (1f - 0.1f * u)) + Vector3.up * (len * (lift * u - (lift + 0.62f) * u * u));
+        for (int i = 0; i < n; i++)
+        {
+            float u = (float)i / n, u1 = (float)(i + 1) / n;
+            var p = At(u); var q = At(u1);
+            var rig = 1f - u * 0.95f;
+            var ca = Mk.Rig(Color.Lerp(c0, c1, u) * shade, rig);
+            var ct = Mk.Rig(Color.Lerp(c0, c1, Mathf.Min(1f, u + 0.3f)) * shade, Mathf.Max(0f, rig - 0.2f));
+            var stem = side * 0.022f;
+            m.Tri2(p - stem, p + stem, q, Mk.Rig(H("#B7B26A"), rig), Mk.Rig(H("#B7B26A"), rig), Mk.Rig(H("#B7B26A"), rig));
+            float leaf = len * 0.31f * Mathf.Sin(Mathf.Min(1f, u * 1.08f + 0.1f) * Mathf.PI);
+            var along = (q - p).normalized;
+            foreach (float sgn in new[] { -1f, 1f })
+            {
+                var tip = p + side * (sgn * leaf * 0.82f) + along * (leaf * 0.5f) + Vector3.down * (leaf * 0.42f);
+                m.Tri2(p, q, tip, ca, ca, ct);
+            }
+        }
     }
 
     static void Grass(Mk m, Vector3 p)
@@ -255,7 +286,7 @@ public static class BeachSc
         var m = new Mk(3);
         var one = Color.white;
         // dense near patch (waves live here) ...
-        const float X0 = -70f, X1 = 70f, Z0 = 4f, Z1 = -90f; const int NX = 74, NZ = 50;
+        const float X0 = -90f, X1 = 90f, Z0 = 4f, Z1 = -90f; const int NX = 90, NZ = 50;
         for (int i = 0; i < NX; i++)
             for (int j = 0; j < NZ; j++)
             {
@@ -357,7 +388,7 @@ public static class BeachSc
             }
             var foam = x.Mesh(strip, "Foam" + i, x.Unlit(new Color(1, 1, 1, 0.8f), night ? 0.3f : 1f, 1, 0f, 0f, 2450 + i)).transform;
             int ii = i;
-            x.life.Add((t, dt) => { if (foam != null) foam.position = new Vector3(0, WATER_Y + 0.045f, -6.4f - Mathf.Sin(t * 0.5f + ii * 1.3f) * 0.9f - ii * 0.9f); });
+            x.life.Add((t, dt) => { if (foam != null) foam.position = new Vector3(0, WATER_Y + 0.045f, -0.9f - Mathf.Sin(t * 0.5f + ii * 1.3f) * 0.5f - ii * 0.7f); });
         }
     }
 }

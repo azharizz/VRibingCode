@@ -143,3 +143,7 @@ Cloud deployment notes: `DEPLOY.md`.
 - Team state is in memory: restarting the server starts a fresh team (the role library is kept).
 - Worktrees of rejected/failed/stopped tasks stay in `data/worktrees/` until the task is approved (reject reuses them).
 - Desktop-app preview (Electron via Playwright, native via window capture) is the next step.
+
+## Boards, chat and clickable previews
+
+The headset uses these too: board layouts, notes, project files, task diffs, agent chat, suggestions and live preview sessions. See `DEPLOY.md` for the list. Team, tasks, chat memory, notes and layouts survive a restart in the data folder.

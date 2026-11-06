@@ -41,7 +41,12 @@ public class LoftWorld : MonoBehaviour
 {
     public const float RIG_START_Z = 6.5f;
     public static readonly Vector3 Seat = new Vector3(0f, 1.2f, RIG_START_Z);
-    public const float DECK_FRONT = 0f, DECK_BACK = 10.4f, DECK_HALF = 7.4f; // shared floor plan (x +-DECK_HALF)
+    public const float DECK_FRONT = Plan.Z0, DECK_BACK = Plan.Z1, DECK_HALF = Plan.X1; // shared floor plan (x +-DECK_HALF)
+
+    // Where the CEO can teleport / stand (x, z; y is the floor). Same in every scene.
+    public static Rect WalkBounds => Plan.Walk;
+    // Named floor spots: ceo, spawn, view, lounge, work, desk0..9 (where an agent works), lounge0..5, view0..3.
+    public static Dictionary<string, Vector3> Spots => Plan.Spots;
 
     // A point `dist` m from the seat at `bearing` degrees (+ = CEO's right).
     public static Vector3 Polar(float bearing, float dist, float y)
@@ -51,13 +56,6 @@ public class LoftWorld : MonoBehaviour
     }
 
     // Two big screens flank the open middle (horizon stays visible); two slim ones sit further out.
-    public static readonly (string id, string title, Vector3 pos, Vector2 size)[] Boards =
-    {
-        ("notes", "REVIEW", Polar(49f, 3.5f, 1.4f), new Vector2(1.7f, 1.1f)),
-        ("kanban", "KANBAN", Polar(-49f, 3.5f, 1.4f), new Vector2(1.7f, 1.1f)),
-        ("calendar", "TEAM", Polar(-88f, 3.4f, 2.0f), new Vector2(1.4f, 0.8f)),
-        ("log", "LIVE LOG", Polar(-88f, 3.4f, 1.05f), new Vector2(1.4f, 0.95f)),
-    };
 
     public string defaultTheme = "beach";
     public Transform rig;
@@ -68,7 +66,7 @@ public class LoftWorld : MonoBehaviour
     Light sun;
     AudioSource ambience;
     WorldCtx ctx;
-    Material boardScreen, boardFrame, fadeMat;
+    Material fadeMat;
     Transform fadeQuad;
     bool fading;
     // base lighting (SetMood scales these)
@@ -84,7 +82,7 @@ public class LoftWorld : MonoBehaviour
     void OnDestroy()
     {
         if (ctx != null) ctx.Dispose();
-        LoftUtil.Kill(boardScreen); LoftUtil.Kill(boardFrame); LoftUtil.Kill(fadeMat);
+        LoftUtil.Kill(fadeMat);
     }
 
     // A saved or default id that no longer exists must not trap the user: fall back to beach.
@@ -110,72 +108,22 @@ public class LoftWorld : MonoBehaviour
         if (sun == null) sun = lightGo.AddComponent<Light>();
         sun.type = LightType.Directional;
         sun.shadows = LightShadows.None;
-        if (boardScreen == null)
+        if (fadeMat == null)
         {
             var u = Resources.Load<Shader>("Shaders/LoftUnlit");
-            var l = Resources.Load<Shader>("Shaders/LoftLit");
-            boardScreen = new Material(u) { name = "board_screen" };
-            boardFrame = new Material(l) { name = "board_frame" };
             fadeMat = new Material(u) { name = "fade" };
             fadeMat.SetColor("_Tint", new Color(0f, 0f, 0f, 0f));
             fadeMat.SetFloat("_Src", 5); fadeMat.SetFloat("_Dst", 10); fadeMat.SetFloat("_ZW", 0); fadeMat.SetFloat("_ZT", 8);
             fadeMat.SetFloat("_FogAdd", 0); fadeMat.renderQueue = 4000;
         }
-        foreach (var (id, title, pos, size) in Boards) BuildBoard(id, title, pos, size);
+        foreach (var old in new[] { "Board_notes", "Board_kanban", "Board_calendar", "Board_log", "PreviewScreen" }) // fixed boards of older scenes
+        {
+            GameObject g;
+            while ((g = GameObject.Find(old)) != null) { g.SetActive(false); LoftUtil.Kill(g); }
+        }
         BuildFade();
     }
 
-    void BuildBoard(string id, string title, Vector3 pos, Vector2 size)
-    {
-        var go = GameObject.Find($"Board_{id}");
-        // Old cube plate, or a leftover from an edit-mode build whose materials are gone.
-        var oldFrame = go != null ? go.transform.Find("Frame") : null;
-        if (go != null && (oldFrame == null || oldFrame.GetComponent<MeshRenderer>().sharedMaterial != boardFrame))
-        {
-            go.SetActive(false);
-            LoftUtil.Kill(go);
-            go = null;
-        }
-        if (go == null)
-        {
-            go = WorldCtx.New($"Board_{id}", null);
-            var m = new Mk(id.Length);
-            float w = size.x, h = size.y;
-            var dark = Mk.Hex("#232C38");
-            // bezel, accent line, stand: all in the board's local space (+Z faces the seat)
-            m.Box(new Vector3(0, 0, -0.03f), new Vector3(w + 0.1f, h + 0.1f, 0.04f), dark, 0.02f);
-            m.Box(new Vector3(0, h / 2 - 0.17f, -0.002f), new Vector3(w - 0.14f, 0.012f, 0.004f), Mk.Hex("#FFD27A"), 0f);
-            var foot = new Vector3(0, -pos.y, -0.1f);
-            m.Prism(foot + Vector3.up * 0.02f, new Vector3(0, -h / 2 - 0.05f, -0.06f), 0.035f, 0.035f, 6, Mk.Hex("#3A3F4A"), true, false);
-            m.Prism(foot, foot + Vector3.up * 0.03f, 0.3f, 0.3f, 10, Mk.Hex("#2E3440"), false, true);
-            var frame = new GameObject("Frame");
-            if (!Application.isPlaying) frame.hideFlags = HideFlags.DontSaveInEditor;
-            frame.transform.SetParent(go.transform, false);
-            frame.AddComponent<MeshFilter>().sharedMesh = m.Build("board_frame");
-            frame.AddComponent<MeshRenderer>().sharedMaterial = boardFrame;
-            var s = new Mk();
-            var top = Mk.Hex("#FFFFFF"); var bot = Mk.Hex("#C9D2DE");
-            s.QuadFacing(new Vector3(-w / 2, h / 2, 0), new Vector3(w / 2, h / 2, 0), new Vector3(w / 2, -h / 2, 0), new Vector3(-w / 2, -h / 2, 0), top, bot, Vector3.forward);
-            var scr = new GameObject("Screen");
-            if (!Application.isPlaying) scr.hideFlags = HideFlags.DontSaveInEditor;
-            scr.transform.SetParent(go.transform, false);
-            scr.AddComponent<MeshFilter>().sharedMesh = s.Build("board_screen");
-            scr.AddComponent<MeshRenderer>().sharedMaterial = boardScreen;
-            var col = go.AddComponent<BoxCollider>();
-            col.center = new Vector3(0, 0, -0.03f); col.size = new Vector3(w + 0.1f, h + 0.1f, 0.1f);
-            foreach (var r in go.GetComponentsInChildren<MeshRenderer>())
-            { r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; r.receiveShadows = false; }
-        }
-        go.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(new Vector3(Seat.x - pos.x, 0f, Seat.z - pos.z)));
-        var t = LoftUtil.Label(go.transform, "Title", new Vector3(0f, size.y / 2 - 0.095f, 0.012f), 0.1f, new Color(1f, 0.92f, 0.72f), size.x - 0.2f);
-        t.text = title;
-        t.fontStyle = FontStyles.Bold;
-        float top_ = size.y / 2 - 0.21f, bottom = -size.y / 2 + 0.07f;
-        var c = LoftUtil.Label(go.transform, "Content", new Vector3(0f, (top_ + bottom) / 2, 0.012f), 0.078f, new Color(0.88f, 0.94f, 1f),
-            size.x - 0.2f, TextAlignmentOptions.TopLeft, top_ - bottom);
-        c.overflowMode = TextOverflowModes.Ellipsis;
-        if (string.IsNullOrEmpty(c.text)) c.text = "…";
-    }
 
     void BuildFade()
     {
@@ -244,7 +192,7 @@ public class LoftWorld : MonoBehaviour
     {
         var t = LoadTheme(id);
         if (t == null) { Debug.LogWarning($"[World] no theme '{id}' in Resources/Themes"); return false; }
-        if (sun == null || boardScreen == null) Build();
+        if (sun == null || fadeMat == null) Build();
         Current = t;
 
         // Drop the old scene completely (also one saved into an old Loft.unity).
@@ -275,9 +223,6 @@ public class LoftWorld : MonoBehaviour
         RenderSettings.fogMode = FogMode.ExponentialSquared;
         SetMood(0f);
 
-        var screen = LoftUtil.Hex(t.board, new Color(0.08f, 0.12f, 0.18f));
-        boardScreen.SetColor("_Tint", screen);
-        boardFrame.SetColor("_Tint", Color.white);
 
         // Ambient audio (optional clip at Resources/Audio/<audio>).
         if (ambience == null) ambience = GetComponent<AudioSource>();

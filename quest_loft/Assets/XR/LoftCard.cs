@@ -20,6 +20,7 @@ namespace VirtualLoft.XR
 
         public CardState State { get; private set; } = CardState.Hidden;
         public bool Risky { get; private set; }
+        public bool IsSuggestion { get; private set; }  // an agent's idea: trigger on ACCEPT only, A never accepts
         public string TitleText => title != null ? title.text : "";
         public string BodyText => body != null ? body.text : "";
         public string HeardText => heard != null ? heard.text : "";
@@ -102,6 +103,21 @@ namespace VirtualLoft.XR
             }
         }
 
+        // An agent's suggestion. Accept = onSend (trigger on the button), Dismiss = onCancel (B or button).
+        public void ShowSuggestion(string who, string title, string reason)
+        {
+            Begin(CardState.Proposal, "IDEA FROM " + (string.IsNullOrEmpty(who) ? "AN AGENT" : who.ToUpperInvariant()), false);
+            IsSuggestion = true;
+            heard.text = string.IsNullOrWhiteSpace(reason) ? "" : LoftUtil.Trunc(reason, 120);
+            body.text = LoftUtil.Trunc(title, 140);
+            hint.text = "Point at ACCEPT and pull the trigger to queue it. B dismisses.";
+            ShowLevel(false);
+            Buttons(true, true, false, false);
+            send.SetText("ACCEPT");
+            cancel.SetText("DISMISS   (B)");
+            cancel.MoveTo(new Vector3(-0.21f, BtnY, 0.016f));
+        }
+
         public void ShowResult(string message, string transcript = null)
         {
             Begin(CardState.Result, "DONE", false);
@@ -128,6 +144,7 @@ namespace VirtualLoft.XR
         {
             State = CardState.Hidden;
             Risky = false;
+            IsSuggestion = false;
             if (root != null) root.gameObject.SetActive(false);
         }
 
@@ -136,6 +153,9 @@ namespace VirtualLoft.XR
             Build();
             State = s;
             Risky = risky;
+            IsSuggestion = false;
+            send.SetText("SEND   (A)");
+            cancel.SetText("CANCEL   (B)");
             hideAt = 0f;
             level = 0f;
             title.text = heading;

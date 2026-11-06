@@ -90,3 +90,72 @@ Esc/C = B, Q/E = snap turn, M = wrist, uses the Mac microphone through the same 
 It must exercise the SAME code as VR, not a separate UI. The old OnGUI desktop overlay
 is reduced to a small debug strip, off by default.
 Automated checks in `Assets/Editor/LoftVerify.cs` must be updated to the new world.
+
+# Round 2 contract (phases 1-5)
+
+## Extra hard rules
+- Work on branch `vr-rebuild`. Do not commit or push: the lead does that.
+- Edit-mode checks are not enough. These bugs passed them: `while (Find) Destroy` hangs in Play,
+  DontSaveInEditor objects keep dead materials in Play, reusing objects queued for Destroy,
+  JSON null is a JValue. Add a real Play-mode smoke run in your scratch copy where you can.
+- UI root +Z faces the head, so local +X is the viewer's LEFT. Backing panels go at negative z.
+- TMP font lacks some symbols: use plain words or draw shapes. Never use emoji glyphs.
+- Stay inside your owned files. Disk has ~13 GB free: clone Library with `cp -cR`, stop under 3 GB.
+
+## Ownership
+- loft-backend: `backend/**`.
+- loft-world: `Assets/World/**`, `App/LoftWorld.cs` (except board code), `Resources/Themes/**`,
+  `Resources/Shaders/**`, `Agents/**`, `App/LoftParty.cs`, `App/LoftUtil.cs`.
+- loft-interaction: `XR/**` except `XR/LoftUi.cs`, `Boards/LoftClient.cs`, `App/LoftDesk.cs` except board code,
+  `Editor/LoftBootstrap.cs`, `Editor/LoftVerify.cs`, `Editor/LoftQuestBuild.cs`.
+- loft-boards: new `Assets/Panels/**`, `XR/LoftUi.cs`, `App/LoftPreviewScreen.cs`, the board code in `LoftWorld.cs`
+  (Boards, BuildBoard) and in `LoftDesk.cs` (SetBoard, RefreshViews, board text). Add `LoftClient` calls in a
+  new partial file `Assets/Panels/LoftClient.Panels.cs` (loft-interaction makes the class `partial` first).
+
+## World (phase 2, phase 4)
+- Floor about 3x the area in every scene, higher roof, areas to walk to (work area, lounge, view edge).
+  Keep it open: no big walls in front of the view. Publish `LoftWorld.WalkBounds` and `LoftWorld.Spots`
+  (named Vector3s: desks, lounge, ceo) for others.
+- Art: palms must read as palms (long arching fronds, no willow droop), real thatch layers, a wider sea view.
+- Fixed wall boards go away. Default start: an open space, boards are spawned.
+- Living agents, driven by REAL state: Working = walk to a desk and work, Done/Review = walk to the CEO and wait,
+  Idle = wander or chat in the lounge, never through furniture. `AgentSkin.Say(text, seconds)` shows a speech bubble.
+
+## Movement (phase 2, owner loft-interaction)
+Teleport anywhere on the floor: push right stick forward, arc plus landing marker, release to go, inside
+`WalkBounds`. Snap turn stays. Smooth walk on left stick is OFF by default and toggled in the wrist menu.
+Desktop: WASD stays.
+
+## Pointer hook (owner loft-interaction, consumed by loft-boards)
+`interface IPointerTarget { void OnHover(bool on); void OnPress(Ray r, RaycastHit h); void OnDrag(Ray r); void OnRelease(); }`
+in `XR/LoftInput.cs` or a new XR file. `LoftInteraction` routes trigger events to any `IPointerTarget` it hits, before
+its normal click logic. Land this first.
+
+## Boards (phases 3, 5, owner loft-boards)
+Design system first, in `Assets/Panels/`: tokens (colors, type scale, spacing, radius), parts (card, pill, avatar,
+progress bar, tab, list row, button), rounded panels by mesh or 9-slice, not cubes. A shared frame: title bar, grab handle,
+resize corner, close button, consistent shadow/edge. Boards are assembled from parts. Quality bar: looks like a real product UI,
+with hierarchy and whitespace, never a block of text.
+Types: `kanban`, `review`, `log`, `preview`, `notes`, `files`, `diff`.
+Spawn by wrist menu or voice. Move by grabbing, resize by corner with proportional text, close with X. Layout saved per scene
+through the backend. No fixed limit, but boards beyond ~12 m or out of view stop updating. Live previews capped at 3.
+`Assets/Panels/Editor/BoardGallery.cs` renders every board with sample data to PNGs at VR scale.
+Expose `LoftPanels.Open(type)`, `Close(type)`, `CloseAll()` for voice and the wrist menu.
+
+## Backend additions (owner loft-backend)
+- Fix "spawn new agent as data analyst": voice spawn with a new role must work end to end.
+- `GET/PUT /boards?scene=` board layout `[{id,type,pos,rot,size,args}]`.
+- `GET/POST/PATCH/DELETE /notes`.
+- `GET /projects/:id/tree?path=`, `GET /projects/:id/file?path=` (locked to the project folder).
+- `GET /tasks/:id/diff` -> `{files:[{path,added,removed,hunks:[{header,lines:[{type,text}]}]}]}`.
+- `POST /agents/:id/chat {text}` -> `{reply}`, SSE `{type:"say",agentId,text}`. Short, in role, with memory.
+- Team, tasks, chat memory and notes persist across restarts in the data dir.
+- Suggestions: after a finished task an agent may raise at most one, SSE `{type:"suggestion",id,agentId,title,reason}`,
+  `POST /suggestions/:id/accept` queues it, `/dismiss` drops it. Never acts alone. One LLM call, `LOFT_SUGGESTIONS=0` disables.
+- Clickable preview: `POST /preview/sessions {taskId|url}` -> `{id,width,height}`, `GET /preview/sessions/:id/frame` (JPEG),
+  `POST /preview/sessions/:id/input {type:click|move|scroll|key|text,...}`, `DELETE`. Playwright. Cap 3, idle timeout. URL locked to
+  the project's own preview or an http(s) url the CEO gave; block cloud metadata and file URLs.
+- New voice actions: `chat{agentId,text}`, `board{op:open|close,type}`. Plain greetings to an agent become `chat`.
+- STT: compare whisper.cpp small vs large-v3-turbo vs faster-whisper with `tools/stt-compare`. Provide a faster-whisper
+  server (OpenAI-compatible, Docker) for cloud. Optional `STT_SAVE_SAMPLES=1` (off by default) keeps recordings locally so the
+  user can run the comparison on their own voice.

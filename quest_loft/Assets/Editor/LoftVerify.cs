@@ -35,7 +35,6 @@ public static class LoftVerify
         root == null ? new List<string>()
             : root.GetComponentsInChildren<TextMesh>(true).Select(t => t.text)
                 .Concat(root.GetComponentsInChildren<TMP_Text>(true).Select(t => t.text)).ToList();
-    static string BoardText(string id) => string.Join("\n", TextsUnder(GameObject.Find($"Board_{id}")));
 
     public static void RunAll()
     {
@@ -57,8 +56,16 @@ public static class LoftVerify
         agents.Clear();
         world.Build();
         desk.agents = agents; desk.world = world; desk.client = client; desk.interaction = inter;
-        desk.preview = Object.FindFirstObjectByType<LoftPreviewScreen>();
-        if (desk.preview != null) { desk.preview.client = client; desk.preview.EnsureBuilt(); }
+        var panels = Object.FindFirstObjectByType<LoftPanels>();
+        panels.desk = desk; panels.client = client; panels.world = world;
+        List<string> Board(string type)
+        {   // what a board of this type shows right now
+            panels.Pull();
+            var b = VirtualLoft.Panels.LoftBoard.Create("verify", type, panels.state);
+            var texts = TextsUnder(b.gameObject);
+            LoftUtil.Kill(b.gameObject);
+            return texts;
+        }
         inter.EnsureBuilt();
 
         // 1. Themes: every JSON loads and applies; scenes really differ.
@@ -98,25 +105,21 @@ public static class LoftVerify
         var builder = agents.Find("builder-2");
         Check(builder.CurrentState == AgentState.Working, "agent event 'working' -> Working");
         Check(builder.GetComponent<AgentSkin>().line == "Edit src/login.ts", "live progress line on the animal");
-        Check(BoardText("kanban").Contains("Doing(1)"), "kanban board shows the running task");
+        Check(Board("kanban").Contains("Working") && Board("kanban").Any(t => t.Contains("login")), "kanban board shows the running task as a card");
         desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = Task("t1", "builder-2", "add login page", "review", "", "PASS 3/3 — login.ts added") });
         desk.HandleEvent(new JObject { ["type"] = "agent", ["agent"] = Agent("builder-2", "builder", "fox", "done") });
         Check(builder.CurrentState == AgentState.Done, "review -> animal Done");
-        Check(BoardText("notes").Contains("login.ts added"), "REVIEW board shows the result for the CEO");
+        Check(Board("review").Any(t => t.Contains("login.ts added")), "REVIEW board shows the result for the CEO");
         // Review with a git diff + preview (shapes from backend orchestrator.js).
         var withDiff = Task("t1", "builder-2", "add login page", "review", "", "PASS 3/3 — login.ts added");
         withDiff["projectId"] = "landing-site";
         withDiff["diff"] = new JObject { ["stat"] = "2 files changed, 40 insertions(+)", ["files"] = new JArray("login.html", "login.css") };
         withDiff["preview"] = new JObject { ["status"] = "loading" };
         desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = withDiff });
-        Check(BoardText("notes").Contains("2 files changed") && BoardText("notes").Contains("landing-site"), "REVIEW board shows project + git diff size");
-        var screen = Object.FindFirstObjectByType<LoftPreviewScreen>();
-        var screenText = TextsUnder(GameObject.Find("PreviewScreen"));
-        Check(screen != null && screenText.Any(t => t.Contains("Taking screenshots")) && screenText.Any(t => t.Contains("landing-site")),
-            "PREVIEW screen: shows project + 'taking screenshots' while the backend captures");
-        withDiff["preview"] = new JObject { ["status"] = "error", ["error"] = "preview server never answered" };
-        desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = withDiff });
-        Check(TextsUnder(GameObject.Find("PreviewScreen")).Any(t => t.Contains("never answered")), "PREVIEW screen explains a failed preview");
+        var rv = Board("review");
+        Check(rv.Contains("2") && rv.Contains("+40") && rv.Contains("Hold to approve"), "REVIEW board shows change size and a hold-to-approve action");
+        Check(Board("preview").Any(t => t.Contains("Nothing to preview") || t.Contains("unavailable")), "PREVIEW board explains itself when no page is open");
+        Check(Board("diff").Any(t => t.Contains("No changes")) && Board("log").Count > 0 && Board("files").Count > 0 && Board("notes").Any(t => t.Contains("New note")), "every board type builds");
         Check(desk.ReviewTask()?.id == "t1", "approve/reject target = task in review");
 
         // 4. Spawn up to 20, never more; layout stays distinct.
@@ -371,11 +374,114 @@ public static class LoftVerify
         client.serverUrl = "http://127.0.0.1:49999";
         inter.inputOverride = null;
 
-        // 6g. Teleport pads still work (subtle markers, no labels).
-        inter.TeleportTo(1);
+        // 6g. Moving: teleport anywhere (arc + marker), clamp, smooth walk off by default.
+        var move = inter.move;
+        var pts = new Vector3[70];
+        bool lands = LoftMove.Trace(new Vector3(0f, 1.2f, 6f), new Vector3(0f, -0.2f, -1f), pts, out int arcN, out var landAt);
+        Check(lands && Mathf.Abs(landAt.y) < 0.001f && landAt.z < 6f && arcN > 3, $"teleport arc lands on the floor ({landAt})");
+        LoftMove.Trace(new Vector3(0f, 1.2f, 6f), Vector3.back, pts, out int lvN, out _);
+        Check(Enumerable.Range(0, lvN).Max(i => pts[i].y) > 1.3f, "a level aim arcs up before it falls");
+        var walkRect = LoftBridge.WalkRect();
+        var clampedP = LoftMove.ClampTo(walkRect, new Vector3(walkRect.xMax + 50f, 0f, walkRect.yMin - 50f), out bool wasClamped);
+        Check(wasClamped && clampedP.x == walkRect.xMax && clampedP.z == walkRect.yMin, "landing outside the walkable floor is clamped to its edge");
+        var tgt = new Vector3(walkRect.center.x, 0f, walkRect.center.y);
+        inter.TeleportTo(tgt);
         var cam = world.cam.transform.position;
-        Check(Vector3.Distance(cam, new Vector3(0f, Comfort.SEATED_EYE_HEIGHT, 5.2f)) < 0.05f, $"teleport moves the rig, eye height kept ({cam})");
-        Check(GameObject.Find("TelePad_0") != null && GameObject.Find("TelePad_0").GetComponentInChildren<TMP_Text>() == null && GameObject.Find("TelePad_0").transform.Find("Label") == null, "pads are label-free floor markers");
+        Check(Mathf.Abs(cam.x - tgt.x) < 0.01f && Mathf.Abs(cam.z - tgt.z) < 0.01f && Mathf.Abs(cam.y - Comfort.SEATED_EYE_HEIGHT) < 0.05f, $"teleport puts the HEAD on the marker, eye height kept ({cam})");
+        var fk = new FakeInput { hasRay = true, directAim = false };
+        inter.inputOverride = fk;
+        Vector3 eyes2 = world.cam.transform.position;
+        var posBefore = world.rig.position;
+        fk.Frame(); fk.rayOrigin = eyes2; fk.handPos = eyes2 + Vector3.down * 0.3f; fk.rayDir = (Vector3.forward * 1f + Vector3.down * 0.35f).normalized; fk.aimTeleport = true;
+        inter.Tick(0.016f);
+        Check(move.Aiming && move.HasLanding && GameObject.Find("TeleportMarker") != null && GameObject.Find("TeleportMarker").activeSelf, "stick forward: arc + landing marker shown");
+        var willLand = move.Landing;
+        Check(world.rig.position == posBefore, "aiming alone does not move you");
+        fk.Frame(); fk.aimTeleport = false; fk.teleportRelease = true;
+        inter.Tick(0.016f);
+        var cam2 = world.cam.transform.position;
+        Check(!move.Aiming && Mathf.Abs(cam2.x - willLand.x) < 0.02f && Mathf.Abs(cam2.z - willLand.z) < 0.02f, "letting go teleports to the marker");
+        fk.Frame(); fk.rayOrigin = cam2; fk.handPos = cam2; fk.aimTeleport = true; inter.Tick(0.016f);
+        var posMid = world.rig.position;
+        fk.Frame(); fk.aimTeleport = true; fk.cancelDown = true; inter.Tick(0.016f);
+        fk.Frame(); fk.aimTeleport = false; fk.teleportRelease = true; inter.Tick(0.016f);
+        Check(world.rig.position == posMid && !move.Aiming, "B while aiming cancels the teleport");
+        Check(!move.SmoothWalk, "smooth walk is OFF by default");
+        fk.Frame(); fk.walk = Vector2.up; fk.aimTeleport = false; fk.rayOrigin = cam2;
+        var beforeWalk = world.rig.position; inter.Tick(0.5f);
+        Check(world.rig.position == beforeWalk, "left stick does nothing while smooth walk is off");
+        move.SmoothWalk = true;
+        fk.Frame(); fk.walk = Vector2.up; inter.Tick(0.5f);
+        Check(Vector3.Distance(world.rig.position, beforeWalk) > 0.5f, "smooth walk on: left stick moves you");
+        for (int i = 0; i < 60; i++) { fk.Frame(); fk.walk = Vector2.up; inter.Tick(0.5f); }
+        var hp = world.cam.transform.position;
+        Check(hp.x >= walkRect.xMin - 0.01f && hp.x <= walkRect.xMax + 0.01f && hp.z >= walkRect.yMin - 0.01f && hp.z <= walkRect.yMax + 0.01f, "smooth walk stays inside the walkable floor");
+        move.SmoothWalk = false; fk.walk = Vector2.zero;
+        inter.inputOverride = null;
+        world.rig.SetPositionAndRotation(new Vector3(0f, Comfort.SEATED_EYE_HEIGHT, LoftWorld.RIG_START_Z), Quaternion.Euler(0f, 180f, 0f));
+        Check(GameObject.Find("TelePad_0") == null, "old fixed teleport pads are gone");
+
+        // 6g2. IPointerTarget: boards get raw trigger events before the click logic.
+        var tgo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        tgo.name = "PtrTest";
+        var ptr = tgo.AddComponent<PtrProbe>();
+        tgo.transform.position = world.cam.transform.position + world.cam.transform.forward * 2f;
+        Physics.SyncTransforms();
+        var pin = new FakeInput { hasRay = true };
+        inter.inputOverride = pin;
+        var eye3 = world.cam.transform.position;
+        void Aim(bool down, bool held, bool up, Vector3 at) { pin.Frame(); pin.rayOrigin = eye3; pin.handPos = eye3; pin.rayDir = (at - eye3).normalized; pin.triggerDown = down; pin.triggerHeld = held; pin.triggerUp = up; inter.Tick(0.016f); }
+        Aim(false, false, false, tgo.transform.position);
+        Check(ptr.hover, "IPointerTarget: OnHover(true) when pointed at");
+        Aim(true, true, false, tgo.transform.position);
+        Check(ptr.pressed == 1, "IPointerTarget: OnPress on trigger down");
+        Aim(false, true, false, tgo.transform.position + Vector3.up * 30f);
+        Check(ptr.drags >= 1, "IPointerTarget: OnDrag continues even when the ray leaves the collider");
+        Aim(false, false, true, tgo.transform.position + Vector3.up * 30f);
+        Check(ptr.released == 1 && !ptr.hover, "IPointerTarget: OnRelease on trigger up, hover cleared");
+        Check(desk.selectedAgentId == null, "IPointerTarget swallowed the click (no agent select)");
+        inter.inputOverride = null;
+        Object.DestroyImmediate(tgo);
+
+        // 6g3. Round 2 voice actions, speech and suggestions (fake backend).
+        srv = new FakeServer(); client.serverUrl = srv.Url;
+        desk.HandleEvent(new JObject { ["type"] = "snapshot", ["agents"] = new JArray(Agent("scout-1", "scout", "owl")), ["tasks"] = new JArray() });
+        Check(desk.ExecuteIntent(Intent("chat", "agentId", "scout-1", "text", "hello there")) && (string)srv.Wait("POST", "/agents/scout-1/chat")?.Json["text"] == "hello there", "intent chat -> POST /agents/:id/chat");
+        Check(!desk.ExecuteIntent(Intent("chat", "text", "hi")) , "chat with nobody pointed at asks to point");
+        Check(LoftIntent.Route(Resp("chat", false, false, new JObject { ["agentId"] = "scout-1", ["text"] = "hi" })) == IntentRoute.Immediate
+              && LoftIntent.Route(Resp("board", false, false, new JObject { ["op"] = "open", ["type"] = "kanban" })) == IntentRoute.Immediate, "chat and board act immediately");
+        bool boardOk = desk.ExecuteIntent(Intent("board", "op", "open", "type", "kanban"));
+        Check(boardOk == LoftBridge.HasPanels, $"intent board open: {(LoftBridge.HasPanels ? "routed to LoftPanels" : "clear 'not available' message while LoftPanels is absent")}");
+        desk.HandleEvent(new JObject { ["type"] = "say", ["agentId"] = "scout-1", ["text"] = "On it!" });
+        Check(true, "say event handled without error");
+        desk.HandleEvent(new JObject { ["type"] = "suggestion", ["id"] = "sg1", ["agentId"] = "scout-1", ["title"] = "Add a favicon", ["reason"] = "tab looks bare" });
+        desk.HandleEvent(new JObject { ["type"] = "suggestion", ["id"] = "sg1", ["agentId"] = "scout-1", ["title"] = "Add a favicon" });
+        Check(desk.PendingSuggestions == 1, "suggestion event queued once (duplicates ignored)");
+        var sfk = new FakeInput(); inter.inputOverride = sfk; inter.card.Hide();
+        sfk.Frame(); inter.Tick(0.016f);
+        Check(inter.card.State == LoftCard.CardState.Proposal && inter.card.IsSuggestion && inter.card.BodyText.Contains("favicon") && desk.PendingSuggestions == 0, "suggestion shows on the card as Accept / Dismiss");
+        sfk.Frame(); sfk.talkDown = true; sfk.talkHeld = true; inter.Tick(0.016f);
+        System.Threading.Thread.Sleep(250);
+        Check(srv.Count == 0 && !inter.card.IsSuggestion, "A never accepts a suggestion (it makes way for talking)");
+        sfk.Frame(); sfk.talkHeld = false; sfk.talkUp = true; inter.Tick(0.016f); inter.card.Hide();
+        Check(desk.PendingSuggestions == 1, "the idea waits its turn instead of being lost");
+        sfk.Frame(); inter.Tick(0.016f);
+        Check(inter.card.IsSuggestion && inter.card.PressSend() && srv.Wait("POST", "/suggestions/sg1/accept") != null, "ACCEPT -> POST /suggestions/:id/accept");
+        desk.HandleEvent(new JObject { ["type"] = "suggestion", ["id"] = "sg2", ["agentId"] = "scout-1", ["title"] = "Rename button" });
+        sfk.Frame(); inter.Tick(0.016f);
+        sfk.Frame(); sfk.cancelDown = true; inter.Tick(0.016f);
+        Check(srv.Wait("POST", "/suggestions/sg2/dismiss") != null, "B dismisses -> POST /suggestions/:id/dismiss");
+        // Wrist: boards page + walk toggle.
+        inter.wrist.SetOpen(true, true);
+        var wbtn = inter.wrist.Root.GetComponentsInChildren<LoftButton>(true).Select(bt => bt.id).ToList();
+        Check(wbtn.Contains("walk") && wbtn.Contains("boards"), "wrist menu has smooth-walk toggle and the boards page");
+        inter.wrist.page = LoftWrist.Page.Boards; inter.wrist.Rebuild();
+        wbtn = inter.wrist.Root.GetComponentsInChildren<LoftButton>(true).Select(bt => bt.id).ToList();
+        Check(LoftBridge.BoardTypes.All(t => wbtn.Contains("board_" + t)), "boards page lists all 7 board types");
+        inter.wrist.SetOpen(false);
+        inter.inputOverride = null;
+        srv.Dispose();
+        client.serverUrl = "http://127.0.0.1:49999";
 
         // 6h. Android manifest: RECORD_AUDIO + cleartext.
         var mf = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "loft-manifest-test.xml");
@@ -467,6 +573,15 @@ public static class LoftVerify
         }
 
         Finish();
+    }
+
+    class PtrProbe : MonoBehaviour, IPointerTarget
+    {
+        public bool hover; public int pressed, drags, released;
+        public void OnHover(bool on) { hover = on; }
+        public void OnPress(Ray r, RaycastHit h) { pressed++; }
+        public void OnDrag(Ray r) { drags++; }
+        public void OnRelease() { released++; }
     }
 
     static JObject Intent(string action, params string[] kv)

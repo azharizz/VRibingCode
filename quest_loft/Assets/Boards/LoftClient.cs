@@ -21,7 +21,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-public class LoftClient : MonoBehaviour
+public partial class LoftClient : MonoBehaviour
 {
     public string serverUrl = "http://127.0.0.1:4101";
     [Tooltip("LOFT_TOKEN from backend/.env (required when the server listens on the LAN).")]
@@ -164,6 +164,10 @@ public class LoftClient : MonoBehaviour
         Send(HttpMethod.Post, "/tasks", Body("agentId", agentId, "title", title, "projectId", projectId));
     public Task<JObject> Goal(string goal, string projectId = null) =>
         Send(HttpMethod.Post, "/goal", Body("goal", goal, "projectId", projectId));
+    public Task<JObject> Chat(string agentId, string text) =>
+        Send(HttpMethod.Post, $"/agents/{Uri.EscapeDataString(agentId ?? "")}/chat", Body("text", text));
+    public Task<JObject> AnswerSuggestion(string id, bool accept) =>
+        Send(HttpMethod.Post, $"/suggestions/{Uri.EscapeDataString(id ?? "")}/{(accept ? "accept" : "dismiss")}", null);
     public Task<JObject> CreateProject(string name, string template = "static") =>
         Send(HttpMethod.Post, "/projects/new", Body("name", name, "template", template));
 

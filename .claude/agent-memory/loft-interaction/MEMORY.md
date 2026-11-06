@@ -25,3 +25,9 @@
 - JSON null is a JValue, not C# null: use `(x["k"] as JObject)?[...]`.
 - Verified live in Editor: pointing, select, card, send, risky hold, wrist, snap turn, scene fade. Real mic NOT verified: blocked by macOS permission for Unity.
 - Editor Play has no XR ("Failed to load openxr runtime loader"), so the desktop rig is the test path.
+
+## Round 2 (stopped early: quota)
+DONE in source: IPointerTarget (XR/LoftInput.cs) routed first in LoftInteraction.Point; LoftClient is partial; LoftMove (teleport arc + marker, clamp to WalkRect, G on desktop, smooth walk off by default, left stick); LoftBridge (reflection for LoftWorld.WalkBounds, AgentSkin.Say, LoftPanels, with fallbacks); XrInput: isTracked check, stick aim/release, left stick; ExecuteIntent chat + board; say + suggestion events in LoftDesk; suggestion card (Accept by trigger only, A defers it); wrist Boards page + walk toggle; LoftClient.Chat/AnswerSuggestion; old TelePad pads removed; LoftVerify extended (~45 new checks).
+VERIFIED: one scratch run before the last test tweak: 168 pass, 1 fail (a bad test, since fixed in source, not re-run). Process exit code was 139 after the summary (Unity teardown), cause unknown.
+NOT DONE: Play-mode smoke run; re-run of LoftVerify after the last edit; the last compile was blocked by loft-world AgentSkin.cs(367) GetInstanceID error (not mine).
+NEXT: sync.sh, run LoftVerify, then a Play-mode smoke; swap LoftBridge reflection for direct calls once WalkBounds / AgentSkin.Say / LoftPanels exist (IL2CPP stripping risk).

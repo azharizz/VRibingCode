@@ -24,7 +24,7 @@ public class LoftDesk : MonoBehaviour
     public LoftWorld world;
     public LoftInteraction interaction;
     public LoftParty party;
-    public LoftPreviewScreen preview;
+    public LoftPanels panels;
 
     [Header("Desktop walk")]
     public float walkSpeed = 2.5f;
@@ -67,8 +67,8 @@ public class LoftDesk : MonoBehaviour
         if (world == null) world = gameObject.AddComponent<LoftWorld>(); // scenes built before themes existed
         if (party == null) party = FindFirstObjectByType<LoftParty>();
         if (party == null) party = gameObject.AddComponent<LoftParty>();
-        if (preview == null) preview = FindFirstObjectByType<LoftPreviewScreen>();
-        if (preview == null) preview = gameObject.AddComponent<LoftPreviewScreen>();
+        if (panels == null) panels = FindFirstObjectByType<LoftPanels>();
+        if (panels == null) panels = gameObject.AddComponent<LoftPanels>();
         projectId = PlayerPrefs.GetString("loft.project", "");
         if (interaction == null) interaction = FindFirstObjectByType<LoftInteraction>();
         if (interaction == null) interaction = gameObject.AddComponent<LoftInteraction>(); // scenes built before the voice card existed
@@ -129,6 +129,13 @@ public class LoftDesk : MonoBehaviour
             case "party":
                 bool on = (bool?)e["on"] ?? false;
                 if (party != null && party.On != on) { party.SetParty(on); Note(on ? "PARTY TIME!" : "Party's over — back to work"); }
+                break;
+            case "say":
+                var talker = agents.Find((string)e["agentId"]);
+                if (talker != null) LoftBridge.Say(talker.GetComponent<AgentSkin>(), (string)e["text"], (float?)e["seconds"] ?? 6f);
+                break;
+            case "suggestion":
+                if (e["id"] != null && !suggestions.Any(x => (string)x["id"] == (string)e["id"])) { suggestions.Add(e); Note($"Idea from {AgentName((string)e["agentId"])}: {LoftUtil.Trunc((string)e["title"], 40)}"); }
                 break;
             case "goal":
                 Note($"GOAL {(string)e["status"]}: {LoftUtil.Trunc((string)e["goal"], 40)} {(string)e["error"]}");
@@ -415,6 +422,18 @@ public class LoftDesk : MonoBehaviour
     }
 
     // ---- voice intents -> the same commands the menu uses --------------------------
+    // Agent ideas waiting for the CEO (shown one at a time on the card).
+    readonly List<JObject> suggestions = new List<JObject>();
+    public int PendingSuggestions => suggestions.Count;
+    public JObject TakeSuggestion() { if (suggestions.Count == 0) return null; var s = suggestions[0]; suggestions.RemoveAt(0); return s; }
+    public void RequeueSuggestion(JObject s) { if (s != null) suggestions.Insert(0, s); }
+    public void AnswerSuggestion(string id, bool accept)
+    {
+        if (string.IsNullOrEmpty(id)) return;
+        _ = client.AnswerSuggestion(id, accept);
+        Note(accept ? "Idea accepted, queued." : "Idea dismissed.");
+    }
+
     public string LastIntentMessage = "";
 
     bool Ok(string msg) { LastIntentMessage = msg; Note(msg); return true; }
@@ -473,6 +492,29 @@ public class LoftDesk : MonoBehaviour
             case "selectNext":
                 SelectNext();
                 return Ok(selectedAgentId == null ? "No animals to select." : $"Selected {AgentName(selectedAgentId)}.");
+            case "chat":
+            {
+                string id = S("agentId") ?? selectedAgentId;
+                if (S("text") == null) return Fail("I did not catch what to say.");
+                if (id == null || agents.Find(id) == null) return Fail("Point at an animal to talk to it.");
+                string text = S("text");
+                client.Then(client.Chat(id, text), res =>
+                {   // the SSE `say` event normally shows it; this covers a dropped stream
+                    var reply = (string)res?["reply"];
+                    var a = agents.Find(id);
+                    if (reply != null && a != null) LoftBridge.Say(a.GetComponent<AgentSkin>(), reply, 6f);
+                });
+                return Ok($"Talking to {AgentName(id)}.");
+            }
+            case "board":
+            {
+                string op = S("op") ?? "open", type = S("type")?.ToLowerInvariant();
+                if (!LoftBridge.HasPanels) return Fail("Boards are not available in this build yet.");
+                bool ok = op == "close" ? (type == null || type == "all" ? LoftBridge.Panels("CloseAll") : LoftBridge.Panels("Close", type))
+                                        : (type != null && LoftBridge.Panels("Open", type));
+                if (!ok) return Fail(type == null ? "Which board?" : $"I could not {op} the {type} board.");
+                return Ok(op == "close" ? "Board closed." : $"Opened the {type} board.");
+            }
             case "none":
                 return Ok(S("reply") ?? "I did not understand that.");
             default:
@@ -528,41 +570,8 @@ public class LoftDesk : MonoBehaviour
         return Ok($"Project: {ProjectName}.");
     }
 
-    // ---- wall boards ----
-    public void RefreshViews()
-    {
-        SetBoard("kanban", KanbanText());
-        SetBoard("log", string.Join("\n", eventLog.Skip(Math.Max(0, eventLog.Count - 6)).Select(s => LoftUtil.Trunc(s, 34))));
-        var r = ReviewTask();
-        SetBoard("notes", r == null ? $"Nothing to review yet.\nProject: {ProjectName}"
-            : $"{AgentName(r.agentId)} — {r.status.ToUpperInvariant()} · {r.projectId}\n" +
-              $"{(string.IsNullOrEmpty(r.diffStat) ? "" : r.diffStat + "\n")}{LoftUtil.Wrap(r.result, 40, string.IsNullOrEmpty(r.diffStat) ? 7 : 6)}");
-        if (preview != null) preview.Show(r?.raw);
-        var counts = agents.agents.Where(a => a != null).GroupBy(a => a.CurrentState).Select(g => $"{g.Key} {g.Count()}");
-        var skinsNow = agents.agents.Where(a => a != null).Select(a => a.GetComponent<AgentSkin>()).ToList();
-        double cost = skinsNow.Sum(k => k.costUsd ?? 0);
-        long tokens = skinsNow.Sum(k => k.tokens);
-        SetBoard("calendar", $"{agents.agents.Count}/{maxAgents} agents\n{string.Join("  ", counts)}\n" +
-                             $"{tokens / 1000}k tokens{(cost > 0 ? $" · ${cost:0.000}" : "")}\n{(Connected ? "● live" : "○ offline")}");
-    }
-
-    string KanbanText()
-    {
-        string Col(string label, params string[] statuses)
-        {
-            var list = tasks.Values.Where(t => statuses.Contains(t.status)).ToList();
-            var shown = list.Skip(Math.Max(0, list.Count - 2)).Select(t => LoftUtil.Trunc(FirstLine(t.title), 18));
-            return $"{label}({list.Count}): {string.Join(" | ", shown)}";
-        }
-        return $"{Col("ToDo", "queued")}\n{Col("Doing", "running")}\n{Col("Review", "review", "failed")}\n{Col("Done", "approved")}";
-    }
-
-    static void SetBoard(string id, string text)
-    {
-        var c = GameObject.Find($"Board_{id}")?.transform.Find("Content");
-        var tm = c != null ? c.GetComponent<TMPro.TMP_Text>() : null; // TextMeshPro SDF (LoftWorld.BuildBoard)
-        if (tm != null) tm.text = text;
-    }
+    // Boards read the same state on their own (LoftPanels.Pull).
+    public void RefreshViews() { }
 
     string AgentName(string id) => agents.Find(id)?.GetComponent<AgentSkin>()?.displayName ?? id;
     static string FirstLine(string s) => string.IsNullOrEmpty(s) ? "" : s.Split('\n')[0];
@@ -591,7 +600,8 @@ public class LoftDesk : MonoBehaviour
         if (move.sqrMagnitude > 0.01f)
         {
             var p = rig.position + rig.rotation * move.normalized * walkSpeed * Time.deltaTime;
-            rig.position = new Vector3(Mathf.Clamp(p.x, -6f, 6f), rig.position.y, Mathf.Clamp(p.z, 0.2f, 8f));
+            var wb = LoftBridge.WalkRect();
+            rig.position = new Vector3(Mathf.Clamp(p.x, wb.xMin, wb.xMax), rig.position.y, Mathf.Clamp(p.z, wb.yMin, wb.yMax));
         }
         if (!showDebug) return; // dev shortcuts only while the strip is up
         if (Input.GetKeyDown(KeyCode.Alpha1)) SpawnAgent("scout");

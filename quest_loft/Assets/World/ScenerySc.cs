@@ -27,63 +27,60 @@ public static class ScenerySc
         var planks = new[] { H("#8A5F3B"), H("#7B5434"), H("#946A44"), H("#85583A") };
         var logC = H("#7A5230"); var logD = H("#4D3220"); var stone = H("#8C8A82"); var stoneL = H("#A8A59A");
 
-        SceneKit.Planks(m, -LoftWorld.DECK_HALF, LoftWorld.DECK_HALF, LoftWorld.DECK_FRONT, LoftWorld.DECK_BACK, 0f, 0.34f, 0.012f, planks);
-        m.Beam(new Vector3(-LoftWorld.DECK_HALF, -0.15f, 0f), new Vector3(LoftWorld.DECK_HALF, -0.15f, 0f), 0.2f, 0.3f, logD, 0.03f);
-        for (float px = -7f; px <= 7f; px += 2.33f) m.Prism(new Vector3(px, -30f, 0.2f), new Vector3(px, -0.1f, 0.2f), 0.2f, 0.2f, 7, logD, false, true);
-        foreach (float sx in new[] { -LoftWorld.DECK_HALF + 0.08f, LoftWorld.DECK_HALF - 0.08f })
+        SceneKit.Planks(m, Plan.X0, Plan.X1, Plan.Z0, Plan.Z1, 0f, 0.34f, 0.012f, planks);
+        m.Beam(new Vector3(Plan.X0, -0.15f, 0f), new Vector3(Plan.X1, -0.15f, 0f), 0.2f, 0.3f, logD, 0.03f);
+        for (float px = Plan.X0 + 0.3f; px <= Plan.X1; px += 2.6f) m.Prism(new Vector3(px, -30f, 0.2f), new Vector3(px, -0.1f, 0.2f), 0.2f, 0.2f, 7, logD, false, true);
+        foreach (float sx in new[] { Plan.X0 + 0.08f, Plan.X1 - 0.08f })
         {
-            m.Prism(new Vector3(sx, 1.0f, 0.2f), new Vector3(sx, 1.0f, 10.3f), 0.07f, 0.07f, 6, logC, false, true);
-            m.Prism(new Vector3(sx, 0.5f, 0.2f), new Vector3(sx, 0.5f, 10.3f), 0.055f, 0.055f, 6, logC, false, true);
-            for (float pz = 0.2f; pz <= 10.3f; pz += 1.8f) m.Prism(new Vector3(sx, 0f, pz), new Vector3(sx, 1.1f, pz), 0.09f, 0.08f, 6, logD, false, true);
+            m.Prism(new Vector3(sx, 1.0f, 0.2f), new Vector3(sx, 1.0f, 17.8f), 0.07f, 0.07f, 6, logC, false, true);
+            m.Prism(new Vector3(sx, 0.5f, 0.2f), new Vector3(sx, 0.5f, 17.8f), 0.055f, 0.055f, 6, logC, false, true);
+            for (float pz = 0.2f; pz <= 17.9f; pz += 2.2f) m.Prism(new Vector3(sx, 0f, pz), new Vector3(sx, 1.1f, pz), 0.09f, 0.08f, 6, logD, false, true);
         }
         // boulders + lantern posts along the open front edge
-        foreach (float bx in new[] { -7.0f, -4.6f, 4.8f, 7.0f }) m.Blob(new Vector3(bx, 0.15f, 0.25f), new Vector3(0.65f, 0.45f, 0.5f), stone, stoneL, 3, 6, 0.2f, Quaternion.Euler(0, bx * 17, 0), true);
-        foreach (float lx in new[] { -2.6f, 2.6f })
+        foreach (float bx in new[] { -12.4f, -8f, 8f, 12.4f }) m.Blob(new Vector3(bx, 0.15f, 0.25f), new Vector3(0.65f, 0.45f, 0.5f), stone, stoneL, 3, 7, 0.15f);
+        foreach (float lx in new[] { -3f, 3f })
         {
             m.Prism(new Vector3(lx, 0f, 0.15f), new Vector3(lx, 0.95f, 0.15f), 0.07f, 0.06f, 6, logD, false, true);
             glow.Blob(new Vector3(lx, 1.08f, 0.15f), new Vector3(0.13f, 0.18f, 0.13f), H("#FF9F4A"), H("#FFD890"), 3, 6, 0.02f);
         }
 
         // log frame + shingle roof
-        float eaveY = 3.1f, ridgeY = 5.4f;
-        foreach (float px in new[] { -6.6f, 6.6f })
-            foreach (float pz in new[] { 5.2f, 7.65f, 10.1f })
-            {
-                m.Prism(new Vector3(px, 0f, pz), new Vector3(px, 3.2f, pz), 0.2f, 0.17f, 8, logC, false, true, 0.05f);
-                m.Box(new Vector3(px, 0.25f, pz), new Vector3(0.7f, 0.5f, 0.7f), stone, 0.08f);
-                m.Box(new Vector3(px, 0.62f, pz), new Vector3(0.55f, 0.28f, 0.55f), stoneL, 0.08f);
-            }
-        foreach (float bz in new[] { 5.2f, 7.65f, 10.1f }) m.Prism(new Vector3(-7.2f, 3.15f, bz), new Vector3(7.2f, 3.15f, bz), 0.19f, 0.19f, 8, logD, true, true);
-        foreach (float px in new[] { -6.6f, 6.6f }) m.Prism(new Vector3(px, 3.15f, 5.2f), new Vector3(px, 3.15f, 10.1f), 0.17f, 0.17f, 8, logD, true, true);
+        foreach (var pp in Plan.Posts)
+        {
+            m.Prism(new Vector3(pp.x, 0f, pp.y), new Vector3(pp.x, SceneKit.POST_H, pp.y), 0.24f, 0.2f, 8, logC, false, true, 0.05f);
+            m.Box(new Vector3(pp.x, 0.25f, pp.y), new Vector3(0.74f, 0.5f, 0.74f), stone, 0.08f);
+            m.Box(new Vector3(pp.x, 0.62f, pp.y), new Vector3(0.58f, 0.28f, 0.58f), stoneL, 0.08f);
+        }
+        foreach (float bz in new[] { 4f, 10.3f, 16.6f }) m.Prism(new Vector3(-13.2f, SceneKit.POST_H - 0.05f, bz), new Vector3(13.2f, SceneKit.POST_H - 0.05f, bz), 0.21f, 0.21f, 8, logD, true, true);
+        foreach (float px in new[] { -12.5f, -5f, 5f, 12.5f }) m.Prism(new Vector3(px, SceneKit.POST_H - 0.05f, 2.9f), new Vector3(px, SceneKit.POST_H - 0.05f, 17.5f), 0.19f, 0.19f, 8, logD, true, true);
         Color s0 = H("#5B4636"), s1 = H("#8D7660"), u0 = H("#4A3626"), u1 = H("#6B523C");
-        SceneKit.Roof(m, new Vector3(0, eaveY, 4.5f), new Vector3(0, ridgeY, 7.65f), s0, s1, u0, u1, logD, false);
-        SceneKit.Roof(m, new Vector3(0, eaveY, 10.8f), new Vector3(0, ridgeY, 7.65f), s0, s1, u0, u1, logD, false);
-        m.Prism(new Vector3(-7.8f, ridgeY + 0.04f, 7.65f), new Vector3(7.8f, ridgeY + 0.04f, 7.65f), 0.3f, 0.3f, 6, H("#3E2D20"), true, true);
+        SceneKit.Roof(m, new Vector3(0, SceneKit.EAVE_Y, SceneKit.EAVE_FRONT), new Vector3(0, SceneKit.RIDGE_Y, SceneKit.RIDGE_Z), s0, s1, u0, u1, logD, false, SceneKit.ROOF_HX);
+        SceneKit.Roof(m, new Vector3(0, SceneKit.EAVE_Y, SceneKit.EAVE_BACK), new Vector3(0, SceneKit.RIDGE_Y, SceneKit.RIDGE_Z), s0, s1, u0, u1, logD, false, SceneKit.ROOF_HX);
+        m.Prism(new Vector3(-14f, SceneKit.RIDGE_Y + 0.04f, SceneKit.RIDGE_Z), new Vector3(14f, SceneKit.RIDGE_Y + 0.04f, SceneKit.RIDGE_Z), 0.32f, 0.32f, 6, H("#3E2D20"), true, true);
 
-        // back wall: stacked logs, stone fireplace with a fire
-        for (int i = 0; i < 10; i++) m.Prism(new Vector3(-7.4f, 0.17f + i * 0.31f, 10.5f), new Vector3(7.4f, 0.17f + i * 0.31f, 10.5f), 0.16f, 0.16f, 8, m.Jit(logC, 0.1f), true, true);
-        for (int i = 0; i < 26; i++)
+        // back wall: stacked logs, stone fireplace with a fire behind the lounge
+        for (int i = 0; i < 14; i++) m.Prism(new Vector3(-13f, 0.17f + i * 0.31f, 17.9f), new Vector3(13f, 0.17f + i * 0.31f, 17.9f), 0.16f, 0.16f, 6, m.Jit(logC, 0.08f), true, true);
+        for (int i = 0; i < 34; i++)
         {
-            float bx = -5.2f + (i % 6) * 0.42f + (i / 6 % 2) * 0.2f, by = 0.2f + (i / 6) * 0.33f;
-            m.Box(new Vector3(bx, by + 0.1f, 10.25f), new Vector3(0.4f, 0.3f, 0.35f), m.Jit(m.R() < 0.5f ? stone : stoneL, 0.1f), 0.02f);
+            float bx = -12.2f + (i % 6) * 0.42f + (i / 6 % 2) * 0.2f, by = 0.2f + (i / 6) * 0.33f;
+            m.Box(new Vector3(bx, by + 0.1f, 17.6f), new Vector3(0.4f, 0.3f, 0.35f), m.Jit(m.R() < 0.5f ? stone : stoneL, 0.1f), 0.02f);
         }
-        glow.Blob(new Vector3(-4.4f, 0.4f, 10.0f), new Vector3(0.45f, 0.4f, 0.12f), H("#FF6A1F"), H("#FFD060"), 3, 6, 0.1f);
+        glow.Blob(new Vector3(-11.2f, 0.4f, 17.3f), new Vector3(0.45f, 0.4f, 0.12f), H("#FF6A1F"), H("#FFD060"), 3, 6, 0.1f);
 
-        // seat, rug, agents' wool rug
-        SceneKit.Rug(m, new Vector3(0, 0, 6.6f), 1.35f, new[] { H("#C9B28A"), H("#7A2E2A"), H("#C9B28A") });
-        BeachSc.Lounger(m, new Vector3(0f, 0f, 6.9f));
-        SceneKit.RectRug(m, new Vector3(0, 0, 3.2f), new Vector2(6.4f, 2.6f), H("#7A2E2A"), H("#CDB88F"), H("#B59E72"));
+        SceneKit.Seat(m, new[] { H("#C9B28A"), H("#7A2E2A"), H("#C9B28A") });
+        SceneKit.Furniture(m, glow, new SceneKit.Style { wood = H("#8A5F3B"), wood2 = H("#4D3220"), fabric = H("#B9A27A"), fabric2 = H("#7A2E2A"), metal = H("#2F2A26"), accent = H("#C9663A"), plant = H("#3C7A4A"), screen = H("#BFE3D0"), pot = H("#6B523C") });
 
-        // hanging lanterns under the front beam
-        foreach (float lx in new[] { -6.0f, 6.0f })
-        {
-            m.Beam(new Vector3(lx, 3.0f, 5.3f), new Vector3(lx, 2.6f, 5.3f), 0.015f, 0.015f, logD, 0f);
-            glow.Blob(new Vector3(lx, 2.45f, 5.3f), new Vector3(0.12f, 0.17f, 0.12f), H("#FFA34F"), H("#FFD890"), 3, 6, 0.02f);
-        }
+        // hanging lanterns under the beams
+        foreach (float lx in new[] { -9f, 0f, 9f })
+            foreach (float lz in new[] { 4f, 10.3f })
+            {
+                m.Beam(new Vector3(lx, SceneKit.POST_H - 0.1f, lz), new Vector3(lx, SceneKit.POST_H - 0.6f, lz), 0.015f, 0.015f, logD, 0f);
+                glow.Blob(new Vector3(lx, SceneKit.POST_H - 0.76f, lz), new Vector3(0.14f, 0.2f, 0.14f), H("#FFA34F"), H("#FFD890"), 3, 6, 0.02f);
+            }
 
         // ---- terrain: foreground slope + far peaks ----
         var ter = new Mk(34);
-        ter.Grid(-130f, 130f, -2f, -90f, 52, 40, Terrain, TerrainColor);
+        ter.Grid(-130f, 130f, 22f, -90f, 52, 44, Terrain, TerrainColor);
         ter.Grid(-1100f, 1100f, -90f, -1500f, 110, 78, Terrain, TerrainColor);
         x.Mesh(ter, "Terrain", x.Lit());
 
@@ -91,12 +88,12 @@ public static class ScenerySc
         for (int i = 0; i < 70; i++)
         {
             float tx = ter.R(-55f, 55f), tz = -ter.R(4f, 80f);
-            if (Mathf.Abs(tx) < 3f && tz > -20f) continue;
+            if (Mathf.Abs(tx) < 15f && tz > -20f) continue;
             float ty = Terrain(tx, tz);
             if (ty < LAKE_Y + 2f) continue;
             SceneKit.Pine(trees, new Vector3(tx, ty - 0.3f, tz), ter.R(6f, 13f), H("#1F4A33"), H("#3C7A4A"));
         }
-        foreach (var (px, pz, h) in new[] { (-11.5f, -3f, 10f), (12f, -3.5f, 11f), (-16f, -9f, 12f), (17f, -10f, 12f) })
+        foreach (var (px, pz, h) in new[] { (-15.5f, -1f, 11f), (16f, -1.5f, 12f), (-20f, -8f, 13f), (21f, -9f, 13f), (-17f, 8f, 12f), (17.5f, 8f, 12f) })
             SceneKit.Pine(trees, new Vector3(px, Terrain(px, pz) - 0.2f, pz), h, H("#1F4A33"), H("#43854F"));
         x.Mesh(m, "Shell", x.Lit());
         x.Mesh(glow, "Glow", x.Unlit(null, 1.3f));

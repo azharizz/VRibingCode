@@ -16,10 +16,11 @@ namespace VirtualLoft.XR
         public LoftDesk desk;
         public LoftWorld world;
         public LoftTextEntry entry;
+        public LoftMove move;
         public Func<string> voiceStatus = () => "";
         public Action<string> say = s => { };   // message to the CEO (card or note)
 
-        public enum Page { Main, Keys }
+        public enum Page { Main, Keys, Boards }
         public Page page = Page.Main;
         public bool IsOpen { get; private set; }
         public bool pinned;                      // opened by X/M: stays until toggled/B
@@ -58,7 +59,7 @@ namespace VirtualLoft.XR
         public bool Back()
         {
             if (!IsOpen) return false;
-            if (page == Page.Keys) { page = Page.Main; Rebuild(); }
+            if (page != Page.Main) { page = Page.Main; Rebuild(); }
             else SetOpen(false);
             return true;
         }
@@ -92,7 +93,7 @@ namespace VirtualLoft.XR
             if (desk == null) return "";
             return string.Join("|", LoftWorld.ThemeIds()) + "#" + (world != null && world.Current != null ? world.Current.id : "") + "#" +
                    string.Join(",", desk.projects.Select(p => (string)p["id"])) + "#" + desk.projectId + "#" + page + "#" +
-                   (desk.formDraft != null) + "#" + desk.FormSummary() + "#" + voiceStatus() + "#" + (desk.selectedAgentId ?? "");
+                   (desk.formDraft != null) + "#" + desk.FormSummary() + "#" + voiceStatus() + "#" + (desk.selectedAgentId ?? "") + "#" + (move != null && move.SmoothWalk) + "#" + LoftBridge.HasPanels;
         }
 
         // ---- layout ---------------------------------------------------------------
@@ -104,7 +105,7 @@ namespace VirtualLoft.XR
             foreach (Transform t in root) if (t.name == "Back") LoftUtil.Kill(t.gameObject);
             signature = Sig();
             y = -0.02f;
-            if (page == Page.Main) BuildMain(); else BuildKeys();
+            if (page == Page.Main) BuildMain(); else if (page == Page.Boards) BuildBoards(); else BuildKeys();
             float h = -y + 0.02f;
             var back = LoftUi.Quad(root, "Back", new Vector3(0f, 0f, -0.01f), new Vector2(W + 0.03f, h), LoftUi.Panel, 0.01f);
             content.localPosition = new Vector3(0f, h / 2f, 0f);
@@ -166,12 +167,35 @@ namespace VirtualLoft.XR
             Note("Point at nothing, hold A and say:\n\"add a designer, make it a panda\"", new Color(0.8f, 0.86f, 0.95f), 0.019f, 2);
             Row(("keys", "KEYBOARD...", LoftUi.Neutral, () => { page = Page.Keys; Rebuild(); }, 0f, false));
 
+            Header("BOARDS AND MOVING");
+            bool walk = move != null && move.SmoothWalk;
+            Row(("boards", "OPEN BOARDS...", LoftUi.Neutral, () => { page = Page.Boards; Rebuild(); }, 0f, false),
+                ("walk", walk ? "SMOOTH WALK: ON" : "SMOOTH WALK: OFF", LoftUi.Neutral, () => { if (move != null) { move.SmoothWalk = !move.SmoothWalk; Rebuild(); } }, 0f, walk));
+            Note("Teleport: push the right stick forward, let go to go.", new Color(0.8f, 0.86f, 0.95f), 0.019f, 1);
+
             y -= 0.03f; // clear gap: dangerous actions live apart from the rest
             var rule = LoftUi.Quad(content, "Rule", new Vector3(0f, y, 0f), new Vector2(W, 0.003f), LoftUi.Danger, 0.002f);
             y -= 0.012f;
             Header("DANGER  (hold the trigger)");
             Row(("stop", "STOP ALL", LoftUi.Danger, () => { desk.Stop(); say("Stopped everyone."); }, 1.0f, false),
                 ("exit", "EXIT", LoftUi.Danger, () => desk.ExitApp(), 1.5f, false));
+        }
+
+        void BuildBoards()
+        {
+            var title = LoftUi.Text(content, "Title", new Vector3(0f, y - 0.016f, 0f), 0.026f, Color.white, W, TextAlignmentOptions.Left);
+            title.text = LoftBridge.HasPanels ? "BOARDS" : "BOARDS (not in this build yet)";
+            y -= 0.042f;
+            var types = LoftBridge.BoardTypes;
+            for (int i = 0; i < types.Length; i += 3)
+                Row(types.Skip(i).Take(3).Select(t => ("board_" + t, Cap(t), LoftUi.Neutral, (Action)(() => OpenBoard(t)), 0f, false)).ToArray());
+            Row(("board_closeall", "CLOSE ALL", LoftUi.Neutral, () => { if (!LoftBridge.Panels("CloseAll")) say("Boards are not available yet."); }, 0f, false),
+                ("board_back", "BACK", LoftUi.Neutral, () => { page = Page.Main; Rebuild(); }, 0f, false));
+        }
+
+        void OpenBoard(string type)
+        {
+            if (!LoftBridge.Panels("Open", type)) say("Boards are not available yet.");
         }
 
         void BuildKeys()

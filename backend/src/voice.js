@@ -4,11 +4,13 @@
 // projects, roles, review queue and scenes. Total: nothing here throws on bad model output.
 import { MAX_AGENTS, MODEL_ID_RE, SKINS } from "./agents.js";
 import { HttpError } from "./orchestrator.js";
+import { WRITE_TOOLS } from "./tools.js";
 
 export const SCENES = ["beach", "scenery", "city", "galaxy", "party", "loft", "meadow", "night"];
 const RISKY = new Set(["approve", "reject", "remove"]);
-const IMMEDIATE = new Set(["scene", "party", "selectNext", "none"]); // needsConfirm false
-export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "selectNext", "none"];
+const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "none"]); // needsConfirm false
+export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "selectNext", "chat", "board", "none"];
+export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "files", "diff"];
 
 // Spoken code words -> characters ("slash health" -> "/health", "index dot js" -> "index.js").
 export function fixCodeWords(text) {
@@ -76,7 +78,8 @@ export function normalizeIntent(raw, ctx) {
       if (name) i.name = name;
       const role = ctx.roles.find((r) => norm(r.id) === norm(o.roleId)) ?? ctx.roles.find((r) => norm(r.title) === norm(o.roleId));
       if (role) i.roleId = role.id;
-      const description = clip(o.description, 500);
+      const wanted = str(o.roleId);
+      const description = clip(o.description || (!role && wanted ? wanted : ""), 500); // "data analyst" is a need, not a role id
       if (description) i.description = description; // no matching role: Unity can offer POST /roles/draft with this
       const skin = norm(o.skin);
       if (SKINS.includes(skin) || skin === "random") i.skin = skin;
@@ -118,6 +121,19 @@ export function normalizeIntent(raw, ctx) {
     }
     case "selectNext":
       return { action };
+    case "chat": {
+      const a = agent(o.agentId, o.agent) ?? pointed;
+      const text = clip(o.text ?? o.message, 1000);
+      if (!text) return none("What do you want to say?");
+      return a ? { action, agentId: a.id, text } : none("Who are you talking to? Point at an agent or say its name.");
+    }
+    case "board": {
+      const op = norm(o.op);
+      const type = norm(o.type ?? o.boardType);
+      if (!["open", "close"].includes(op)) return none("Do you want to open or close a board?");
+      if (!BOARD_TYPES.includes(type) && !(op === "close" && type === "all")) return none(`Boards I know: ${BOARD_TYPES.join(", ")}.`);
+      return { action, op, type };
+    }
     default:
       return none(str(o.reply) || "Sorry, I did not catch that. Say it again?");
   }
@@ -131,7 +147,7 @@ export function summarize(i, ctx) {
   const s = {
     goal: () => `Give the team the goal ${q(i.goal)}`,
     task: () => `Ask ${name(i.agentId)} to ${q(i.title)}`,
-    spawn: () => `Add ${i.name ?? "a new agent"}${i.skin && i.skin !== "random" ? ` (${i.skin})` : ""}${i.roleId ? ` as ${i.roleId}` : i.description ? ` for ${q(i.description)}` : ""}`,
+    spawn: () => `Add ${i.name ?? i.role?.title ?? "a new agent"}${i.skin && i.skin !== "random" ? ` (${i.skin})` : ""}${i.roleId ? ` as ${i.roleId}` : i.description ? ` for ${q(i.description)}` : ""}`,
     remove: () => `Remove ${name(i.agentId)} from the team`,
     scene: () => `Switch to the ${i.sceneId} scene`,
     approve: () => `Approve ${q(task(i.taskId)?.title)} and merge it`,
@@ -140,6 +156,8 @@ export function summarize(i, ctx) {
     party: () => (i.on ? "Start the party" : "Stop the party"),
     project: () => `Switch to project ${ctx.projects.find((p) => p.id === i.projectId)?.name ?? i.projectId}`,
     selectNext: () => "Select the next agent",
+    chat: () => `Say to ${name(i.agentId)}: ${q(i.text)}`,
+    board: () => (i.type === "all" ? "Close all boards" : `${i.op === "open" ? "Open" : "Close"} the ${i.type} board`),
     none: () => i.reply,
   };
   return clip(s[i.action](), 160);
@@ -162,8 +180,10 @@ export function buildPrompt(ctx, text, scene) {
     `Pick "action" from:\n` +
     `- goal {goal}: a big objective for the whole team\n` +
     `- task {agentId,title}: work for ONE agent. Animals mean agents ("the fox"). A bare instruction with a pointed-at agent is a task for it.\n` +
-    `- spawn {name?,roleId?,description?,skin?,model?}: add an agent. skin is one of ${SKINS.join(", ")}. roleId must be one listed above, else put the need in description.\n` +
+    `- spawn {name?,roleId?,description?,skin?,model?}: add an agent. For a job with no matching role ("data analyst") put it in description. skin is one of ${SKINS.join(", ")}. roleId must be one listed above, else put the need in description.\n` +
     `- remove {agentId} · stop {agentId?} (no agentId = stop everyone) · approve · reject {feedback?} (about the review queue)\n` +
+    `- chat {agentId,text}: the CEO just talks to an agent (greeting, question, small talk, "how is it going"). Not an instruction to do work. Keep their words.\n` +
+    `- board {op:"open"|"close",type}: show or hide a panel in the room. type is one of ${BOARD_TYPES.join(", ")} (close also takes "all"). Hints: tasks/kanban=kanban, "what's waiting"=review, activity=log, website/screen=preview, notes, folders=files, changes=diff.\n` +
     `- scene {sceneId} · party {on:true|false} · project {projectId} · selectNext (next agent)\n` +
     `- none {reply}: not a command or unclear; reply briefly in the CEO's language\n` +
     `Rules: keep task titles/goals as the CEO's own words, in English if mixed. Fix spoken code words: "slash health" means "/health", "dot js" means ".js". ` +
@@ -174,12 +194,23 @@ export function buildPrompt(ctx, text, scene) {
 }
 
 // ask(system, prompt) -> model text; extract(text) -> parsed JSON or null.
-export function createVoice({ snapshot, ask, extract, stt = null }) {
+// draft(description) -> {title,instructions,tools}: writes a role for a spawn with no matching one.
+export function createVoice({ snapshot, ask, extract, stt = null, draft = null }) {
   function context({ agentId, projectId } = {}) {
     const s = snapshot();
     if (agentId && !s.agents.some((a) => a.id === agentId)) throw new HttpError(404, `no agent '${agentId}'`);
     if (projectId && !s.projects.some((p) => p.id === projectId)) throw new HttpError(404, `no project '${projectId}'`);
     return { agents: s.agents, projects: s.projects, roles: s.roles, review: s.tasks.filter((t) => t.status === "review"), pointed: agentId || null, projectId: projectId || null };
+  }
+
+  // A spawn with no matching role gets an AI-written one, so the headset can spawn it in one POST /agents.
+  async function withRole(intent) {
+    try {
+      const role = await draft(intent.description);
+      return { ...intent, role, writes: role.tools.filter((t) => WRITE_TOOLS.includes(t)) };
+    } catch {
+      return intent; // still valid: POST /agents {description} drafts the role on the server
+    }
   }
 
   // -> { transcript, summary, needsConfirm, risky, intent }. Never throws for model problems.
@@ -193,6 +224,7 @@ export function createVoice({ snapshot, ask, extract, stt = null }) {
       try {
         const { system, prompt } = buildPrompt(ctx, text, scene);
         intent = normalizeIntent(extract(await ask(system, prompt)), ctx);
+        if (intent.action === "spawn" && !intent.roleId && intent.description && draft) intent = await withRole(intent);
       } catch (err) {
         warning = String(err?.message ?? err).slice(0, 160);
         intent = none("I could not reach my language model just now. Please try again.");

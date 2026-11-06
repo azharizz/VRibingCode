@@ -142,7 +142,6 @@ public static class WorldShot
         long tris = 0; int draws = 0; int renderers = 0;
         var all = new System.Collections.Generic.List<Renderer>(UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None));
         all.AddRange(GameObject.Find("ThemeProps").GetComponentsInChildren<Renderer>());
-        foreach (var bd in LoftWorld.Boards) all.AddRange(GameObject.Find("Board_" + bd.id).GetComponentsInChildren<Renderer>());
         all.AddRange(Camera.main.GetComponentsInChildren<Renderer>(true).Where(q => false));
         foreach (var r in all.Distinct())
         {
@@ -163,17 +162,6 @@ public static class WorldShot
     static void MeasureText(StringBuilder sb, LoftWorld w, Camera cam)
     {
         var eye = cam.transform.position;
-        foreach (var (id, _, pos, size) in LoftWorld.Boards)
-        {
-            var go = GameObject.Find($"Board_{id}");
-            if (go == null) continue;
-            var c = go.transform.Find("Content").GetComponent<TMP_Text>();
-            var t = go.transform.Find("Title").GetComponent<TMP_Text>();
-            float lh = c.GetPreferredValues("Hg").y, th = t.GetPreferredValues("Hg").y;
-            float d = Vector3.Distance(eye, c.transform.position);
-            float ang(float h) => 2f * Mathf.Atan(h / 2f / d) * Mathf.Rad2Deg;
-            sb.AppendLine($"board {id}: dist {d:0.00} m, body line {lh:0.0000} m = {ang(lh):0.00} deg, title line {th:0.000} m = {ang(th):0.00} deg, fontSize {c.fontSize:0.00}, font {c.font?.name}, lines shown {c.textInfo.lineCount}");
-        }
         foreach (var tm in UnityEngine.Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None).Where(x => x.transform.parent != null && x.transform.parent.name.StartsWith("Agent_")).Take(2))
         {
             float lh = tm.GetPreferredValues("Hg").y, d = Vector3.Distance(eye, tm.transform.position);
