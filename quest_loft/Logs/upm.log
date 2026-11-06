@@ -1,0 +1,48 @@
+[2026-11-02T11:58:30.657Z][INFO] Command-line: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/PackageManager/Server/UnityPackageManager server -s 87608 --ipc-path /tmp/Unity-Upm-87608.sock -l 2 --log-file /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Logs/upm.log
+[2026-11-02T11:58:30.671Z][INFO] IPC server started (IPC path=/tmp/Unity-Upm-87608.sock).
+[2026-11-02T11:58:30.671Z][INFO] Hint: To connect to this UPM instance, launch Unity with the command-line parameter -upmIpcPath Upm-87608.
+[2026-11-02T11:58:31.548Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T11:58:31.632Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T11:58:31.633Z][INFO] project:list-packages --> 200 (85 ms)
+[2026-11-02T11:58:31.999Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T11:58:32.012Z][INFO] config:project:get-registries <-- Request received
+params: {}
+[2026-11-02T11:58:32.015Z][INFO] config:project:get-registries --> 200 (3 ms)
+[2026-11-02T11:58:32.055Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T11:58:32.056Z][INFO] project:list-packages --> 200 (57 ms)
+[2026-11-02T11:58:33.492Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T11:58:33.517Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T11:58:33.566Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T11:58:33.566Z][INFO] project:list-packages --> 200 (74 ms)
+[2026-11-02T11:58:33.567Z][INFO] config:project:get-registries <-- Request received
+params: {}
+[2026-11-02T11:58:33.571Z][INFO] config:project:get-registries --> 200 (4 ms)
+[2026-11-02T11:58:33.590Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T11:58:33.590Z][INFO] project:list-packages --> 200 (73 ms)
+[2026-11-02T11:58:33.626Z][INFO] packages:get-all-packageinfo <-- Request received
+params: {}
+[2026-11-02T11:58:33.652Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T11:58:34.184Z][INFO] packages:get-all-packageinfo --> 200 (558 ms)
+[2026-11-02T11:58:34.219Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T11:58:34.219Z][INFO] project:list-packages --> 200 (567 ms)
+[2026-11-02T11:58:34.510Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T11:58:34.572Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T11:58:34.573Z][INFO] project:list-packages --> 200 (63 ms)
+[2026-11-02T12:00:26.625Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T12:00:26.636Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-11-02T12:00:26.709Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T12:00:26.710Z][INFO] project:list-packages --> 200 (85 ms)
+[2026-11-02T12:00:26.710Z][INFO] config:project:get-registries <-- Request received
+params: {}
+[2026-11-02T12:00:26.715Z][INFO] config:project:get-registries --> 200 (5 ms)
+[2026-11-02T12:00:26.716Z][WARN] Package [com.unity.nuget.newtonsoft-json] has a non-valid signature — status: Unsigned, reason: No attestation file found, errorCode: ERR_ATTESTATION_NOT_FOUND
+[2026-11-02T12:00:26.716Z][INFO] project:list-packages --> 200 (80 ms)
+[2026-11-02T12:00:54.926Z][INFO] Shutting down UnityPackageManager: parent process [87608] is no longer running.

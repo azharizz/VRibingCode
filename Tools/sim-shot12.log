@@ -1,0 +1,1088 @@
+Unity Editor version:    6000.6.7f1 (b22767f04f04)
+Branch:                  6000.6/staging
+Build type:              Release
+Batch mode:              NO
+macOS version:           Version 14.6.1 (Build 23G93)
+Darwin version:          23.6.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        16384 MB
+Date:                    2026-11-02T11:54:59Z
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client
+VBCSCompilerPreWarmer: watching VBCSCompiler (PID 87212)
+VBCSCompilerPreWarmer: pre-warm launched (dotnet PID 87214)
+VBCSCompiler prewarm took 2.51 ms
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-azharie doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 87215)
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/PackageManager/Server/UnityPackageManager
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/MacOS/Unity
+-projectPath
+quest_loft
+-logFile
+Tools/sim-shot12.log
+Successfully changed project path to: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-remapper-allocator-initial-capacity=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-main-allocator-mimalloc-enabled=1"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie" at "2026-11-02T11:55:00.020006Z"
+Logging is directed to a specific file, skipping project log.
+Player connection [8590462784]  Target information:
+
+Player connection [8590462784]  * "[IP] 192.168.18.50 [Port] 55504 [Flags] 2 [Guid] 242533047 [EditorId] 242533047 [Version] 1048832 [Id] OSXEditor(0,Azhar-Izzannada.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8590462784] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8590462784] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-87210" after 0.1 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              4481b9c7adde4958b6986eb6498f7b59
+  Correlation Id:          3fbfa5b4375b88071f618067d9c9cb8d
+  External correlation Id: 4007883868853471328
+  Machine Id:              A8knmJu4QVJsst31a7pUeu1BBlg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-azharie" (connect: 0.17s, validation: 0.02s, handshake: 0.22s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie-notifications" at "2026-11-02T11:55:00.26274Z"
+[Licensing::Module] Connected to LicensingClient (PId: 87215, launch time: 0.00, total connection time: 0.42s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968537812619-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.43s
+[Licensing::Module] Licensing is initialized (took 0.08s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+Initialising UDS system complete:
+  - System type: Client
+  - Resource namespace: 35571781078b0bc8bdd66070b9a59cb0
+  - Shared memory size: 1073741824
+  - Command buffer id: 1052672
+  - Command buffer size: 8192
+  - Hashmap size: 4194304
+  - Service connected: false
+Launching Unity Data Store - /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/Unity.DataStore 
+Unity Data Store artifact dir = Library/DataStore, working dir = /Users/azharie/Documents/azhar_project/vr_games/quest_loftUnity Data Store running and initialised
+Refreshing native plugins compatible for Editor in 7.80 ms, found 5 plugins.
+[Physics::Module] Selected backend (deferred post-plugins).
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.6.7f1 (b22767f04f04)
+[EntityIdStore] init: VM path (explicit commit), pageSize=16384, blockCount=262144, entitiesPerBlock=1024, blocksPerSlotPage=0, slots reserved=4294967296 bytes
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+GfxDevice: creating device client; kGfxThreadingModeThreaded
+ preferred device: Apple M2 (high power)
+Metal devices available: 1
+0: Apple M2 (high power)
+Using device Apple M2 (high power)
+Initializing Metal device caps: Apple M2
+Mac GPU Family: 2
+Apple GPU Family: 8
+MSL Version: 3.0
+Has Float MSAA: 1
+Has Float Filtering: 1
+ReadWrite Texture Tier: 2
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/BCLExtensions/runtime/netstandard2.1'
+Mono path[2] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56210
+CodeReloadManager initialized
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.001314 seconds.
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.740 seconds
+Domain Reload Profiling: 1045ms
+	BeginReloadAssembly (67ms)
+		CreateAndSetChildDomain (22ms)
+	RebuildCommonClasses (3ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (30ms)
+	LoadAllAssembliesAndSetupDomain (192ms)
+		LoadAssemblies (46ms)
+		TypeCache.Refresh (138ms)
+			TypeCache.ScanAssembly (127ms)
+		AnalyzeDomain (0ms)
+	FinalizeReload (741ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (52ms)
+			BeforeProcessingInitializeOnLoad (63ms)
+			ProcessInitializeOnLoadAttributes (61ms)
+			ProcessInitializeOnLoadMethodAttributes (452ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 21 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.nuget.newtonsoft-json@3.2.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.nuget.newtonsoft-json@74deb55db2a0)
+    com.unity.xr.management@4.5.4 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.management@e3a3882b360a)
+    com.unity.xr.legacyinputhelpers@3.0.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.legacyinputhelpers@3f62d634f63b)
+    com.unity.inputsystem@1.20.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.inputsystem@2436e68c60c4)
+    com.unity.xr.core-utils@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.core-utils@a8b900321199)
+  Built-in packages:
+    com.unity.textmeshpro@5.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.textmeshpro@5861d0377263)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.xr@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.ugui@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.ugui@eb824e41fbc7)
+    com.unity.modules.uielements@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.physics@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.ui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.imgui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.audio@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.hierarchycore)
+    com.unity.modules.animation@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.physicscore2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physicscore2d)
+  Embedded packages:
+    com.unity.xr.openxr@file:/Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr)
+[Package Manager] com.unity.textmeshpro is deprecated: This package is no longer supported. TextMeshPro functionalities are now included in the com.unity.ugui package. To continue using them, consider adding it to your project dependencies.
+[Subsystems] Looking for new subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] Novel subsystem found at Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] No descriptors matched for  examples in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Subsystems] 1 'inputs' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] 1 'displays' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] No descriptors matched for  meshings in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Package Manager] Done registering packages in 0.01 seconds
+[ScriptCompilation] Requested script compilation because: AssetDatabase observed changes in script compilation related files
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 0 Duration: 0s787ms
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.dll (+2 others) [CacheMiss f3ab1c8f4903534c4263b4b28f62d19200000000000000000000000000000006]
+[327/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[382/432    0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.dll (+2 others)
+Packages/com.unity.xr.openxr/Runtime/OpenXRProjectValidation.cs(96,188): warning CS0618: 'AndroidArchitecture.X86_64' is obsolete: 'X86_64 is no longer supported.'
+Packages/com.unity.xr.openxr/Runtime/Features/OpenXRInteractionFeature.cs(122,39): warning UAC1001: Field 'deviceInfos' type 'UnityEngine.XR.OpenXR.Features.OpenXRInteractionFeature.DeviceConfig' is skipped by serialization (missing the [Serializable] attribute). Refer to the Serialization rules analyzer reference. (https://docs.unity3d.com/6000.6/Documentation/Manual/script-serialization-analyzer.html#uac1001)
+[           0s] Csc Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.dll (+2 others) [CacheWrite f3ab1c8f4903534c4263b4b28f62d19200000000000000000000000000000006]
+[405/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.dll, with 144 defines and 274 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[406/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.Editor.dll, with 142 defines and 306 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[407/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.Features.MetaQuestSupport.Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.Features.MetaQuestSupport.Editor.dll, with 141 defines and 306 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[408/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.Features.MetaQuestSupport.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.Features.MetaQuestSupport.dll, with 142 defines and 272 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[409/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.Features.OculusQuestSupport.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.Features.OculusQuestSupport.dll, with 142 defines and 273 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[410/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.Features.MockRuntime.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.Features.MockRuntime.dll, with 142 defines and 273 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[411/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.dll, with 140 defines and 305 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[412/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Assembly-CSharp.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp.dll, with 142 defines and 288 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[413/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.dll
+[416/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.pdb
+[429/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Assembly-CSharp-Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll, with 140 defines and 324 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+*** Tundra build success (0.77 seconds), 13 items updated, 432 evaluated
+Packages/com.unity.xr.openxr/Runtime/OpenXRProjectValidation.cs(96,188): warning CS0618: 'AndroidArchitecture.X86_64' is obsolete: 'X86_64 is no longer supported.'
+Packages/com.unity.xr.openxr/Runtime/Features/OpenXRInteractionFeature.cs(122,39): warning UAC1001: Field 'deviceInfos' type 'UnityEngine.XR.OpenXR.Features.OpenXRInteractionFeature.DeviceConfig' is skipped by serialization (missing the [Serializable] attribute). Refer to the Serialization rules analyzer reference. (https://docs.unity3d.com/6000.6/Documentation/Manual/script-serialization-analyzer.html#uac1001)
+Total cache size 79991958
+AssetDatabase: script compilation time: 1.138698s
+Total cache size after purge 79991958, took 00:00:00.0201215
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.344 seconds
+Domain Reload Profiling: 668ms
+	BeginReloadAssembly (125ms)
+		DisableScriptedObjects (12ms)
+		CreateAndSetChildDomain (29ms)
+	RebuildCommonClasses (6ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (21ms)
+	LoadAllAssembliesAndSetupDomain (159ms)
+		LoadAssemblies (107ms)
+		TypeCache.Refresh (29ms)
+			TypeCache.ScanAssembly (21ms)
+		AnalyzeDomain (8ms)
+			BuildScriptInfoCaches (6ms)
+	FinalizeReload (344ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (8ms)
+			BeforeProcessingInitializeOnLoad (68ms)
+			ProcessInitializeOnLoadAttributes (64ms)
+			ProcessInitializeOnLoadMethodAttributes (32ms)
+		AwakeInstancesAfterBackupRestoration (12ms)
+Starting new worker id: 0 with log in /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Logs/AssetImportWorkerHW0.log
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+
+Asset Pipeline Refresh (id=4c6f3c2f10f2b4b55bb13df26625a8c7): Total: 2.052 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=496 ms
+		Asset DB Callback time: managed=55 ms, native=14 ms
+		Scripting: domain reloads=1, domain reload time=336 ms, compile time=1140 ms, other=8 ms
+		Project Asset Count: scripts=369, non-scripts=281
+		Asset File Changes: new=0, changed=1, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokePackagesCallback: 11.718ms
+	ApplyChangesToAssetFolders: 0.112ms
+	Scan: 80.686ms
+	Collect global state as custom dependencies: 4.221ms
+	OnSourceAssetsModified: 0.351ms
+	CategorizeScriptCompilationAssets: 3.970ms
+	ProcessAssetsWithTransientArtifactChanges: 9.932ms
+	CategorizeAssets: 4.892ms
+	CompileScripts: 1140.184ms
+	ImportOutOfDateAssets: 350.614ms (347.456ms without children)
+		UnloadImportedAssets: 1.121ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.096ms
+		ImportSchedulerStart: 1.936ms
+	PostProcessAllAssets: 55.964ms
+		VCAutoAddAssetPostprocess 0.444ms
+		XRBuildSystem.XRAssetImported 0.187ms
+		MonoPostProcessAllAssets: 55.089ms
+			AssetPostprocessor.OnPostprocessAllAssets 17.648ms
+			AssetCallbacks.OnPostprocessAllAssets 8.258ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 6.207ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 4.328ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 4.268ms
+			AssetChangedListener.OnPostprocessAllAssets 3.585ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 0.816ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 0.764ms
+			SyncVS.PostprocessSyncProject 0.635ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.577ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.475ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.308ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 0.229ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.163ms
+			InputActionJsonNameModifierAssetProcessor.OnPostprocessAllAssets 0.155ms
+			TMPro_TexturePostProcessor.OnPostprocessAllAssets 0.154ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.153ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.150ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.142ms
+			AssetEvents.OnPostprocessAllAssets 0.137ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.115ms
+			ThemePostprocessor.OnPostprocessAllAssets 0.099ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.080ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.071ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.058ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 0.058ms
+	PostAssetChangesProfiler: 2.761ms
+	UnloadStreamsBegin: 0.776ms
+	GenerateScriptTypeHashes: 0.770ms
+	GenerateScriptTypeSerializationHashes: 1.676ms
+	Untracked: 383.628ms
+
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler after 0.01 seconds
+Scanning for USB devices : 0.023ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-quest_loft
+2026-11-02 18:55:03.725 Unity[87210:5791193] NSEventModifierFlagFunction specified to -setKeyEquivalentModifierMask: for item <NSMenuItem: 0x600002d02f40 SDF, ke='Command-F12'>, but is only supported for system-provided menu items; will not be used
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/Loft.unity'
+	Deserialize:            5.410 ms
+	Integration:            56.482 ms
+	Integration of assets:  0.011 ms
+	Thread Wait Time:       0.004 ms
+	Total Operation Time:   61.906 ms
+Unloading 1201 unused Assets / (0.5 MB). Loaded Objects now: 2138.
+Memory consumption went from 165.9 MB to 165.3 MB.
+Total: 5.981125 ms (FindLiveObjects: 0.178708 ms CreateObjectMapping: 0.038042 ms MarkObjects: 5.041166 ms  DeleteObjects: 0.625042 ms)
+
+[LAYOUT] About to load UserSettings/Layouts/default-6000.dwlt, keepMainWindow=False
+2026-11-02 18:55:03.818 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:03.818 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:03.819 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:03.819 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:03.819 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:03.819 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.284 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.284 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.284 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.284 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.285 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.285 Unity[87210:5791193] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:55:04.376 Unity[87210:5791193] NSEventModifierFlagFunction specified to -setKeyEquivalentModifierMask: for item <NSMenuItem: 0x600002d01dc0 SDF, ke='Command-F12'>, but is only supported for system-provided menu items; will not be used
+[LAYOUT] About to save layout /Users/azharie/Documents/azhar_project/vr_games/quest_loft/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/azharie/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+[MODES] ModeService[default].InitializeCurrentMode
+[MODES] ModeService[default].RaiseModeChanged(default, default)
+This project uses Input Manager, which is marked for deprecation. To manage input in your project, use the <a href="https://docs.unity3d.com/Packages/com.unity.inputsystem@latest">Input System package</a> instead.
+[Project] Loading completed in 4.552 seconds
+	Project init time: 				3.731 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		0.217 seconds
+		Asset Database init time: 		0.073 seconds
+		Global illumination init time: 	0.000 seconds
+		Assemblies load time: 			1.062 seconds
+		Unity extensions init time: 	0.002 seconds
+		Asset Database refresh time: 	2.052 seconds
+	Scene opening time: 			0.678 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1793620504394,"processId":87210,"projectLoad":4.5523943749999995,"projectInit":3.730842375,"templateInit":0.0,"packageManagerInit":0.21725375,"assetDatabaseInit":0.0731175,"globalIlluminationInit":0.000466459,"assembliesLoad":1.062424375,"unityExtensionsInit":0.002357708,"assetDatabaseRefresh":2.051899458,"sceneOpening":0.6781525}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1793620504394,"processId":87210,"editorVersion":"6000.6.7f1 (b22767f04f04)","branch":"6000.6/staging","buildType":"Release","platform":"OSX"}
+Subscribe to USB device events
+Multiple ADB server instances found, the following ADB server instance have been terminated due to being run from another SDK. 
+If instance restarts during deployment, this may cause unexpected issues. Please check that ADB versions are consistent across instances. 
+Process paths: 
+/Applications/Meta Quest Developer Hub.app/Contents/Resources/bin/adb
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.Android.AndroidDeploymentTargetsExtension:GetKnownTargets (UnityEditor.DeploymentTargets.IDeploymentTargetsMainThreadContext,UnityEditor.ProgressHandler) (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/DeploymentTargets/AndroidDeploymentTargetsExtension.cs:379)
+UnityEditor.Android.TargetScanWorker:DoScan (UnityEditor.DeploymentTargets.IDeploymentTargetsExtension,UnityEditor.DeploymentTargets.IDeploymentTargetsMainThreadContext,System.Threading.CancellationToken) (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/TargetScanWorker.cs:188)
+UnityEditor.Android.TargetScanWorker/<>c__DisplayClass15_0:<MainThreadProcessing>b__0 () (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/TargetScanWorker.cs:227)
+System.Threading.Tasks.Task:InnerInvoke ()
+System.Threading.Tasks.Task:Execute ()
+System.Threading.Tasks.Task:ExecutionContextCallback (object)
+System.Threading.ExecutionContext:RunInternal (System.Threading.ExecutionContext,System.Threading.ContextCallback,object,bool)
+System.Threading.ExecutionContext:Run (System.Threading.ExecutionContext,System.Threading.ContextCallback,object,bool)
+System.Threading.Tasks.Task:ExecuteWithThreadLocal (System.Threading.Tasks.Task&)
+System.Threading.Tasks.Task:ExecuteEntry (bool)
+System.Threading.Tasks.Task:System.Threading.IThreadPoolWorkItem.ExecuteWorkItem ()
+System.Threading.ThreadPoolWorkQueue:Dispatch ()
+System.Threading._ThreadPoolWaitCallback:PerformWaitCallback ()
+
+(Filename: /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/DeploymentTargets/AndroidDeploymentTargetsExtension.cs Line: 379)
+
+Worker ready: AssetImportWorkerHW0 0
+Android Extension - Scanning For ADB Devices 335 ms
+Start Indexing on Editor startup
+[Indexing] Starting Initial Indexing for Assets
+[Licensing::Client] Successfully resolved entitlement details
+Thread 0xc51dc7000 may have been prematurely finalized
+Reloading assemblies for play mode.
+Reloading assemblies after forced synchronous recompile.
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Refreshing native plugins compatible for Editor in 3.91 ms, found 5 plugins.
+[Licensing::Client] Successfully resolved entitlement details
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.725 seconds
+Domain Reload Profiling: 1064ms
+	BeginReloadAssembly (218ms)
+		DisableScriptedObjects (43ms)
+		CreateAndSetChildDomain (70ms)
+	RebuildCommonClasses (5ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (20ms)
+	LoadAllAssembliesAndSetupDomain (84ms)
+		LoadAssemblies (80ms)
+		TypeCache.Refresh (4ms)
+		AnalyzeDomain (2ms)
+	FinalizeReload (726ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (6ms)
+			BeforeProcessingInitializeOnLoad (63ms)
+			ProcessInitializeOnLoadAttributes (62ms)
+			ProcessInitializeOnLoadMethodAttributes (50ms)
+		AwakeInstancesAfterBackupRestoration (297ms)
+No restricted APIs configured; Validation skipped.
+Checking 1 assemblies for restricted APIs found 0 usage(s) in 2 ms
+
+Asset Pipeline Refresh (id=51a8e7195462b46b3b68aeb6465b5eb1): Total: 1.224 seconds - Initiated by StopAssetImportingV2(ForceSynchronousImport | ForceDomainReload)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=782 ms
+		Asset DB Callback time: managed=39 ms, native=18 ms
+		Scripting: domain reloads=1, domain reload time=382 ms, compile time=1 ms, other=0 ms
+		Project Asset Count: scripts=369, non-scripts=281
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokePackagesCallback: 1.275ms
+	ApplyChangesToAssetFolders: 0.086ms
+	Collect global state as custom dependencies: 0.517ms
+	ProcessAssetsWithTransientArtifactChanges: 15.388ms
+	CategorizeAssets: 3.179ms
+	CompileScripts: 1.168ms
+	ImportOutOfDateAssets: 733.346ms (732.269ms without children)
+		CollectScriptTypesHashes: 0.179ms
+		ReloadNativeAssets: 0.146ms
+		UnloadImportedAssets: 0.666ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.090ms
+		ImportSchedulerStart: 0.171ms
+	PostProcessAllAssets: 53.438ms
+		PostprocessAssetsUpdateCachedIcon 1.606ms
+		PostProcessCallbackCreateDeferredMaterials 1.476ms
+		ShaderAssetModifiedCallback 0.911ms
+		AssemblyValidation.PostprocessAllAssets 0.848ms
+		ComputeShaderImportPostprocess 0.762ms
+		RaytracingShaderImportPostprocess 0.734ms
+		SpeedTreeImporter.PostprocessAllAssets 0.728ms
+		LocalizationDatabase.AssetDatabasePostprocessCallback 0.343ms
+		BlockShaderImporter.PostprocessAllAssets 0.335ms
+		XRBuildSystem.XRAssetImported 0.175ms
+		MonoPostProcessAllAssets: 37.772ms
+			AssetPostprocessor.OnPostprocessAllAssets 5.340ms
+			AssetCallbacks.OnPostprocessAllAssets 4.462ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 4.062ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 4.021ms
+			InputActionJsonNameModifierAssetProcessor.OnPostprocessAllAssets 3.715ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 2.770ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 2.359ms
+			AssetChangedListener.OnPostprocessAllAssets 2.063ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 0.701ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.637ms
+			SyncVS.PostprocessSyncProject 0.553ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.241ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.168ms
+			TMPro_TexturePostProcessor.OnPostprocessAllAssets 0.163ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.153ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.139ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.133ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 0.126ms
+			AssetEvents.OnPostprocessAllAssets 0.102ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.099ms
+			ThemePostprocessor.OnPostprocessAllAssets 0.087ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.085ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.071ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.068ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.061ms
+	PostAssetChangesProfiler: 3.717ms
+	UnloadStreamsBegin: 1.319ms
+	GenerateScriptTypeHashes: 0.750ms
+	GenerateScriptTypeSerializationHashes: 1.408ms
+	Untracked: 407.613ms
+
+[Subsystems] OpenXR XR Plugin successfully registered Provider for OpenXR Display
+[Subsystems] OpenXR XR Plugin successfully registered Provider for OpenXR Input
+[Subsystems] OpenXR XR Plugin successfully registered Provider for OpenXR Display
+[SIMDBG] loaderPath='/Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr/RuntimeLoaders/osx/libopenxr_loader.dylib'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:LoadOpenXRSymbols () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:551)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:InitializeInternal () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:233)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:Initialize () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:203)
+UnityEngine.XR.Management.XRManagerSettings:InitializeLoaderSync () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRManagerSettings.cs:186)
+UnityEngine.XR.Management.XRGeneralSettings:InitXRSDK () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRGeneralSettings.cs:172)
+UnityEngine.XR.Management.XRGeneralSettings:AttemptInitializeXRSDKOnLoad () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRGeneralSettings.cs:145)
+
+(Filename: ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs Line: 551)
+
+Failed to load openxr runtime loader.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:InitializeInternal () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:235)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:Initialize () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:203)
+UnityEngine.XR.Management.XRManagerSettings:InitializeLoaderSync () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRManagerSettings.cs:186)
+UnityEngine.XR.Management.XRGeneralSettings:InitXRSDK () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRGeneralSettings.cs:172)
+UnityEngine.XR.Management.XRGeneralSettings:AttemptInitializeXRSDKOnLoad () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRGeneralSettings.cs:145)
+
+(Filename: ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs Line: 235)
+
+[XR] [0x200080f40] [18:56:56.792][Info   ] 
+
+==== Start Unity OpenXR Diagnostic Report ====
+
+
+[XR] [0x200080f40] [18:56:56.792][Info   ] ==== Report Reason: System Shutdown ====
+
+
+[XR] [0x200080f40] [18:56:56.792][Info   ] ==== Last 20 Events ====
+[XR] [0x200080f40] [18:56:56.792][Info   ] 
+
+==== End Unity OpenXR Diagnostic Report ====
+
+
+[Desk] Desk ready — WASD walk, assign below, all in-app.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftDesk:Note (string) (at Assets/App/LoftDesk.cs:452)
+LoftDesk:Awake () (at Assets/App/LoftDesk.cs:93)
+
+(Filename: Assets/App/LoftDesk.cs Line: 452)
+
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            1.470 ms
+	Integration:            49.897 ms
+	Integration of assets:  0.013 ms
+	Thread Wait Time:       0.010 ms
+	Total Operation Time:   51.390 ms
+[STANDUP-TEST] PASS: AgentManager present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:42)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: BoardManager present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:43)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: VoiceCommands present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:44)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: Multiplayer present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:45)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+Created GICache directory at /Users/azharie/Library/Caches/com.unity3d.UnityEditor/GiCache. Took: 0.003s, timestamps: [4.565 - 4.567]
+[STANDUP-TEST] PASS: wake 3 agents -> all Idle
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:55)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[VoiceCommands] Matched Run: 'jalankan tes'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:60)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[STANDUP-TEST] PASS: voice ID 'jalankan tes' -> Run
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:61)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[VoiceCommands] Matched Run: 'run landing test'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+VirtualLoft.XR.VoiceCommands:SimulateCommand (string) (at Assets/XR/VoiceCommands.cs:184)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:62)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[STANDUP-TEST] PASS: voice EN 'run landing test' -> Run
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:63)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[Agents] builder <- run landing test
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:64)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+[STANDUP-TEST] PASS: Builder Working after assign
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:67)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: log board AddCard PASS 12/12
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:71)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: VoiceMove -> Done
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:75)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: card column == Done
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:77)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[VoiceCommands] Button fallback invoked: Done
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:78)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[STANDUP-TEST] PASS: button fallback InvokeCommand(Done)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:79)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: OnAgentDone broadcast on Done
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:84)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[Multiplayer] JoinRoom stub: loft-focus-01 as CEO (CEO). Wire to Fusion NetworkRunner.StartGame in production.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:JoinRoom (string,string,VirtualLoft.XR.LoftRole) (at Assets/XR/Multiplayer.cs:73)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:87)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 73)
+
+[Activity] [2026-11-02T11:56:57.4551320Z] CEO assign agent:builder ( -> Member-1)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:Assign (string,string,string) (at Assets/XR/Multiplayer.cs:103)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:88)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Multiplayer] Assign DENIED: Member-1 is not CEO.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+VirtualLoft.XR.Multiplayer:Assign (string,string,string) (at Assets/XR/Multiplayer.cs:100)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:89)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 100)
+
+[STANDUP-TEST] PASS: CEO assign allowed, member assign denied
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:90)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[Activity] [2026-11-02T11:56:57.4561040Z] Member-1 move card:86e333a2 (Doing -> Done)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:MoveCard (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:116)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:91)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Multiplayer] Move DENIED: Member-1 cannot move CEO's card 86e333a2.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+VirtualLoft.XR.Multiplayer:MoveCard (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:113)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:92)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 113)
+
+[STANDUP-TEST] PASS: member moves own card, denied others'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:93)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: activity log has entries (2)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:94)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+Android Extension - Scanning For ADB Devices 83 ms
+[STANDUP-TEST] PASS: save/load roundtrip keeps Done card
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:99)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] SUMMARY: 17 pass, 0 fail — STANDUP FLOW GREEN
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Finish () (at Assets/Tests/StandupFlowTest.cs:108)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:102)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 108)
+
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully resolved entitlement details
+Android Extension - Scanning For ADB Devices 71 ms
+Attempted to call .Dispose on an already disposed CancellationTokenSource
+Android Extension - Scanning For ADB Devices 81 ms
+Thread 0xc39b87000 may have been prematurely finalized
+[Agents] builder <- simulator proof task
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+LoftDesk:Assign (string,string) (at Assets/App/LoftDesk.cs:106)
+LoftSimShot:Tick () (at Assets/Editor/LoftSimShot.cs:60)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions () (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:412)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+[Activity] [2026-11-02T11:57:22.3220340Z] CEO assign agent:builder ( -> builder)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:Assign (string,string,string) (at Assets/XR/Multiplayer.cs:103)
+LoftDesk:Assign (string,string) (at Assets/App/LoftDesk.cs:107)
+LoftSimShot:Tick () (at Assets/Editor/LoftSimShot.cs:60)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions () (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:412)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Activity] [2026-11-02T11:57:22.3221230Z] CEO assign card:5564d4da ( -> builder:simulator proof task)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+LoftDesk:Assign (string,string) (at Assets/App/LoftDesk.cs:108)
+LoftSimShot:Tick () (at Assets/Editor/LoftSimShot.cs:60)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions () (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:412)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Desk] ASSIGN builder: simulator proof task
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftDesk:Note (string) (at Assets/App/LoftDesk.cs:452)
+LoftDesk:Assign (string,string) (at Assets/App/LoftDesk.cs:113)
+LoftSimShot:Tick () (at Assets/Editor/LoftSimShot.cs:60)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions () (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:412)
+
+(Filename: Assets/App/LoftDesk.cs Line: 452)
+
+[SIMSHOT] done tasks=1 boards=5
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftSimShot:Tick () (at Assets/Editor/LoftSimShot.cs:67)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions () (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:412)
+
+(Filename: Assets/Editor/LoftSimShot.cs Line: 67)
+
+Unloading 13 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.951 ms
+	Integration:            10.195 ms
+	Integration of assets:  0.008 ms
+	Thread Wait Time:       0.008 ms
+	Total Operation Time:   11.161 ms
+Unloading 990 unused Assets / (16.9 MB). Loaded Objects now: 3119.
+Memory consumption went from 240.4 MB to 223.5 MB.
+Total: 16.466000 ms (FindLiveObjects: 0.213583 ms CreateObjectMapping: 0.045375 ms MarkObjects: 13.367000 ms  DeleteObjects: 2.765833 ms)
+
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully resolved entitlement details
+MonoPathRemapper: Attempts to remap: 24739; Successful remaps: 1050
+Thread 0xc515df000 may have been prematurely finalized
+Serialized file version minimum: 23, current 23
+[LAYOUT] About to save layout /Users/azharie/Documents/azhar_project/vr_games/quest_loft/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/azharie/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+Killing ADB server in 0.05003 seconds.
+Importing 'GUID: d1da30e74f62a4db8a2724defb5a77bc - Path: Assets/XR/Settings/OpenXR Package Settings.asset' with importer (NativeFormatImporter)
+Imported 'GUID: d1da30e74f62a4db8a2724defb5a77bc' -> (Import Result ID: '31d842aff628ea18faf845b11d9c2279') in 0.003 seconds [static dependencies only]. Details - ImportResultOutputID=250c25ec8bd409a30da52db348ca35a6 DependenciesID=e0dafcf261cc99db9d36e00469a855d0 StaticDependenciesID=0c111f7ae50e8fb23505d243740fc91a 
+Thread 0xc392d7000 may have been prematurely finalized
+Asset Pipeline Refresh (id=0bce84b75c4524393aa67914692e34b2): Total: 0.011 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Thread 0x17e237000 may have been prematurely finalized
+Thread 0x17e2c3000 may have been prematurely finalized
+Thread 0x17e467000 may have been prematurely finalized
+Thread 0x17e3db000 may have been prematurely finalized
+Thread 0x17e34f000 may have been prematurely finalized
+Thread 0x17e4f3000 may have been prematurely finalized
+Thread 0x17e57f000 may have been prematurely finalized
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+[Licensing::IpcConnector] LicenseClient-azharie-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-azharie channel disconnected successfully.
+Shut down UDS service system complete
+debugger-agent: Unable to listen on 57
+Lingering sessions upon destruction of worker manager
+Unity Data Store service was successfully shut down
+UDS shutting down local client system
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+CodeReloadManager destroyed
+VBCSCompilerPreWarmer: requested VBCSCompiler shutdown

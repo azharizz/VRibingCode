@@ -1,0 +1,346 @@
+Unity Editor version:    6000.6.7f1 (b22767f04f04)
+Branch:                  6000.6/staging
+Build type:              Release
+Batch mode:              YES
+macOS version:           Version 14.6.1 (Build 23G93)
+Darwin version:          23.6.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        16384 MB
+Date:                    2026-11-02T09:57:18Z
+VBCSCompilerPreWarmer: watching VBCSCompiler (PID 77519)
+VBCSCompilerPreWarmer: pre-warm launched (dotnet PID 77521)
+VBCSCompiler prewarm took 2.79 ms
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-azharie doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 77522)
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/PackageManager/Server/UnityPackageManager
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/MacOS/Unity
+-batchmode
+-nographics
+-projectPath
+quest_loft
+-executeMethod
+LoftBootstrap.Build
+-quit
+-logFile
+Tools/bootstrap-exit.log
+Successfully changed project path to: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-remapper-allocator-initial-capacity=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-main-allocator-mimalloc-enabled=1"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+Logging is directed to a specific file, skipping project log.
+Player connection [8590462784]  Target information:
+
+Player connection [8590462784]  * "[IP] 192.168.18.50 [Port] 55504 [Flags] 2 [Guid] 2614003565 [EditorId] 2614003565 [Version] 1048832 [Id] OSXEditor(0,Azhar-Izzannada.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8590462784] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8590462784] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie" at "2026-11-02T09:57:18.801532Z"
+[Package Manager] Connected to IPC stream "Upm-77518" after 0.2 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+Initialising UDS system complete:
+  - System type: Client
+  - Resource namespace: 35571781078b0bc8bdd66070b9a59cb0
+  - Shared memory size: 1073741824
+  - Command buffer id: 1052672
+  - Command buffer size: 8192
+  - Hashmap size: 4194304
+  - Service connected: false
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              9c377f214979434987e974c4b63cd93e
+  Correlation Id:          d47a68c1be8a21ff1c9b10b1dee9eb2d
+  External correlation Id: 3664001087047558862
+  Machine Id:              A8knmJu4QVJsst31a7pUeu1BBlg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-azharie" (connect: 0.17s, validation: 0.02s, handshake: 0.21s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie-notifications" at "2026-11-02T09:57:19.027681Z"
+[Licensing::Module] Connected to LicensingClient (PId: 77522, launch time: 0.00, total connection time: 0.39s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968537812619-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.40s
+[Licensing::Module] Licensing is initialized (took 0.12s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+Launching Unity Data Store - /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/Unity.DataStore 
+Unity Data Store artifact dir = Library/DataStore, working dir = /Users/azharie/Documents/azhar_project/vr_games/quest_loftUnity Data Store running and initialised
+[Physics::Module] Selected backend (deferred post-plugins).
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.6.7f1 (b22767f04f04)
+[EntityIdStore] init: VM path (explicit commit), pageSize=16384, blockCount=262144, entitiesPerBlock=1024, blocksPerSlotPage=0, slots reserved=4294967296 bytes
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+Forcing GfxDevice: Null
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/BCLExtensions/runtime/netstandard2.1'
+Mono path[2] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56518
+CodeReloadManager initialized
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.001375 seconds.
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.367 seconds
+Domain Reload Profiling: 678ms
+	BeginReloadAssembly (63ms)
+		CreateAndSetChildDomain (16ms)
+	RebuildCommonClasses (3ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (31ms)
+	LoadAllAssembliesAndSetupDomain (202ms)
+		LoadAssemblies (47ms)
+		TypeCache.Refresh (146ms)
+			TypeCache.ScanAssembly (135ms)
+		AnalyzeDomain (0ms)
+	FinalizeReload (367ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			BeforeProcessingInitializeOnLoad (63ms)
+			ProcessInitializeOnLoadAttributes (55ms)
+			ProcessInitializeOnLoadMethodAttributes (131ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 21 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.nuget.newtonsoft-json@3.2.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.nuget.newtonsoft-json@74deb55db2a0)
+    com.unity.xr.management@4.5.4 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.management@e3a3882b360a)
+    com.unity.xr.legacyinputhelpers@3.0.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.legacyinputhelpers@3f62d634f63b)
+    com.unity.inputsystem@1.20.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.inputsystem@2436e68c60c4)
+    com.unity.xr.core-utils@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.core-utils@a8b900321199)
+  Built-in packages:
+    com.unity.textmeshpro@5.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.textmeshpro@5861d0377263)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.xr@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.ugui@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.ugui@eb824e41fbc7)
+    com.unity.modules.uielements@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.physics@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.ui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.imgui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.audio@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.hierarchycore)
+    com.unity.modules.animation@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.physicscore2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physicscore2d)
+  Embedded packages:
+    com.unity.xr.openxr@file:/Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr)
+[Package Manager] com.unity.textmeshpro is deprecated: This package is no longer supported. TextMeshPro functionalities are now included in the com.unity.ugui package. To continue using them, consider adding it to your project dependencies.
+[Subsystems] Looking for new subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] Novel subsystem found at Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] No descriptors matched for  examples in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Subsystems] 1 'inputs' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] 1 'displays' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] No descriptors matched for  meshings in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Package Manager] Done registering packages in 0.05 seconds
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 0s166ms
+[350/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+*** Tundra build success (0.15 seconds), 1 items updated, 432 evaluated
+AssetDatabase: script compilation time: 0.522347s
+Total cache size 79623016
+Total cache size after purge 79623016, took 00:00:00.0244603
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.292 seconds
+Domain Reload Profiling: 594ms
+	BeginReloadAssembly (113ms)
+		DisableScriptedObjects (10ms)
+		CreateAndSetChildDomain (24ms)
+	RebuildCommonClasses (6ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (20ms)
+	LoadAllAssembliesAndSetupDomain (151ms)
+		LoadAssemblies (101ms)
+		TypeCache.Refresh (28ms)
+			TypeCache.ScanAssembly (20ms)
+		AnalyzeDomain (8ms)
+			BuildScriptInfoCaches (6ms)
+	FinalizeReload (292ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			BeforeProcessingInitializeOnLoad (66ms)
+			ProcessInitializeOnLoadAttributes (60ms)
+			ProcessInitializeOnLoadMethodAttributes (30ms)
+		AwakeInstancesAfterBackupRestoration (11ms)
+Starting new worker id: 0 with log in /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Logs/AssetImportWorkerHW0.log
+
+Asset Pipeline Refresh (id=7abc8d6ce79b1480f9ddef15270a6c27): Total: 1.343 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=434 ms
+		Asset DB Callback time: managed=11 ms, native=50 ms
+		Scripting: domain reloads=1, domain reload time=312 ms, compile time=524 ms, other=9 ms
+		Project Asset Count: scripts=369, non-scripts=280
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokePackagesCallback: 51.416ms
+	ApplyChangesToAssetFolders: 0.114ms
+	Scan: 72.953ms
+	Collect global state as custom dependencies: 3.672ms
+	CategorizeScriptCompilationAssets: 3.161ms
+	ProcessAssetsWithTransientArtifactChanges: 8.781ms
+	CategorizeAssets: 4.663ms
+	CompileScripts: 523.864ms
+	ImportOutOfDateAssets: 297.843ms (295.386ms without children)
+		UnloadImportedAssets: 1.159ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.096ms
+		ImportSchedulerStart: 1.198ms
+	PostProcessAllAssets: 11.635ms
+		MonoPostProcessAllAssets: 11.596ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 4.366ms
+			SyncVS.PostprocessSyncProject 0.585ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.500ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.422ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.151ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.146ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 0.145ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.116ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.084ms
+	UnloadStreamsBegin: 0.868ms
+	GenerateScriptTypeHashes: 0.747ms
+	GenerateScriptTypeSerializationHashes: 1.568ms
+	Untracked: 362.093ms
+
+Application.AssetDatabase Initial Refresh End
+Scanning for USB devices : 0.031ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-quest_loft
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 1197 unused Assets / (434.6 KB). Loaded Objects now: 1966.
+Memory consumption went from 149.9 MB to 149.5 MB.
+Total: 7.556125 ms (FindLiveObjects: 0.167500 ms CreateObjectMapping: 0.040042 ms MarkObjects: 6.992833 ms  DeleteObjects: 0.286708 ms)
+
+Unloading 1 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 0 unused Assets / (Unknown). Loaded Objects now: 1975.
+Memory consumption went from 148.9 MB to 148.9 MB.
+Total: 4.730042 ms (FindLiveObjects: 0.117292 ms CreateObjectMapping: 0.015375 ms MarkObjects: 4.526083 ms  DeleteObjects: 0.003000 ms)
+
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.01 seconds
+Importing 'GUID: 59dd2f9a4a91f4632a9ac5252c0469e9 - Path: Assets/Scenes/Loft.unity' with importer (DefaultImporter)
+Imported 'GUID: 59dd2f9a4a91f4632a9ac5252c0469e9' -> (Import Result ID: 'e133721f8b22787d1134cfe6eb069167') in 0.003 seconds [static dependencies only]. Details - ImportResultOutputID=1a007a3f065447c834d19bb45bbe32e1 DependenciesID=ae1514a7ccf8b0ac82587d1b9a0f1e98 StaticDependenciesID=a9d603f599abeb9763889d04454851aa 
+Asset Pipeline Refresh (id=2ce30d52c966f42d08449559d21bb754): Total: 0.042 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[LoftBootstrap] Saved Assets/Scenes/Loft.unity — open it and press Play.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftBootstrap:Build () (at Assets/Editor/LoftBootstrap.cs:120)
+
+(Filename: Assets/Editor/LoftBootstrap.cs Line: 120)
+
+Thread 0xc32887000 may have been prematurely finalized
+Batchmode quit successfully invoked - shutting down!
+Worker ready: AssetImportWorkerHW0 0
+Thread 0xc32913000 may have been prematurely finalized
+Killing ADB server in 1.040199 seconds.
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+Thread 0x17b993000 may have been prematurely finalized
+Thread 0x17ba1f000 may have been prematurely finalized
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+[Licensing::IpcConnector] LicenseClient-azharie-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-azharie channel disconnected successfully.
+Shut down UDS service system complete
+debugger-agent: Unable to listen on 53
+Lingering sessions upon destruction of worker manager
+Unity Data Store service was successfully shut down
+UDS shutting down local client system
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+CodeReloadManager destroyed
+Exiting batchmode successfully now!
+[ExitDontLaunchBugReporter] Exiting without the bug reporter. Application will exit with return code 0
+[Package Manager] Server process was shutdown

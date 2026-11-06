@@ -1,0 +1,8 @@
+== E2E PROOF: keeper solves the stuck-standup problem (LIVE) ==
+BEFORE: standup-01 column = Doing
+KEEPER SAYS: Moved card standup-01 to Done.
+Assigned 'Write launch notes' to builder.
+TOOLS CALLED: move_card({"cardId":"standup-01","to":"Done"}) | assign_task({"owner":"builder","title":"Write launch notes"})
+AFTER: standup-01 column = Done (movedAt=2026-11-02T05:37:32.326Z)
+wrote /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Tools/e2e-result.json
+E2E PROOF GREEN: live keeper moved the card + assigned the task on the shared loft.

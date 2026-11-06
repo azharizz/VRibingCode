@@ -1,0 +1,28 @@
+{
+  "agents": [
+    {
+      "id": "scout",
+      "role": "Researcher",
+      "color": "#4FC3F7",
+      "desk": "desk-1",
+      "anims": { "idle": "scout_sleep", "working": "scout_search", "done": "scout_present" },
+      "sound": "scout_done_ping"
+    },
+    {
+      "id": "builder",
+      "role": "Coder/Runner",
+      "color": "#9CCC65",
+      "desk": "desk-2",
+      "anims": { "idle": "builder_breathe", "working": "builder_type", "done": "builder_stretch" },
+      "sound": "builder_done_check"
+    },
+    {
+      "id": "keeper",
+      "role": "Organizer",
+      "color": "#FFB74D",
+      "desk": "desk-3",
+      "anims": { "idle": "keeper_tidy", "working": "keeper_move", "done": "keeper_bell" },
+      "sound": "keeper_done_bell"
+    }
+  ]
+}

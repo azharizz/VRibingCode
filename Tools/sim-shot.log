@@ -1,0 +1,906 @@
+Unity Editor version:    6000.6.7f1 (b22767f04f04)
+Branch:                  6000.6/staging
+Build type:              Release
+Batch mode:              NO
+macOS version:           Version 14.6.1 (Build 23G93)
+Darwin version:          23.6.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        16384 MB
+Date:                    2026-11-02T11:06:22Z
+VBCSCompilerPreWarmer: watching VBCSCompiler (PID 81753)
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client
+VBCSCompilerPreWarmer: pre-warm launched (dotnet PID 81755)
+VBCSCompiler prewarm took 3.28 ms
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-azharie doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 81756)
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/PackageManager/Server/UnityPackageManager
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/MacOS/Unity
+-projectPath
+quest_loft
+-executeMethod
+LoftSimShot.Run
+-logFile
+Tools/sim-shot.log
+Successfully changed project path to: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-remapper-allocator-initial-capacity=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-main-allocator-mimalloc-enabled=1"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+Logging is directed to a specific file, skipping project log.
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie" at "2026-11-02T11:06:23.214129Z"
+Player connection [8590462784]  Target information:
+
+Player connection [8590462784]  * "[IP] 192.168.18.50 [Port] 55504 [Flags] 2 [Guid] 970375952 [EditorId] 970375952 [Version] 1048832 [Id] OSXEditor(0,Azhar-Izzannada.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8590462784] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8590462784] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialising UDS system complete:
+  - System type: Client
+  - Resource namespace: 35571781078b0bc8bdd66070b9a59cb0
+  - Shared memory size: 1073741824
+  - Command buffer id: 1052672
+  - Command buffer size: 8192
+  - Hashmap size: 4194304
+  - Service connected: false
+[Package Manager] Connected to IPC stream "Upm-81751" after 0.2 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              fc7d3bf32bb842e4aaa043e443c9665a
+  Correlation Id:          7702424eb39ee03bae5d0f6139cf5098
+  External correlation Id: 249901358641960092
+  Machine Id:              A8knmJu4QVJsst31a7pUeu1BBlg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-azharie" (connect: 0.25s, validation: 0.02s, handshake: 0.24s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie-notifications" at "2026-11-02T11:06:23.47272Z"
+[Licensing::Module] Connected to LicensingClient (PId: 81756, launch time: 0.00, total connection time: 0.51s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968537812619-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.52s
+[Licensing::Module] Licensing is initialized (took 0.08s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+Launching Unity Data Store - /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/Unity.DataStore 
+Unity Data Store artifact dir = Library/DataStore, working dir = /Users/azharie/Documents/azhar_project/vr_games/quest_loftUnity Data Store running and initialised
+Refreshing native plugins compatible for Editor in 8.73 ms, found 5 plugins.
+[Physics::Module] Selected backend (deferred post-plugins).
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.6.7f1 (b22767f04f04)
+[EntityIdStore] init: VM path (explicit commit), pageSize=16384, blockCount=262144, entitiesPerBlock=1024, blocksPerSlotPage=0, slots reserved=4294967296 bytes
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+GfxDevice: creating device client; kGfxThreadingModeThreaded
+ preferred device: Apple M2 (high power)
+Metal devices available: 1
+0: Apple M2 (high power)
+Using device Apple M2 (high power)
+Initializing Metal device caps: Apple M2
+Mac GPU Family: 2
+Apple GPU Family: 8
+MSL Version: 3.0
+Has Float MSAA: 1
+Has Float Filtering: 1
+ReadWrite Texture Tier: 2
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/BCLExtensions/runtime/netstandard2.1'
+Mono path[2] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56751
+CodeReloadManager initialized
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.003045 seconds.
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.682 seconds
+Domain Reload Profiling: 1016ms
+	BeginReloadAssembly (82ms)
+		CreateAndSetChildDomain (7ms)
+	RebuildCommonClasses (3ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (33ms)
+	LoadAllAssembliesAndSetupDomain (202ms)
+		LoadAssemblies (77ms)
+		TypeCache.Refresh (146ms)
+			TypeCache.ScanAssembly (135ms)
+		AnalyzeDomain (0ms)
+	FinalizeReload (684ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (57ms)
+			BeforeProcessingInitializeOnLoad (64ms)
+			ProcessInitializeOnLoadAttributes (62ms)
+			ProcessInitializeOnLoadMethodAttributes (387ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 21 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.nuget.newtonsoft-json@3.2.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.nuget.newtonsoft-json@74deb55db2a0)
+    com.unity.xr.management@4.5.4 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.management@e3a3882b360a)
+    com.unity.xr.legacyinputhelpers@3.0.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.legacyinputhelpers@3f62d634f63b)
+    com.unity.inputsystem@1.20.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.inputsystem@2436e68c60c4)
+    com.unity.xr.core-utils@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.core-utils@a8b900321199)
+  Built-in packages:
+    com.unity.textmeshpro@5.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.textmeshpro@5861d0377263)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.xr@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.ugui@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.ugui@eb824e41fbc7)
+    com.unity.modules.uielements@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.physics@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.ui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.imgui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.audio@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.hierarchycore)
+    com.unity.modules.animation@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.physicscore2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physicscore2d)
+  Embedded packages:
+    com.unity.xr.openxr@file:/Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr)
+[Package Manager] com.unity.textmeshpro is deprecated: This package is no longer supported. TextMeshPro functionalities are now included in the com.unity.ugui package. To continue using them, consider adding it to your project dependencies.
+[Subsystems] Looking for new subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] Novel subsystem found at Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] No descriptors matched for  examples in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Subsystems] 1 'inputs' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] 1 'displays' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] No descriptors matched for  meshings in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Package Manager] Done registering packages in 0.01 seconds
+[ScriptCompilation] Requested script compilation because: AssetDatabase observed changes in script compilation related files
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 4 Duration: 0s170ms
+Rebuilding DAG because FileSignature timestamp changed: Library/Bee/200b0aE-inputdata.json
+[278/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+*** Tundra requires additional run (0.15 seconds), 1 items updated, 276 evaluated
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/DotNetSdk/dotnet "/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/ScriptCompilationBuildProgram.exe" "Library/Bee/200b0aE.dag.json" "Library/Bee/200b0aE-inputdata.json" "Library/Bee/buildprogram0.traceevents"
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 0 Duration: 0s617ms
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --dagfilejson="Library/Bee/200b0aE.dag.json" --profile="Library/Bee/backend2.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 0 Duration: 0s671ms
+Finished compiling graph: 435 nodes, 6143 flattened edges (5429 ToBuild, 54 ToUse), maximum node priority 439
+[272/432    0s] WriteText Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.rsp
+[349/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[370/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.dll
+[371/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MockRuntime.dll
+[373/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.dll
+[375/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.dll
+[376/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.dll
+[377/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.dll
+[378/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.dll
+[379/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.dll
+[381/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.SpatialTracking.dll
+[382/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.UI.dll
+[383/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.dll
+[385/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.dll
+[387/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.pdb
+[388/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.Editor.pdb
+[389/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.dll
+[390/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.004.dll
+[391/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.dll
+[392/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Editor.dll
+[393/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.Editor.dll
+[394/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Editor.pdb
+[395/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.Editor.dll
+[396/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.Editor.pdb
+[397/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.Editor.pdb
+[398/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll
+[399/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.XR.LegacyInputHelpers.pdb
+[400/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.SpatialTracking.pdb
+[401/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.SpatialTracking.dll
+[402/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.XR.LegacyInputHelpers.dll
+[403/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.DocCodeSamples.dll
+[404/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.DocCodeSamples.pdb
+[405/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.Editor.dll
+[406/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.Editor.pdb
+[407/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.Editor.dll
+[408/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.Editor.pdb
+[409/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.pdb
+[410/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.dll
+[411/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.pdb
+[412/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.pdb
+[413/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.pdb
+[414/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.pdb
+[415/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.004.pdb
+[416/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.pdb
+[417/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MockRuntime.pdb
+[418/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.pdb
+[419/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.SpatialTracking.pdb
+[420/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.pdb
+[421/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.pdb
+[422/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.pdb
+[423/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.pdb
+[424/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.UI.pdb
+[426/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.Analytics.dll
+[427/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.Analytics.pdb
+[428/432    0s] Csc Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+Assets/Editor/LoftSimShot.cs(33,24): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftSimShot.cs(56,13): warning CS0618: 'SubsystemManager.GetInstances<T>(List<T>)' is obsolete: 'Use GetSubsystems instead. (UnityUpgradable) -> GetSubsystems<T>(*)'
+Assets/Editor/LoftSimShot.cs(57,72): warning CS0618: 'IntegratedSubsystem<XRDisplaySubsystemDescriptor>.SubsystemDescriptor' is obsolete: 'The property 'SubsystemDescriptor' is deprecated. Use `subsystemDescriptor` instead. (UnityUpgradable) -> subsystemDescriptor'
+Assets/Editor/LoftVerify.cs(26,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(27,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(28,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(29,69): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(30,71): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(31,74): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(122,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftQuestBuild.cs(42,26): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(42,49): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(118,26): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(118,49): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftVerify.cs(146,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(147,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(148,21): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(149,19): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(150,23): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(279,20): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(280,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(281,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(332,20): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(333,21): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(334,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(335,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(336,23): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(387,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(388,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+[429/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Assembly-CSharp-Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll, with 140 defines and 324 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[430/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[431/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (0.56 seconds), 58 items updated, 432 evaluated
+[ApiUpdater] Total time: 1172ms, Parse response file: 33ms, Collect updater configs: 671ms, Update: 467ms, Save: 1ms Files: 1 modified / 1 visited / 6 total (Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll).
+[API Updater] Updated Files:
+Assets/Editor/LoftSimShot.cs
+Finished running ScriptUpdaters
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend3.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 0 Duration: 0s296ms
+[349/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[428/432    0s] Csc Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+Assets/Editor/LoftSimShot.cs(33,24): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftSimShot.cs(57,72): warning CS0618: 'IntegratedSubsystem<XRDisplaySubsystemDescriptor>.SubsystemDescriptor' is obsolete: 'The property 'SubsystemDescriptor' is deprecated. Use `subsystemDescriptor` instead. (UnityUpgradable) -> subsystemDescriptor'
+Assets/Editor/LoftVerify.cs(26,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(27,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(28,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(29,69): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(30,71): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(31,74): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(122,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftQuestBuild.cs(42,26): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(42,49): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(118,26): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(118,49): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftVerify.cs(146,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(147,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(148,21): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(149,19): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(150,23): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(279,20): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(280,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(281,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(332,20): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(333,21): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(334,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(335,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(336,23): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(387,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(388,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+[429/432    0s] ILPostProcess Library/Bee/artifacts/200b0aE.dag/post-processed/Assembly-CSharp-Editor.dll (+pdb)
+Processing assembly Library/Bee/artifacts/200b0aE.dag/Assembly-CSharp-Editor.dll, with 140 defines and 324 references
+processors: zzzUnity.Burst.CodeGen.BurstILPostProcessor
+1 processor(s) skipped this assembly
+[430/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[431/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (0.28 seconds), 5 items updated, 432 evaluated
+Assets/Editor/LoftSimShot.cs(33,24): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftSimShot.cs(57,72): warning CS0618: 'IntegratedSubsystem<XRDisplaySubsystemDescriptor>.SubsystemDescriptor' is obsolete: 'The property 'SubsystemDescriptor' is deprecated. Use `subsystemDescriptor` instead. (UnityUpgradable) -> subsystemDescriptor'
+Assets/Editor/LoftVerify.cs(26,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(27,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(28,73): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(29,69): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(30,71): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(31,74): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(122,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftQuestBuild.cs(42,26): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(42,49): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(118,26): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftQuestBuild.cs(118,49): warning CS0618: 'XRManagerSettings.loaders' is obsolete: ''XRManagerSettings.loaders' property is obsolete. Use 'XRManagerSettings.activeLoaders' instead to get a list of the current loaders.'
+Assets/Editor/LoftVerify.cs(146,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(147,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(148,21): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(149,19): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(150,23): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(279,20): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(280,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(281,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(332,20): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(333,21): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(334,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(335,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(336,23): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(387,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Assets/Editor/LoftVerify.cs(388,22): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Total cache size 79623016
+Total cache size after purge 79623016, took 00:00:00.0208266
+AssetDatabase: script compilation time: 46.616215s
+[ScriptCompilation] Requested script compilation because: AssetDatabase observed changes in script compilation related files
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 0 Duration: 0s133ms
+[350/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+*** Tundra build success (0.12 seconds), 1 items updated, 432 evaluated
+Total cache size 79623016
+Total cache size after purge 79623016, took 00:00:00.0247204
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Refreshing native plugins compatible for Editor in 3.99 ms, found 5 plugins.
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.341 seconds
+Domain Reload Profiling: 709ms
+	BeginReloadAssembly (153ms)
+		DisableScriptedObjects (12ms)
+		CreateAndSetChildDomain (32ms)
+	RebuildCommonClasses (6ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (21ms)
+	LoadAllAssembliesAndSetupDomain (175ms)
+		LoadAssemblies (145ms)
+		TypeCache.Refresh (32ms)
+			TypeCache.ScanAssembly (23ms)
+		AnalyzeDomain (8ms)
+			BuildScriptInfoCaches (6ms)
+	FinalizeReload (341ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (8ms)
+			BeforeProcessingInitializeOnLoad (67ms)
+			ProcessInitializeOnLoadAttributes (64ms)
+			ProcessInitializeOnLoadMethodAttributes (33ms)
+		AwakeInstancesAfterBackupRestoration (12ms)
+Starting new worker id: 0 with log in /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Logs/AssetImportWorkerHW0.log
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+
+Asset Pipeline Refresh (id=5cecd0bf623124865a5a61f0ef1ad5d8): Total: 47.831 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=522 ms
+		Asset DB Callback time: managed=58 ms, native=9 ms
+		Scripting: domain reloads=1, domain reload time=380 ms, compile time=46851 ms, other=9 ms
+		Project Asset Count: scripts=369, non-scripts=281
+		Asset File Changes: new=1, changed=2, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokePackagesCallback: 7.879ms
+	ApplyChangesToAssetFolders: 0.134ms
+	Scan: 89.018ms
+	Collect global state as custom dependencies: 3.863ms
+	OnSourceAssetsModified: 0.360ms
+	CategorizeScriptCompilationAssets: 4.765ms
+	ProcessAssetsWithTransientArtifactChanges: 9.898ms
+	CategorizeAssets: 4.814ms
+	CompileScripts: 46851.125ms
+	ImportOutOfDateAssets: 352.097ms (348.871ms without children)
+		UnloadImportedAssets: 1.695ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.098ms
+		ImportSchedulerStart: 1.429ms
+	PostProcessAllAssets: 57.649ms
+		XRBuildSystem.XRAssetImported 0.175ms
+		MonoPostProcessAllAssets: 57.232ms
+			AssetPostprocessor.OnPostprocessAllAssets 16.937ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 9.623ms
+			AssetCallbacks.OnPostprocessAllAssets 8.550ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 4.250ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 3.826ms
+			AssetChangedListener.OnPostprocessAllAssets 3.564ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 0.898ms
+			SyncVS.PostprocessSyncProject 0.631ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.502ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.478ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 0.431ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.312ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 0.217ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.182ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.175ms
+			InputActionJsonNameModifierAssetProcessor.OnPostprocessAllAssets 0.168ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.163ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.157ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.152ms
+			TMPro_TexturePostProcessor.OnPostprocessAllAssets 0.148ms
+			AssetEvents.OnPostprocessAllAssets 0.138ms
+			ThemePostprocessor.OnPostprocessAllAssets 0.084ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.079ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.075ms
+			RenderPipelineGlobalSettingsPostprocessor.OnPostprocessAllAssets 0.072ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.061ms
+	PostAssetChangesProfiler: 2.743ms
+	UnloadStreamsBegin: 0.769ms
+	GenerateScriptTypeHashes: 0.754ms
+	GenerateScriptTypeSerializationHashes: 1.597ms
+	Untracked: 443.668ms
+
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler after 0.07 seconds
+Scanning for USB devices : 0.027ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-quest_loft
+2026-11-02 18:07:13.167 Unity[81751:5745197] NSEventModifierFlagFunction specified to -setKeyEquivalentModifierMask: for item <NSMenuItem: 0x600000dc75d0 SDF, ke='Command-F12'>, but is only supported for system-provided menu items; will not be used
+Opening scene 'Assets/Scenes/Loft.unity'
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/Loft.unity'
+	Deserialize:            5.248 ms
+	Integration:            406.969 ms
+	Integration of assets:  0.011 ms
+	Thread Wait Time:       0.005 ms
+	Total Operation Time:   412.233 ms
+Unloading 1201 unused Assets / (0.5 MB). Loaded Objects now: 2135.
+Memory consumption went from 161.1 MB to 160.5 MB.
+Total: 5.229583 ms (FindLiveObjects: 0.175625 ms CreateObjectMapping: 0.035333 ms MarkObjects: 4.629875 ms  DeleteObjects: 0.315291 ms)
+
+[LAYOUT] About to load UserSettings/Layouts/default-6000.dwlt, keepMainWindow=False
+2026-11-02 18:07:13.654 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:13.654 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:13.655 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:13.655 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:13.655 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:13.655 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+Worker ready: AssetImportWorkerHW0 0
+2026-11-02 18:07:14.142 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:14.142 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:14.150 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:14.150 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:14.150 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:14.150 Unity[81751:5745197] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+[LAYOUT] About to save layout /Users/azharie/Documents/azhar_project/vr_games/quest_loft/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/azharie/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+[MODES] ModeService[default].InitializeCurrentMode
+[MODES] ModeService[default].RaiseModeChanged(default, default)
+2026-11-02 18:07:14.432 Unity[81751:5745197] NSEventModifierFlagFunction specified to -setKeyEquivalentModifierMask: for item <NSMenuItem: 0x600000dc5810 SDF, ke='Command-F12'>, but is only supported for system-provided menu items; will not be used
+Thread 0xc4d513000 may have been prematurely finalized
+This project uses Input Manager, which is marked for deprecation. To manage input in your project, use the <a href="https://docs.unity3d.com/Packages/com.unity.inputsystem@latest">Input System package</a> instead.
+[Project] Loading completed in 51.534 seconds
+	Project init time: 				50.050 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		0.230 seconds
+		Asset Database init time: 		0.076 seconds
+		Global illumination init time: 	0.000 seconds
+		Assemblies load time: 			1.047 seconds
+		Unity extensions init time: 	0.002 seconds
+		Asset Database refresh time: 	47.831 seconds
+	Scene opening time: 			1.303 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1793617634489,"processId":81751,"projectLoad":51.534337625000006,"projectInit":50.0497535,"templateInit":0.0,"packageManagerInit":0.229590875,"assetDatabaseInit":0.076330291,"globalIlluminationInit":0.000428583,"assembliesLoad":1.04724875,"unityExtensionsInit":0.002143958,"assetDatabaseRefresh":47.830782125,"sceneOpening":1.30271725}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1793617634489,"processId":81751,"editorVersion":"6000.6.7f1 (b22767f04f04)","branch":"6000.6/staging","buildType":"Release","platform":"OSX"}
+Subscribe to USB device events
+Reloading assemblies for play mode.
+Reloading assemblies after forced synchronous recompile.
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.747 seconds
+Domain Reload Profiling: 1040ms
+	BeginReloadAssembly (176ms)
+		DisableScriptedObjects (42ms)
+		CreateAndSetChildDomain (55ms)
+	RebuildCommonClasses (6ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (22ms)
+	LoadAllAssembliesAndSetupDomain (77ms)
+		LoadAssemblies (43ms)
+		TypeCache.Refresh (5ms)
+		AnalyzeDomain (2ms)
+	FinalizeReload (747ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (6ms)
+			BeforeProcessingInitializeOnLoad (63ms)
+			ProcessInitializeOnLoadAttributes (72ms)
+			ProcessInitializeOnLoadMethodAttributes (52ms)
+		AwakeInstancesAfterBackupRestoration (306ms)
+No restricted APIs configured; Validation skipped.
+Checking 1 assemblies for restricted APIs found 0 usage(s) in 2 ms
+
+Asset Pipeline Refresh (id=8ed465aa1502d439ea026c345ff93ff7): Total: 1.162 seconds - Initiated by StopAssetImportingV2(ForceSynchronousImport | ForceDomainReload)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=798 ms
+		Asset DB Callback time: managed=41 ms, native=18 ms
+		Scripting: domain reloads=1, domain reload time=302 ms, compile time=1 ms, other=0 ms
+		Project Asset Count: scripts=369, non-scripts=281
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokePackagesCallback: 1.062ms
+	ApplyChangesToAssetFolders: 0.058ms
+	Collect global state as custom dependencies: 0.220ms
+	ProcessAssetsWithTransientArtifactChanges: 15.763ms
+	CategorizeAssets: 3.277ms
+	CompileScripts: 1.174ms
+	ImportOutOfDateAssets: 751.566ms (750.514ms without children)
+		CollectScriptTypesHashes: 0.179ms
+		ReloadNativeAssets: 0.144ms
+		UnloadImportedAssets: 0.671ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.086ms
+		ImportSchedulerStart: 0.147ms
+	PostProcessAllAssets: 54.897ms
+		PostProcessCallbackCreateDeferredMaterials 1.486ms
+		ShaderAssetModifiedCallback 0.951ms
+		AssemblyValidation.PostprocessAllAssets 0.823ms
+		RaytracingShaderImportPostprocess 0.748ms
+		ComputeShaderImportPostprocess 0.746ms
+		SpeedTreeImporter.PostprocessAllAssets 0.664ms
+		BlockShaderImporter.PostprocessAllAssets 0.347ms
+		LocalizationDatabase.AssetDatabasePostprocessCallback 0.345ms
+		XRBuildSystem.XRAssetImported 0.167ms
+		MonoPostProcessAllAssets: 39.767ms
+			BuilderAssetPostprocessor.OnPostprocessAllAssets 6.352ms
+			AssetPostprocessor.OnPostprocessAllAssets 5.306ms
+			AssetCallbacks.OnPostprocessAllAssets 4.218ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 3.874ms
+			InputActionJsonNameModifierAssetProcessor.OnPostprocessAllAssets 3.792ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 2.744ms
+			TextAssetPostProcessor.OnPostprocessAllAssets 2.112ms
+			AssetChangedListener.OnPostprocessAllAssets 2.023ms
+			RetainedModeAssetPostprocessor.OnPostprocessAllAssets 0.749ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.601ms
+			SyncVS.PostprocessSyncProject 0.564ms
+			ArtifactBrowserPostProcessor.OnPostprocessAllAssets 0.314ms
+			AudioMixerPostprocessor.OnPostprocessAllAssets 0.276ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.160ms
+			TMPro_TexturePostProcessor.OnPostprocessAllAssets 0.159ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.146ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.140ms
+			StyleCatalogPostProcessor.OnPostprocessAllAssets 0.134ms
+			AssetEvents.OnPostprocessAllAssets 0.121ms
+			SpeedTreePostProcessor.OnPostprocessAllAssets 0.096ms
+			ThemePostprocessor.OnPostprocessAllAssets 0.084ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.074ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.073ms
+			ConfigAssetsTracker.OnPostprocessAllAssets 0.065ms
+			ScenarioDriftAssetsTracker.OnPostprocessAllAssets 0.055ms
+	PostAssetChangesProfiler: 4.141ms
+	UnloadStreamsBegin: 0.630ms
+	GenerateScriptTypeHashes: 0.774ms
+	GenerateScriptTypeSerializationHashes: 1.482ms
+	Untracked: 326.617ms
+
+[Subsystems] OpenXR XR Plugin successfully registered Provider for OpenXR Display
+[Subsystems] OpenXR XR Plugin successfully registered Provider for OpenXR Input
+[Subsystems] OpenXR XR Plugin successfully registered Provider for OpenXR Display
+Failed to load openxr runtime loader.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogError (object)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:InitializeInternal () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:235)
+UnityEngine.XR.OpenXR.OpenXRLoaderBase:Initialize () (at ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs:203)
+UnityEngine.XR.Management.XRManagerSettings:InitializeLoaderSync () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRManagerSettings.cs:186)
+UnityEngine.XR.Management.XRGeneralSettings:InitXRSDK () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRGeneralSettings.cs:172)
+UnityEngine.XR.Management.XRGeneralSettings:AttemptInitializeXRSDKOnLoad () (at ./Library/PackageCache/com.unity.xr.management@e3a3882b360a/Runtime/XRGeneralSettings.cs:145)
+
+(Filename: ./Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs Line: 235)
+
+[XR] [0x200080f40] [18:07:16.464][Info   ] 
+
+==== Start Unity OpenXR Diagnostic Report ====
+
+
+[XR] [0x200080f40] [18:07:16.464][Info   ] ==== Report Reason: System Shutdown ====
+
+
+[XR] [0x200080f40] [18:07:16.464][Info   ] ==== Last 20 Events ====
+[XR] [0x200080f40] [18:07:16.464][Info   ] 
+
+==== End Unity OpenXR Diagnostic Report ====
+
+
+[Desk] Desk ready — WASD walk, assign below, all in-app.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftDesk:Note (string) (at Assets/App/LoftDesk.cs:452)
+LoftDesk:Awake () (at Assets/App/LoftDesk.cs:93)
+
+(Filename: Assets/App/LoftDesk.cs Line: 452)
+
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            2.179 ms
+	Integration:            814.923 ms
+	Integration of assets:  0.015 ms
+	Thread Wait Time:       0.005 ms
+	Total Operation Time:   817.122 ms
+[STANDUP-TEST] PASS: AgentManager present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:42)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: BoardManager present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:43)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: VoiceCommands present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:44)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[STANDUP-TEST] PASS: Multiplayer present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:45)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.01 seconds
+Multiple ADB server instances found, the following ADB server instance have been terminated due to being run from another SDK. 
+If instance restarts during deployment, this may cause unexpected issues. Please check that ADB versions are consistent across instances. 
+Process paths: 
+/Applications/Meta Quest Developer Hub.app/Contents/Resources/bin/adb
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.Android.AndroidDeploymentTargetsExtension:GetKnownTargets (UnityEditor.DeploymentTargets.IDeploymentTargetsMainThreadContext,UnityEditor.ProgressHandler) (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/DeploymentTargets/AndroidDeploymentTargetsExtension.cs:379)
+UnityEditor.Android.TargetScanWorker:DoScan (UnityEditor.DeploymentTargets.IDeploymentTargetsExtension,UnityEditor.DeploymentTargets.IDeploymentTargetsMainThreadContext,System.Threading.CancellationToken) (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/TargetScanWorker.cs:188)
+UnityEditor.Android.TargetScanWorker/<>c__DisplayClass15_0:<MainThreadProcessing>b__0 () (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/TargetScanWorker.cs:227)
+System.Threading.Tasks.Task:InnerInvoke ()
+System.Threading.Tasks.Task:Execute ()
+System.Threading.Tasks.Task:ExecutionContextCallback (object)
+System.Threading.ExecutionContext:RunInternal (System.Threading.ExecutionContext,System.Threading.ContextCallback,object,bool)
+System.Threading.ExecutionContext:Run (System.Threading.ExecutionContext,System.Threading.ContextCallback,object,bool)
+System.Threading.Tasks.Task:ExecuteWithThreadLocal (System.Threading.Tasks.Task&)
+System.Threading.Tasks.Task:ExecuteEntry (bool)
+System.Threading.Tasks.Task:System.Threading.IThreadPoolWorkItem.ExecuteWorkItem ()
+System.Threading.ThreadPoolWorkQueue:Dispatch ()
+System.Threading._ThreadPoolWaitCallback:PerformWaitCallback ()
+
+(Filename: /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/DeploymentTargets/AndroidDeploymentTargetsExtension.cs Line: 379)
+
+Android Extension - Scanning For ADB Devices 230 ms
+Importing 'GUID: d1da30e74f62a4db8a2724defb5a77bc - Path: Assets/XR/Settings/OpenXR Package Settings.asset' with importer (NativeFormatImporter)
+Imported 'GUID: d1da30e74f62a4db8a2724defb5a77bc' -> (Import Result ID: '2a89e38b6d790feab26ed921b4a891e5') in 0.002 seconds [static dependencies only]. Details - ImportResultOutputID=250c25ec8bd409a30da52db348ca35a6 DependenciesID=e74fbec193eb2182a9c6d17ea9f4dabc StaticDependenciesID=df03ef3693d25bfd1ac995271bedf01b 
+Asset Pipeline Refresh (id=39333d5415e654cc48d1f6543e6a37bd): Total: 0.014 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start Indexing on Editor startup
+[Indexing] Starting Initial Indexing for Assets
+[STANDUP-TEST] PASS: wake 3 agents -> all Idle
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:55)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[VoiceCommands] Matched Run: 'jalankan tes'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:60)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[STANDUP-TEST] PASS: voice ID 'jalankan tes' -> Run
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:61)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[VoiceCommands] Matched Run: 'run landing test'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+VirtualLoft.XR.VoiceCommands:SimulateCommand (string) (at Assets/XR/VoiceCommands.cs:184)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:62)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[STANDUP-TEST] PASS: voice EN 'run landing test' -> Run
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+StandupFlowTest:Check (bool,string) (at Assets/Tests/StandupFlowTest.cs:26)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:63)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Tests/StandupFlowTest.cs Line: 26)
+
+[Agents] builder <- run landing test
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+StandupFlowTest/<Start>d__9:MoveNext () (at Assets/Tests/StandupFlowTest.cs:64)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+MonoPathRemapper: Attempts to remap: 13165; Successful remaps: 1018
+Serialized file version minimum: 23, current 23
+[LAYOUT] About to save layout /Users/azharie/Documents/azhar_project/vr_games/quest_loft/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/azharie/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+Killing ADB server in 0.035933 seconds.
+Importing 'GUID: d1da30e74f62a4db8a2724defb5a77bc - Path: Assets/XR/Settings/OpenXR Package Settings.asset' with importer (NativeFormatImporter)
+Imported 'GUID: d1da30e74f62a4db8a2724defb5a77bc' -> (Import Result ID: '31d842aff628ea18faf845b11d9c2279') in 0.001 seconds [static dependencies only]. Details - ImportResultOutputID=250c25ec8bd409a30da52db348ca35a6 DependenciesID=e0dafcf261cc99db9d36e00469a855d0 StaticDependenciesID=0c111f7ae50e8fb23505d243740fc91a 
+Asset Pipeline Refresh (id=1286293f1bbec4b969afed34a8ace9f6): Total: 0.008 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Thread 0xc4f637000 may have been prematurely finalized
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Thread 0x16bd4b000 may have been prematurely finalized
+Thread 0x16bf7b000 may have been prematurely finalized
+Thread 0x16be63000 may have been prematurely finalized
+Thread 0x16bdd7000 may have been prematurely finalized
+Thread 0x16beef000 may have been prematurely finalized
+Thread 0x16c007000 may have been prematurely finalized
+Thread 0x16c093000 may have been prematurely finalized
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+[Licensing::IpcConnector] LicenseClient-azharie-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-azharie channel disconnected successfully.
+Shut down UDS service system complete
+Lingering sessions upon destruction of worker manager
+Unity Data Store service was successfully shut down
+UDS shutting down local client system
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+CodeReloadManager destroyed
+debugger-agent: Unable to listen on 57
+VBCSCompilerPreWarmer: requested VBCSCompiler shutdown
+Checking for leaked weakptr:
+  Found no leaked weakptrs.
+[Package Manager] Server process was shutdown
+Internal: There are remaining Allocations on the JobTempAlloc. This is a leak, and will impact performance
+To Debug, run app with -diag-job-temp-memory-leak-validation cmd line argument. This will output the callstacks of the leaked allocations.
+Internal: There are remaining Allocations on the JobTempAlloc. This is a leak, and will impact performance
+To Debug, run app with -diag-job-temp-memory-leak-validation cmd line argument. This will output the callstacks of the leaked allocations.
+##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1793617641138,"processId":81751,"allocatedMemory":8020555,"memoryLabels":[{"Default":172727},{"Permanent":15672},{"Thread":1056696},{"Manager":24758},{"VertexData":8},{"Geometry":416},{"Texture":24},{"Shader":841932},{"Material":212},{"GfxDevice":42304},{"GfxThread":1920},{"Animation":968},{"Audio":1240},{"FreeType":8},{"FontEngine":736},{"Physics":2002},{"Physics2D":16},{"Serialization":16952},{"Input":43216},{"JobScheduler":448},{"TextLib":16555},{"Mono":56},{"ScriptingNativeRuntime":155024},{"BaseObject":48976},{"Resource":1460},{"Renderer":2736},{"Transform":4733},{"File":31313},{"WebCam":32},{"Culling":32},{"Terrain":11346},{"Wind":24},{"String":1327295},{"StaticString":3808},{"Utility":2691617},{"PoolAlloc":1960},{"AI":80},{"TypeTree":21125},{"ScriptManager":18984},{"CodeReload":448},{"RuntimeInitializeOnLoadManager":64},{"Sprites":102},{"SpriteAtlas":120},{"GI":7240},{"Director":8288},{"CloudService":15504},{"WebRequest":520},{"VR":49570},{"SceneManager":616},{"Video":2112},{"LazyScriptCache":32},{"Camera":1177},{"Secure":10105},{"SerializationCache":9704},{"APIUpdating":10320},{"Subsystems":192},{"VirtualTexturing":57504},{"StaticSafetyDebugInfo":278528},{"Baselib":16},{"Analytics":568},{"Hierarchy":1492},{"UIElements":40},{"CoreStats":14536},{"Identifiers":7152},{"EntityIdStore":33152},{"Gui":12976},{"EditorUtility":147491},{"VersionControl":8},{"Undo":939},{"AssetDatabase":735183},{"AssetImporter":40},{"EditorGi":328},{"UnityConnect":32546},{"Upm":1788},{"UpmDiagnostics":8},{"AssetCompliance":96},{"DrivenProperties":72},{"HubClient":848},{"LocalIPC":206},{"ProfilerEditor":9738},{"CoreBusinessMetrics":3205},{"Windowing":416},{"Licensing":1408},{"AssetReference":32},{"IPCStream":4714}]}
+Internal: There are remaining Allocations on the JobTempAlloc. This is a leak, and will impact performance
+To Debug, run app with -diag-job-temp-memory-leak-validation cmd line argument. This will output the callstacks of the leaked allocations.

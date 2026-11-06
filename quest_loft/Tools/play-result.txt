@@ -1,0 +1,20 @@
+date=2026-11-02T19:00:27.9819270+07:00
+summary=[STANDUP-TEST] SUMMARY: 17 pass, 0 fail — STANDUP FLOW GREEN
+playFps~228
+PASS: AgentManager present
+PASS: BoardManager present
+PASS: VoiceCommands present
+PASS: Multiplayer present
+PASS: wake 3 agents -> all Idle
+PASS: voice ID 'jalankan tes' -> Run
+PASS: voice EN 'run landing test' -> Run
+PASS: Builder Working after assign
+PASS: log board AddCard PASS 12/12
+PASS: VoiceMove -> Done
+PASS: card column == Done
+PASS: button fallback InvokeCommand(Done)
+PASS: OnAgentDone broadcast on Done
+PASS: CEO assign allowed, member assign denied
+PASS: member moves own card, denied others'
+PASS: activity log has entries (2)
+PASS: save/load roundtrip keeps Done card

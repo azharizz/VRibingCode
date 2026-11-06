@@ -147,3 +147,13 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Unity generated files
+/quest_loft/Library/
+/quest_loft/Temp/
+/quest_loft/Obj/
+/quest_loft/Build/
+/quest_loft/Builds/
+/quest_loft/Logs/
+/quest_loft/MemoryCaptures/
+/quest_loft/UserSettings/

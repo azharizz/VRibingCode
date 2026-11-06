@@ -1,0 +1,16 @@
+{
+  "roomId": "focus-loft",
+  "version": 1,
+  "updatedAt": "2026-11-02T09:00:00+07:00",
+  "boards": [
+    { "id": "notes", "type": "Notes", "wall": "main", "pos": [-4.2, 1.6, 0.0], "size": [2.4, 1.4] },
+    { "id": "kanban", "type": "Kanban", "wall": "main", "pos": [-1.4, 1.6, 0.0], "size": [2.8, 1.6] },
+    { "id": "calendar", "type": "Calendar", "wall": "main", "pos": [1.6, 1.6, 0.0], "size": [2.4, 1.2] },
+    { "id": "log", "type": "Log", "wall": "main", "pos": [4.2, 1.6, 0.0], "size": [2.0, 1.4] }
+  ],
+  "agents": [
+    { "id": "scout", "desk": "desk-1", "pos": [-2.0, 0.0, 1.5] },
+    { "id": "builder", "desk": "desk-2", "pos": [0.0, 0.0, 1.5] },
+    { "id": "keeper", "desk": "desk-3", "pos": [2.0, 0.0, 1.5] }
+  ]
+}

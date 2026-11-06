@@ -1,0 +1,1 @@
+[SIMSHOT] waited=25s tasks=1 boards=5 xrDisplayActive=NO-subsystems

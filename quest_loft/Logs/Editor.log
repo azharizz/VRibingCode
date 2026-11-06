@@ -1,0 +1,430 @@
+Unity Editor version:    6000.6.7f1 (b22767f04f04)
+Branch:                  6000.6/staging
+Build type:              Release
+Batch mode:              NO
+macOS version:           Version 14.6.1 (Build 23G93)
+Darwin version:          23.6.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        16384 MB
+Date:                    2026-11-02T11:07:21Z
+VBCSCompilerPreWarmer: watching VBCSCompiler (PID 81916)
+VBCSCompilerPreWarmer: pre-warm launched (dotnet PID 81918)
+VBCSCompiler prewarm took 2.90 ms
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-azharie doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 81919)
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/MacOS/Unity
+-projectPath
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+Successfully changed project path to: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-remapper-allocator-initial-capacity=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-main-allocator-mimalloc-enabled=1"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie" at "2026-11-02T11:07:21.373557Z"
+Player connection [8590462784]  Target information:
+
+Player connection [8590462784]  * "[IP] 192.168.18.50 [Port] 55504 [Flags] 2 [Guid] 316599500 [EditorId] 316599500 [Version] 1048832 [Id] OSXEditor(0,Azhar-Izzannada.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8590462784] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8590462784] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Initialising UDS system complete:
+  - System type: Client
+  - Resource namespace: 35571781078b0bc8bdd66070b9a59cb0
+  - Shared memory size: 1073741824
+  - Command buffer id: 1052672
+  - Command buffer size: 8192
+  - Hashmap size: 4194304
+  - Service connected: false
+[Package Manager] Connected to IPC stream "Upm-81915" after 0.2 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              d18b1b00edf24100a8330d08cf4a4b84
+  Correlation Id:          d8cf469ede0023a845d7acd144c2e21d
+  External correlation Id: 5849758005782608786
+  Machine Id:              A8knmJu4QVJsst31a7pUeu1BBlg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-azharie" (connect: 0.17s, validation: 0.02s, handshake: 0.22s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie-notifications" at "2026-11-02T11:07:21.613655Z"
+[Licensing::Module] Connected to LicensingClient (PId: 81919, launch time: 0.00, total connection time: 0.41s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968537812619-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.42s
+[Licensing::Module] Licensing is initialized (took 0.06s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+Launching Unity Data Store - /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/Unity.DataStore 
+Unity Data Store artifact dir = Library/DataStore, working dir = /Users/azharie/Documents/azhar_project/vr_games/quest_loftUnity Data Store running and initialised
+Refreshing native plugins compatible for Editor in 7.52 ms, found 5 plugins.
+[Physics::Module] Selected backend (deferred post-plugins).
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.6.7f1 (b22767f04f04)
+[EntityIdStore] init: VM path (explicit commit), pageSize=16384, blockCount=262144, entitiesPerBlock=1024, blocksPerSlotPage=0, slots reserved=4294967296 bytes
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+GfxDevice: creating device client; kGfxThreadingModeThreaded
+ preferred device: Apple M2 (high power)
+Metal devices available: 1
+0: Apple M2 (high power)
+Using device Apple M2 (high power)
+Initializing Metal device caps: Apple M2
+Mac GPU Family: 2
+Apple GPU Family: 8
+MSL Version: 3.0
+Has Float MSAA: 1
+Has Float Filtering: 1
+ReadWrite Texture Tier: 2
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/BCLExtensions/runtime/netstandard2.1'
+Mono path[2] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56915
+CodeReloadManager initialized
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.001496 seconds.
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.454 seconds
+Domain Reload Profiling: 748ms
+	BeginReloadAssembly (54ms)
+		CreateAndSetChildDomain (8ms)
+	RebuildCommonClasses (3ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (31ms)
+	LoadAllAssembliesAndSetupDomain (192ms)
+		LoadAssemblies (47ms)
+		TypeCache.Refresh (137ms)
+			TypeCache.ScanAssembly (127ms)
+		AnalyzeDomain (0ms)
+	FinalizeReload (456ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (51ms)
+			BeforeProcessingInitializeOnLoad (65ms)
+			ProcessInitializeOnLoadAttributes (60ms)
+			ProcessInitializeOnLoadMethodAttributes (158ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 21 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.nuget.newtonsoft-json@3.2.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.nuget.newtonsoft-json@74deb55db2a0)
+    com.unity.xr.management@4.5.4 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.management@e3a3882b360a)
+    com.unity.xr.legacyinputhelpers@3.0.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.legacyinputhelpers@3f62d634f63b)
+    com.unity.inputsystem@1.20.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.inputsystem@2436e68c60c4)
+    com.unity.xr.core-utils@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.xr.core-utils@a8b900321199)
+  Built-in packages:
+    com.unity.textmeshpro@5.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.textmeshpro@5861d0377263)
+    com.unity.modules.androidjni@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.androidjni)
+    com.unity.modules.jsonserialize@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.jsonserialize)
+    com.unity.modules.xr@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.subsystems)
+    com.unity.ugui@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.ugui@eb824e41fbc7)
+    com.unity.modules.uielements@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.uielements)
+    com.unity.modules.physics@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.ui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.imgui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.audio@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.hierarchycore@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.hierarchycore)
+    com.unity.modules.animation@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.animation)
+    com.unity.modules.physicscore2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physicscore2d)
+  Embedded packages:
+    com.unity.xr.openxr@file:/Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr)
+[Package Manager] com.unity.textmeshpro is deprecated: This package is no longer supported. TextMeshPro functionalities are now included in the com.unity.ugui package. To continue using them, consider adding it to your project dependencies.
+[Subsystems] Looking for new subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] Novel subsystem found at Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Packages/com.unity.xr.openxr
+[Subsystems] No descriptors matched for  examples in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Subsystems] 1 'inputs' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] 1 'displays' descriptors matched in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json
+[Subsystems] No descriptors matched for  meshings in Packages/com.unity.xr.openxr/Runtime/UnitySubsystemsManifest.json.
+[Package Manager] Done registering packages in 0.02 seconds
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+ExitCode: 0 Duration: 0s181ms
+[350/432    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+[371/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.dll
+[372/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.dll
+[374/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.004.dll
+[375/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.UI.dll
+[376/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.dll
+[377/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.dll
+[378/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.dll
+[380/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.dll
+[381/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.SpatialTracking.dll
+[382/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.dll
+[383/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.dll
+[384/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.dll
+[385/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.dll
+[386/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MockRuntime.dll
+[387/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+[388/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll
+[389/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[390/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.Editor.pdb
+[391/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.SpatialTracking.pdb
+[392/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.SpatialTracking.dll
+[393/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.004.pdb
+[394/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.pdb
+[395/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.Editor.dll
+[397/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.Editor.pdb
+[398/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.XR.LegacyInputHelpers.pdb
+[399/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.XR.LegacyInputHelpers.dll
+[400/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.DocCodeSamples.pdb
+[401/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.DocCodeSamples.dll
+[402/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.Editor.pdb
+[405/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.pdb
+[406/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.CoreUtils.Editor.dll
+[407/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.pdb
+[408/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.Editor.dll
+[409/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.dll
+[410/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.pdb
+[411/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.dll
+[412/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.Editor.dll
+[413/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.Editor.pdb
+[414/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.pdb
+[415/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.Editor.pdb
+[416/432    0s] CopyFiles Library/ScriptAssemblies/Unity.InputSystem.ForUI.pdb
+[417/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.OculusQuestSupport.pdb
+[418/432    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.pdb
+[419/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.pdb
+[420/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.Management.pdb
+[421/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MockRuntime.pdb
+[422/432    0s] CopyFiles Library/ScriptAssemblies/Unity.TextMeshPro.pdb
+[423/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Features.MetaQuestSupport.pdb
+[426/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.UI.pdb
+[427/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Editor.dll
+[428/432    0s] CopyFiles Library/ScriptAssemblies/UnityEngine.SpatialTracking.pdb
+[429/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.Analytics.pdb
+[430/432    0s] CopyFiles Library/ScriptAssemblies/UnityEditor.UI.Analytics.dll
+[431/432    0s] CopyFiles Library/ScriptAssemblies/Unity.XR.OpenXR.Editor.pdb
+*** Tundra build success (0.17 seconds), 55 items updated, 432 evaluated
+Total cache size 79623016
+Total cache size after purge 79623016, took 00:00:00.0221756
+AssetDatabase: script compilation time: 0.529847s
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoaderInternal.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+'Packages/com.unity.xr.openxr/Runtime/OpenXRLoader.cs' contains partial class of Unity.Object, exactly 1 of the partial classes needs to be in a file with the same filename. This is to know the one that can be referenced from ie. GameObjects
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.346 seconds
+Domain Reload Profiling: 678ms
+	BeginReloadAssembly (131ms)
+		DisableScriptedObjects (11ms)
+		CreateAndSetChildDomain (36ms)
+	RebuildCommonClasses (6ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (21ms)
+	LoadAllAssembliesAndSetupDomain (161ms)
+		LoadAssemblies (108ms)
+		TypeCache.Refresh (31ms)
+			TypeCache.ScanAssembly (22ms)
+		AnalyzeDomain (8ms)
+			BuildScriptInfoCaches (6ms)
+	FinalizeReload (348ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			BeforeProcessingInitializeOnLoad (79ms)
+			ProcessInitializeOnLoadAttributes (66ms)
+			ProcessInitializeOnLoadMethodAttributes (32ms)
+		AwakeInstancesAfterBackupRestoration (12ms)
+Starting new worker id: 0 with log in /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Logs/AssetImportWorkerHW0.log
+
+Asset Pipeline Refresh (id=15b2ba99181e24c2c94eb798491dcd79): Total: 1.440 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=525 ms
+		Asset DB Callback time: managed=12 ms, native=16 ms
+		Scripting: domain reloads=1, domain reload time=346 ms, compile time=531 ms, other=8 ms
+		Project Asset Count: scripts=369, non-scripts=281
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokePackagesCallback: 17.098ms
+	ApplyChangesToAssetFolders: 0.125ms
+	Scan: 85.042ms
+	Collect global state as custom dependencies: 4.262ms
+	CategorizeScriptCompilationAssets: 3.432ms
+	ProcessAssetsWithTransientArtifactChanges: 9.904ms
+	CategorizeAssets: 7.902ms
+	CompileScripts: 531.409ms
+	ImportOutOfDateAssets: 353.703ms (351.156ms without children)
+		UnloadImportedAssets: 1.249ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.096ms
+		ImportSchedulerStart: 1.198ms
+	PostProcessAllAssets: 12.549ms
+		MonoPostProcessAllAssets: 12.508ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 4.747ms
+			SyncVS.PostprocessSyncProject 0.699ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.497ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.431ms
+			ProjectSettingsPostprocessor.OnPostprocessAllAssets 0.204ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.153ms
+			InputActionAssetPostprocessor.OnPostprocessAllAssets 0.143ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.116ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.084ms
+	UnloadStreamsBegin: 0.862ms
+	GenerateScriptTypeHashes: 3.721ms
+	GenerateScriptTypeSerializationHashes: 10.480ms
+	Untracked: 411.614ms
+
+Application.AssetDatabase Initial Refresh End
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.01 seconds
+Scanning for USB devices : 0.022ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-quest_loft
+2026-11-02 18:07:24.415 Unity[81915:5747034] NSEventModifierFlagFunction specified to -setKeyEquivalentModifierMask: for item <NSMenuItem: 0x600003a64230 SDF, ke='Command-F12'>, but is only supported for system-provided menu items; will not be used
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/Loft.unity'
+	Deserialize:            4.973 ms
+	Integration:            65.820 ms
+	Integration of assets:  0.026 ms
+	Thread Wait Time:       0.031 ms
+	Total Operation Time:   70.850 ms
+Unloading 1198 unused Assets / (0.6 MB). Loaded Objects now: 2130.
+Memory consumption went from 165.2 MB to 164.6 MB.
+Total: 6.287583 ms (FindLiveObjects: 0.202625 ms CreateObjectMapping: 0.071709 ms MarkObjects: 5.105583 ms  DeleteObjects: 0.828917 ms)
+
+[LAYOUT] About to load UserSettings/Layouts/default-6000.dwlt, keepMainWindow=False
+2026-11-02 18:07:24.517 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.518 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.518 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.518 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.518 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.518 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.977 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.977 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.978 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.978 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.978 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+2026-11-02 18:07:24.978 Unity[81915:5747034] CAMetalLayer ignoring invalid setDrawableSize width=0.000000 height=0.000000
+[LAYOUT] About to save layout /Users/azharie/Documents/azhar_project/vr_games/quest_loft/UserSettings/Layouts/default-6000.dwlt
+[LAYOUT] About to save layout /Users/azharie/Library/Preferences/Unity/Editor-5.x/Layouts/current/default-6000.dwlt
+[MODES] ModeService[default].InitializeCurrentMode
+[MODES] ModeService[default].RaiseModeChanged(default, default)
+This project uses Input Manager, which is marked for deprecation. To manage input in your project, use the <a href="https://docs.unity3d.com/Packages/com.unity.inputsystem@latest">Input System package</a> instead.
+[Project] Loading completed in 3.799 seconds
+	Project init time: 				3.081 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		0.213 seconds
+		Asset Database init time: 		0.140 seconds
+		Global illumination init time: 	0.001 seconds
+		Assemblies load time: 			0.767 seconds
+		Unity extensions init time: 	0.004 seconds
+		Asset Database refresh time: 	1.440 seconds
+	Scene opening time: 			0.616 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1793617645000,"processId":81915,"projectLoad":3.799174917,"projectInit":3.080561541,"templateInit":0.0,"packageManagerInit":0.212683291,"assetDatabaseInit":0.139997042,"globalIlluminationInit":0.000528084,"assembliesLoad":0.766582667,"unityExtensionsInit":0.004234083,"assetDatabaseRefresh":1.439962542,"sceneOpening":0.615821791}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1793617645000,"processId":81915,"editorVersion":"6000.6.7f1 (b22767f04f04)","branch":"6000.6/staging","buildType":"Release","platform":"OSX"}
+Subscribe to USB device events
+Multiple ADB server instances found, the following ADB server instance have been terminated due to being run from another SDK. 
+If instance restarts during deployment, this may cause unexpected issues. Please check that ADB versions are consistent across instances. 
+Process paths: 
+/Applications/Meta Quest Developer Hub.app/Contents/Resources/bin/adb
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.Android.AndroidDeploymentTargetsExtension:GetKnownTargets (UnityEditor.DeploymentTargets.IDeploymentTargetsMainThreadContext,UnityEditor.ProgressHandler) (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/DeploymentTargets/AndroidDeploymentTargetsExtension.cs:379)
+UnityEditor.Android.TargetScanWorker:DoScan (UnityEditor.DeploymentTargets.IDeploymentTargetsExtension,UnityEditor.DeploymentTargets.IDeploymentTargetsMainThreadContext,System.Threading.CancellationToken) (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/TargetScanWorker.cs:188)
+UnityEditor.Android.TargetScanWorker/<>c__DisplayClass15_0:<MainThreadProcessing>b__0 () (at /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/TargetScanWorker.cs:227)
+System.Threading.Tasks.Task:InnerInvoke ()
+System.Threading.Tasks.Task:Execute ()
+System.Threading.Tasks.Task:ExecutionContextCallback (object)
+System.Threading.ExecutionContext:RunInternal (System.Threading.ExecutionContext,System.Threading.ContextCallback,object,bool)
+System.Threading.ExecutionContext:Run (System.Threading.ExecutionContext,System.Threading.ContextCallback,object,bool)
+System.Threading.Tasks.Task:ExecuteWithThreadLocal (System.Threading.Tasks.Task&)
+System.Threading.Tasks.Task:ExecuteEntry (bool)
+System.Threading.Tasks.Task:System.Threading.IThreadPoolWorkItem.ExecuteWorkItem ()
+System.Threading.ThreadPoolWorkQueue:Dispatch ()
+System.Threading._ThreadPoolWaitCallback:PerformWaitCallback ()
+
+(Filename: /home/bokken/build/output/unity/unity/PlatformDependent/AndroidPlayer/Editor/Managed/DeploymentTargets/AndroidDeploymentTargetsExtension.cs Line: 379)
+
+Worker ready: AssetImportWorkerHW0 0
+Android Extension - Scanning For ADB Devices 263 ms
+Created GICache directory at /Users/azharie/Library/Caches/com.unity3d.UnityEditor/GiCache. Took: 0.005s, timestamps: [3.812 - 3.817]
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully resolved entitlement details
+Android Extension - Scanning For ADB Devices 70 ms
+[Licensing::Client] Successfully resolved entitlement details
+Attempted to call .Dispose on an already disposed CancellationTokenSource
+Android Extension - Scanning For ADB Devices 108 ms
+Android Extension - Scanning For ADB Devices 110 ms
+TrimDiskCacheJob: Current cache size 0mb
+Asset Pipeline Refresh (id=75db08ea9e0494d4f8fa44a7b712aab2): Total: 0.044 seconds - Initiated by RefreshV2(AllowForceSynchronousImport)
+2026-11-02 18:08:36.725 Unity[81915:5747034] NSEventModifierFlagFunction specified to -setKeyEquivalentModifierMask: for item <NSMenuItem: 0x600003a655e0 SDF, ke='Command-F12'>, but is only supported for system-provided menu items; will not be used

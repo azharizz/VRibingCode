@@ -1,0 +1,1174 @@
+Unity Editor version:    6000.6.7f1 (b22767f04f04)
+Branch:                  6000.6/staging
+Build type:              Release
+Batch mode:              YES
+macOS version:           Version 14.6.1 (Build 23G93)
+Darwin version:          23.6.0
+Architecture:            arm64
+Running under Rosetta:   NO
+Available memory:        16384 MB
+Date:                    2026-11-02T06:49:15Z
+VBCSCompilerPreWarmer: watching VBCSCompiler (PID 65811)
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/UnityLicensingClient.app/Contents/MacOS/Unity.Licensing.Client
+VBCSCompilerPreWarmer: pre-warm launched (dotnet PID 65813)
+VBCSCompiler prewarm took 2.47 ms
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-azharie doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 65814)
+Launching external process: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/PackageManager/Server/UnityPackageManager
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/MacOS/Unity
+-batchmode
+-nographics
+-projectPath
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+-openScene
+Assets/Scenes/Loft.unity
+-executeMethod
+LoftVerify.FullA
+-quit
+-logFile
+Tools/fulla-mirror.log
+Successfully changed project path to: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+Open scene: Assets/Scenes/Loft.unity
+/Users/azharie/Documents/azhar_project/vr_games/quest_loft
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-remapper-allocator-initial-capacity=32768"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-main-allocator-mimalloc-enabled=1"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+Logging is directed to a specific file, skipping project log.
+Player connection [8590462784]  Target information:
+
+Player connection [8590462784]  * "[IP] 192.168.18.50 [Port] 55504 [Flags] 2 [Guid] 4278696527 [EditorId] 4278696527 [Version] 1048832 [Id] OSXEditor(0,Azhar-Izzannada.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8590462784] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8590462784] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-65810" after 0.1 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie" at "2026-11-02T06:49:15.273796Z"
+Initialising UDS system complete:
+  - System type: Client
+  - Resource namespace: 35571781078b0bc8bdd66070b9a59cb0
+  - Shared memory size: 1073741824
+  - Command buffer id: 1052672
+  - Command buffer size: 8192
+  - Hashmap size: 4194304
+  - Service connected: false
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.18.3+d7ffd15
+  Session Id:              259d6083436f47689535b20d0493d338
+  Correlation Id:          23304e1d5d6ce21901a41b76ea17d09a
+  External correlation Id: 8765566124471079703
+  Machine Id:              A8knmJu4QVJsst31a7pUeu1BBlg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-azharie" (connect: 0.25s, validation: 0.02s, handshake: 0.20s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-azharie-notifications" at "2026-11-02T06:49:15.497344Z"
+[Licensing::Module] Connected to LicensingClient (PId: 65814, launch time: 0.00, total connection time: 0.48s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 18968537812619-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.49s
+[Licensing::Module] Licensing is initialized (took 0.24s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+Launching Unity Data Store - /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Helpers/Unity.DataStore 
+Unity Data Store artifact dir = Library/DataStore, working dir = /Users/azharie/Documents/azhar_project/vr_games/quest_loftUnity Data Store running and initialised
+[Physics::Module] Selected backend (deferred post-plugins).
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Initialize engine version: 6000.6.7f1 (b22767f04f04)
+[EntityIdStore] init: VM path (explicit commit), pageSize=16384, blockCount=262144, entitiesPerBlock=1024, blocksPerSlotPage=0, slots reserved=4294967296 bytes
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Assets
+Forcing GfxDevice: Null
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/BCLExtensions/runtime/netstandard2.1'
+Mono path[2] = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/Scripting/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56810
+CodeReloadManager initialized
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: /Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.001567 seconds.
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Package Manager log level set to [2]
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.376 seconds
+Domain Reload Profiling: 700ms
+	BeginReloadAssembly (71ms)
+		CreateAndSetChildDomain (21ms)
+	RebuildCommonClasses (3ms)
+	RebuildNativeTypeToScriptingClass (13ms)
+	initialDomainReloadingComplete (33ms)
+	LoadAllAssembliesAndSetupDomain (202ms)
+		LoadAssemblies (50ms)
+		TypeCache.Refresh (147ms)
+			TypeCache.ScanAssembly (136ms)
+		AnalyzeDomain (0ms)
+	FinalizeReload (376ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			BeforeProcessingInitializeOnLoad (64ms)
+			ProcessInitializeOnLoadAttributes (55ms)
+			ProcessInitializeOnLoadMethodAttributes (137ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 9 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.nuget.newtonsoft-json@3.2.1 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.nuget.newtonsoft-json@74deb55db2a0)
+  Built-in packages:
+    com.unity.textmeshpro@5.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.textmeshpro@5861d0377263)
+    com.unity.ugui@2.6.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.ugui@eb824e41fbc7)
+    com.unity.modules.ui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.ui)
+    com.unity.modules.imgui@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.imgui)
+    com.unity.modules.audio@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.audio)
+    com.unity.modules.physics2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics2d)
+    com.unity.modules.physics@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physics)
+    com.unity.modules.physicscore2d@1.0.0 (location: /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Library/PackageCache/com.unity.modules.physicscore2d)
+[Package Manager] com.unity.textmeshpro is deprecated: This package is no longer supported. TextMeshPro functionalities are now included in the com.unity.ugui package. To continue using them, consider adding it to your project dependencies.
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.00 seconds
+Starting: /Applications/Unity/Hub/Editor/6000.6.7f1/Unity.app/Contents/Resources/BuildPipeline/bee_backend --ipc --defer-dag-verification --dagfile="Library/Bee/200b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /Users/azharie/Documents/azhar_project/vr_games/quest_loft
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 0s143ms
+[219/244    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+*** Tundra build success (0.13 seconds), 1 items updated, 244 evaluated
+Total cache size 5284368
+AssetDatabase: script compilation time: 0.485916s
+Total cache size after purge 5284368, took 00:00:00.0065769
+Begin MonoManager ReloadAssembly
+Symbol file LoadedFromMemory is not a mono symbol file
+Native extension for Android target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Scripting: successfully reloaded assembly
+- Finished resetting the current domain, in  0.250 seconds
+Domain Reload Profiling: 541ms
+	BeginReloadAssembly (128ms)
+		DisableScriptedObjects (10ms)
+		CreateAndSetChildDomain (38ms)
+	RebuildCommonClasses (6ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (20ms)
+	LoadAllAssembliesAndSetupDomain (125ms)
+		LoadAssemblies (94ms)
+		TypeCache.Refresh (18ms)
+			TypeCache.ScanAssembly (10ms)
+		AnalyzeDomain (4ms)
+	FinalizeReload (251ms)
+		SetupLoadedEditorAssemblies (0ms)
+			InitializePlatformSupportModulesInManaged (4ms)
+			BeforeProcessingInitializeOnLoad (63ms)
+			ProcessInitializeOnLoadAttributes (34ms)
+			ProcessInitializeOnLoadMethodAttributes (22ms)
+		AwakeInstancesAfterBackupRestoration (11ms)
+Starting new worker id: 0 with log in /Users/azharie/Documents/azhar_project/vr_games/quest_loft/Logs/AssetImportWorkerHW0.log
+
+Asset Pipeline Refresh (id=bb05bab57162e435ea56e62239d2ff7e): Total: 1.156 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	(Values over 0.05ms)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=348 ms
+		Asset DB Callback time: managed=12 ms, native=2 ms
+		Scripting: domain reloads=1, domain reload time=301 ms, compile time=487 ms, other=3 ms
+		Project Asset Count: scripts=134, non-scripts=70
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 1
+	InvokePackagesCallback: 3.317ms
+	ApplyChangesToAssetFolders: 0.071ms
+	Scan: 50.602ms
+	Collect global state as custom dependencies: 3.418ms
+	CategorizeScriptCompilationAssets: 1.002ms
+	ProcessAssetsWithTransientArtifactChanges: 5.143ms
+	CategorizeAssets: 1.118ms
+	CompileScripts: 487.498ms
+	ImportOutOfDateAssets: 253.504ms (251.056ms without children)
+		UnloadImportedAssets: 1.238ms
+		ImportSchedulerStart: 1.176ms
+	PostProcessAllAssets: 12.379ms
+		MonoPostProcessAllAssets: 12.344ms
+			WindowAssetPostprocessingWatcher.OnPostprocessAllAssets 5.152ms
+			EditModeScopePostprocessor.OnPostprocessAllAssets 0.627ms
+			SyncVS.PostprocessSyncProject 0.617ms
+			SpeedTree9Postprocessor.OnPostprocessAllAssets 0.431ms
+			ReferencedClipsPostProcessor.OnPostprocessAllAssets 0.152ms
+			TerrainToolbarOverlayPostProcessor.OnPostprocessAllAssets 0.111ms
+			AssetDatabaseCallbacks.OnPostprocessAllAssets 0.089ms
+	UnloadStreamsBegin: 0.796ms
+	Untracked: 335.151ms
+
+Application.AssetDatabase Initial Refresh End
+Scanning for USB devices : 0.029ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-quest_loft
+Opening scene 'Assets/Scenes/Loft.unity'
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/Loft.unity'
+	Deserialize:            5.699 ms
+	Integration:            54.759 ms
+	Integration of assets:  0.016 ms
+	Thread Wait Time:       0.005 ms
+	Total Operation Time:   60.478 ms
+Unloading 404 unused Assets / (417.5 KB). Loaded Objects now: 1460.
+Memory consumption went from 137.9 MB to 137.5 MB.
+Total: 4.692500 ms (FindLiveObjects: 0.116625 ms CreateObjectMapping: 0.011542 ms MarkObjects: 4.306708 ms  DeleteObjects: 0.189250 ms)
+
+Scene opened with: -openscene "Assets/Scenes/Loft.unity"
+Opening scene 'Assets/Scenes/Loft.unity'
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/Loft.unity'
+	Deserialize:            2.377 ms
+	Integration:            3.303 ms
+	Integration of assets:  0.010 ms
+	Thread Wait Time:       0.003 ms
+	Total Operation Time:   5.693 ms
+Unloading 1 unused Assets / (172 B). Loaded Objects now: 1460.
+Memory consumption went from 136.5 MB to 136.5 MB.
+Total: 4.269083 ms (FindLiveObjects: 0.107084 ms CreateObjectMapping: 0.007291 ms MarkObjects: 4.079625 ms  DeleteObjects: 0.007084 ms)
+
+[VERIFY] PASS: A-core systems present
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:151)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Agents] scout <- shakedown
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:158)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+[Agents] builder <- shakedown
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:158)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+[Agents] keeper <- shakedown
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:158)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+[VERIFY] PASS: A5: all 3 agents Working after assign
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:160)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A5: OnAgentDone fired x3 (got 3)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:162)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Agents] builder <- busywork
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:47)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:165)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 47)
+
+[VERIFY] PASS: A6: StopAll -> all Idle
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:167)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Agents] unknown agent: nope task: ghost task
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+AgentManager:AssignTask (string,string) (at Assets/Agents/AgentManager.cs:46)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:171)
+
+(Filename: Assets/Agents/AgentManager.cs Line: 46)
+
+[VERIFY] PASS: A7: unknown agent -> warning, boards untouched
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:172)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VoiceCommands] Matched Wake: 'wake up'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Run: 'run this'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Stop: 'stop that'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched MoveThat: 'move that to wall'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Summarize: 'summarize this'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Assign: 'assign to builder'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Remind: 'remind me at 5'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Next: 'next item'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Done: 'mark done'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched FocusMode: 'focus mode'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:180)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VERIFY] PASS: A8: voice EN 10/10 route
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:181)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VoiceCommands] Matched Wake: 'bangun semua'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Run: 'jalankan tes'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Stop: 'berhenti'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched MoveThat: 'pindah itu'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Summarize: 'ringkas ini'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Assign: 'kasih ke'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Remind: 'ingatkan jam 5'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Next: 'lanjut'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched Done: 'selesai'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VoiceCommands] Matched FocusMode: 'mode fokus'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:151)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:184)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 151)
+
+[VERIFY] PASS: A9: voice ID 10/10 route
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:185)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VoiceCommands] Ignored transcription: push-to-talk not held.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:134)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:190)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 134)
+
+[VERIFY] PASS: A10: PTT released + live mode -> transcription ignored
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:191)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VoiceCommands] Button fallback invoked: Wake
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Run
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Stop
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: MoveThat
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Summarize
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Assign
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Remind
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Next
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: Done
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VoiceCommands] Button fallback invoked: FocusMode
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:InvokeCommand (VirtualLoft.XR.VoiceCommandId) (at Assets/XR/VoiceCommands.cs:172)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:197)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 172)
+
+[VERIFY] PASS: A11: button fallback 10/10 fire
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:198)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VoiceCommands] Unrecognized: 'asdfgh jkl'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.VoiceCommands:HandleTranscription (string,single) (at Assets/XR/VoiceCommands.cs:156)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:202)
+
+(Filename: Assets/XR/VoiceCommands.cs Line: 156)
+
+[VERIFY] PASS: A12: garbage/empty -> unrecognized, no state change
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:204)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Multiplayer] JoinRoom stub: loft-focus-01 as CEO (CEO). Wire to Fusion NetworkRunner.StartGame in production.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:JoinRoom (string,string,VirtualLoft.XR.LoftRole) (at Assets/XR/Multiplayer.cs:73)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:207)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 73)
+
+[Activity] [2026-11-02T06:49:17.7167200Z] CEO assign agent:builder ( -> Member-1)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:Assign (string,string,string) (at Assets/XR/Multiplayer.cs:103)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:208)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Multiplayer] Assign DENIED: Member-1 is not CEO.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+VirtualLoft.XR.Multiplayer:Assign (string,string,string) (at Assets/XR/Multiplayer.cs:100)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:209)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 100)
+
+[VERIFY] PASS: A19: CEO assign allowed, member assign denied
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:210)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Activity] [2026-11-02T06:49:17.7195530Z] Member-1 move card:71bb89f5 (Doing -> Done)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:MoveCard (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:116)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:212)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Multiplayer] Move DENIED: Member-1 cannot move CEO's card 71bb89f5.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+VirtualLoft.XR.Multiplayer:MoveCard (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:113)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:213)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 113)
+
+[VERIFY] PASS: A20: member moves own, denied others'
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:214)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Activity] [2026-11-02T06:49:17.7197040Z] Member-1 done card:71bb89f5 (Doing -> Done)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:MarkDone (string,string,string) (at Assets/XR/Multiplayer.cs:123)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:215)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[Activity] [2026-11-02T06:49:17.7197480Z] CEO assign agent:scout ( -> Member-1)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:Log (string,string,string,string,string) (at Assets/XR/Multiplayer.cs:142)
+VirtualLoft.XR.Multiplayer:Assign (string,string,string) (at Assets/XR/Multiplayer.cs:103)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:216)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 142)
+
+[VERIFY] PASS: A21: activity log has entries (4)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:217)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A21: log entries complete (who/what/from/to)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:220)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[Multiplayer] LeaveRoom stub: loft-focus-01. Wire to runner.Shutdown().
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:LeaveRoom () (at Assets/XR/Multiplayer.cs:78)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:225)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 78)
+
+[Multiplayer] JoinRoom stub: loft-focus-01 as CEO (CEO). Wire to Fusion NetworkRunner.StartGame in production.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+VirtualLoft.XR.Multiplayer:JoinRoom (string,string,VirtualLoft.XR.LoftRole) (at Assets/XR/Multiplayer.cs:73)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:226)
+
+(Filename: Assets/XR/Multiplayer.cs Line: 73)
+
+[VERIFY] PASS: A22: leave/rejoin preserves boards
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:227)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A23: save/mutate/load roundtrip restores
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:233)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[BoardManager] Load ignored corrupt JSON (JsonReaderException): boards unchanged.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+BoardManager:Load (string) (at Assets/Boards/BoardManager.cs:71)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:237)
+
+(Filename: Assets/Boards/BoardManager.cs Line: 71)
+
+[BoardManager] Load ignored: no boards in JSON.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+BoardManager:Load (string) (at Assets/Boards/BoardManager.cs:67)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:238)
+
+(Filename: Assets/Boards/BoardManager.cs Line: 67)
+
+[VERIFY] PASS: A24: corrupt/foreign JSON ignored, boards unchanged
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:239)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A26: desks at spec positions (+/-0.1m)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:253)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A26: 4 board plates on main wall
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:256)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A28: teleport-only (smooth locomotion off)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:261)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A28: seated default
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:262)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] PASS: A28: camera at seated eye height (1.2m)
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Check (bool,string) (at Assets/Editor/LoftVerify.cs:15)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:265)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 15)
+
+[VERIFY] SUMMARY: 22 pass, 0 fail — GREEN
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:23)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+LoftVerify:Finish () (at Assets/Editor/LoftVerify.cs:111)
+LoftVerify:FullA () (at Assets/Editor/LoftVerify.cs:269)
+
+(Filename: Assets/Editor/LoftVerify.cs Line: 111)
+
+MonoPathRemapper: Attempts to remap: 3555; Successful remaps: 0
+Worker ready: AssetImportWorkerHW0 0
+Thread 0x16f627000 may have been prematurely finalized
+Serialized file version minimum: 23, current 23
+Thread 0x16f6b3000 may have been prematurely finalized
+Killing ADB server in 0.057798 seconds.
+Input System module state changed to: ShutdownInProgress.
+Input Polling Thread exited.
+Input System module state changed to: Shutdown.
+Thread 0x16c1fb000 may have been prematurely finalized
+Thread 0x16c287000 may have been prematurely finalized
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+[Licensing::IpcConnector] LicenseClient-azharie-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-azharie channel disconnected successfully.
+Shut down UDS service system complete
+debugger-agent: Unable to listen on 53
+Lingering sessions upon destruction of worker manager
+Unity Data Store service was successfully shut down
+UDS shutting down local client system
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+CodeReloadManager destroyed
+VBCSCompilerPreWarmer: requested VBCSCompiler shutdown
