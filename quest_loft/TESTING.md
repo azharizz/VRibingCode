@@ -32,6 +32,18 @@ approve or reject the results on the REVIEW wall.
   "run <goal>", "assign <task>", "stop", "done", "next", "focus mode".
 - Point the headset at your Mac: see "Quest on Wi-Fi" in `backend/README.md`.
 
+## Projects + preview
+
+- **Project**: the desktop panel's project row, or **PROJECT ▶** on the VR console.
+  Goals and tasks go to the current project. **+ New project** creates a git repo
+  from a starter.
+- Each task works in its **own git worktree**. The REVIEW wall shows the change
+  ("2 files changed, +40") and the **PREVIEW screen** (to your right, angled to
+  your seat) shows the page the agent built, desktop size plus a phone inset,
+  before you decide. Desktop panel: **Open live preview**.
+- **APPROVE** squash-merges into the project's main branch. **REJECT** sends it back
+  to the same agent in the same worktree. Conflicts go back to that agent to resolve.
+
 ## Party mode ★
 
 The "we shipped it!" moment, whenever you want: **★ PARTY** on the VR console,

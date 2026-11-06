@@ -34,6 +34,7 @@ namespace VirtualLoft.XR
             ("reject", "REJECT", new Color(0.95f, 0.6f, 0.35f)),
             ("exit", "EXIT", new Color(0.55f, 0.55f, 0.6f)),
             ("party", "★ PARTY", new Color(1f, 0.35f, 0.75f)),
+            ("project", "PROJECT ▶", new Color(0.55f, 0.85f, 0.95f)),
         };
         static readonly (string id, string label, Color color)[] SpawnButtons =
         {
@@ -107,6 +108,7 @@ namespace VirtualLoft.XR
                 case "reject": if (!OpenKeyboard("reject")) desk.Reject(null); break;
                 case "exit": desk.ExitApp(); break;
                 case "party": desk.Party(); break;
+                case "project": desk.CycleProject(); break;
             }
         }
 
@@ -250,7 +252,7 @@ namespace VirtualLoft.XR
                                 LoftUtil.Wrap(desk.FormSummary(), 52, 3);
                 return;
             }
-            string sel = desk.selectedAgentId ?? "none (point at an animal)";
+            string sel = $"{desk.selectedAgentId ?? "none (point at an animal)"}   project: {desk.ProjectName}";
             string last = desk.eventLog.Count > 0 ? desk.eventLog[desk.eventLog.Count - 1] : "—";
             statusTm.text = $"{(desk.Connected ? "● live" : "○ offline")}  team {desk.agents.agents.Count}/{desk.maxAgents}  working {working}  review {review}\n" +
                             $"selected: {sel}\n{LoftUtil.Trunc(last, 46)}";
@@ -263,7 +265,7 @@ namespace VirtualLoft.XR
         {
             Wire();
             var root = GameObject.Find("QuestPanel");
-            if (root != null && root.transform.Find("Main/Btn_party") == null) { LoftUtil.Kill(root); root = null; }
+            if (root != null && root.transform.Find("Main/Btn_project") == null) { LoftUtil.Kill(root); root = null; }
             if (root == null)
             {
                 root = new GameObject("QuestPanel");

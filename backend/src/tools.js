@@ -3,6 +3,7 @@
 //   read_file, list_files, search_files  (read)
 //   write_file, edit_file, run_command   (change things: CEO must grant)
 //   fetch_url                            (public http(s) only)
+//   check_page                           (open the project's page from this task's folder in a real browser)
 // Web *search* comes from the model side, e.g. an OpenRouter id ending in ":online".
 
 import { exec } from "node:child_process";
@@ -12,7 +13,7 @@ import net from "node:net";
 import path from "node:path";
 import { tool } from "@openai/agents";
 
-export const TOOL_NAMES = ["read_file", "list_files", "search_files", "write_file", "edit_file", "run_command", "fetch_url"];
+export const TOOL_NAMES = ["read_file", "list_files", "search_files", "write_file", "edit_file", "run_command", "fetch_url", "check_page"];
 export const WRITE_TOOLS = ["write_file", "edit_file", "run_command"];
 
 const MAX_OUT = 20_000;
@@ -161,6 +162,8 @@ const SCHEMAS = {
     { command: { type: "string" }, timeout_sec: { type: "number" } }, ["command"]],
   fetch_url: ["Fetch a public web page or API (http/https) and return its text.",
     { url: { type: "string" } }, ["url"]],
+  check_page: ["Open the project's web page from YOUR folder in a real browser (dev server started for you). Returns HTTP status, title, console errors and visible text. Use it to verify your work.",
+    { path: { type: "string", description: "page path, default /" } }, []],
 };
 
 // One line for the animal's label: "edit_file src/auth.ts", "run_command npm test".
@@ -170,8 +173,12 @@ export function describeCall(name, args = {}) {
 }
 
 // SDK tools for one agent: only the names it was granted.
-export function makeTools(workspace, names, { signal, onProgress = () => {} } = {}) {
+export function makeTools(workspace, names, { signal, onProgress = () => {}, checkPage = null } = {}) {
   const fns = impl(workspace, signal);
+  fns.check_page = async ({ path: p = "/" }) => {
+    if (!checkPage) return "check_page is not available for this project (no preview configured).";
+    return checkPage(String(p || "/"));
+  };
   return names.filter((n) => SCHEMAS[n]).map((name) => {
     const [description, properties, required] = SCHEMAS[name];
     return tool({

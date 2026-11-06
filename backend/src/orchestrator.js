@@ -38,7 +38,7 @@ const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
 const blankUsage = () => ({ requests: 0, inputTokens: 0, outputTokens: 0, costUsd: null });
 
 export function createOrchestrator({
-  runTask, planGoal, draftRole = null, priceOf = async () => null, workspace,
+  runTask, planGoal, draftRole = null, priceOf = async () => null, workspace, projects = null, previews = null,
   maxAgents = MAX_AGENTS, defaults = DEFAULT_AGENTS, roles: savedRoles = [], saveRoles = () => {},
 }) {
   const events = new EventEmitter();
@@ -56,7 +56,7 @@ export function createOrchestrator({
   };
   const setTask = (t, patch) => {
     Object.assign(t, patch, { updatedAt: now() });
-    emit({ type: "task", task: { ...t } });
+    emit({ type: "task", task: { ...t, worktree: undefined } });
   };
   const needAgent = (id) => {
     const a = agents.get(id);
@@ -144,8 +144,11 @@ export function createOrchestrator({
     emit({ type: "agent.removed", id });
   }
 
-  function assign(agentId, title) {
+  // carry = { branch, worktree, projectId } when a task continues earlier work
+  // (CEO rejected it, or a merge conflict needs resolving) in the same worktree.
+  function assign(agentId, title, projectId = null, carry = null) {
     const a = needAgent(agentId);
+    if (projectId && projects) projects.get(projectId); // 404 early on a bad project
     const t = {
       id: `t${++seq}`,
       agentId,
@@ -153,14 +156,22 @@ export function createOrchestrator({
       status: "queued",
       last: "",
       result: "",
+      projectId: carry?.projectId ?? projectId ?? (projects ? projects.get(null).id : null),
+      branch: carry?.branch ?? null,
+      worktree: carry?.worktree ?? null,
+      diff: null,
+      preview: null,
       createdAt: now(),
       updatedAt: now(),
     };
     tasks.set(t.id, t);
-    emit({ type: "task", task: { ...t } });
+    emit({ type: "task", task: pub(t) });
     pump(a);
-    return { ...t };
+    return pub(t);
   }
+
+  // What clients see (the local worktree path stays on the server).
+  const pub = (t) => ({ ...t, worktree: undefined });
 
   async function pump(a) {
     if (running.has(a.id) || !agents.has(a.id)) return;
@@ -170,22 +181,34 @@ export function createOrchestrator({
     running.set(a.id, ac);
     setTask(t, { status: "running" });
     setAgent(a, { state: "working", taskId: t.id });
+    const project = projects ? projects.get(t.projectId) : null;
     try {
+      if (project && !t.worktree) {
+        setTask(t, { last: `preparing ${project.name} workspace` });
+        setTask(t, await projects.prepare(project, { taskId: t.id, agent: a.name }));
+      }
+      const here = t.worktree ?? workspace;
       const out = await runTask({
         agent: a,
         title: t.title,
-        workspace,
+        workspace: here,
         abortController: ac,
+        checkPage: previews && project ? (p) => previews.checkPage(`check:${t.id}`, project, here, p) : null,
         onProgress: (line) => {
           if (!ac.signal.aborted) setTask(t, { last: String(line).slice(0, 200) });
         },
       });
       const text = typeof out === "string" ? out : out?.text ?? "";
       const usage = await addUsage(a, out?.usage);
-      if (!ac.signal.aborted) setTask(t, { status: "review", result: String(text).slice(0, 8000), usage });
+      if (!ac.signal.aborted) {
+        const diff = project ? await projects.finish(project, t, `loft: ${firstLine(t.title)} (${a.name})`) : null;
+        setTask(t, { status: "review", result: String(text).slice(0, 8000), usage, diff });
+        if (previews && project && diff?.files.length) capturePreview(t, project);
+      }
     } catch (err) {
       if (!ac.signal.aborted) setTask(t, { status: "failed", result: errText(err) });
     } finally {
+      previews?.stop(`check:${t.id}`);
       running.delete(a.id);
       if (agents.has(a.id)) {
         const state = t.status === "review" ? "done" : t.status === "failed" ? "failed" : "idle";
@@ -194,6 +217,22 @@ export function createOrchestrator({
       }
     }
   }
+
+  // Screenshots of the task's own worktree, in the background (review is already shown).
+  async function capturePreview(t, project) {
+    setTask(t, { preview: { status: "loading" } });
+    try {
+      const shot = await previews.capture(t.id, project, t.worktree);
+      if (t.status !== "review") return previews.stop(t.id); // decided while we were shooting
+      setTask(t, {
+        preview: { status: "ready", url: shot.url, title: shot.title, desktop: `/previews/${shot.desktop}`, mobile: `/previews/${shot.mobile}` },
+      });
+    } catch (err) {
+      if (t.status === "review") setTask(t, { preview: { status: "error", error: errText(err).slice(0, 400) } });
+    }
+  }
+
+  const firstLine = (s) => String(s).split("\n")[0].slice(0, 72);
 
   // Tokens always; $ when the model's price is known (OpenRouter catalogue).
   async function addUsage(a, u) {
@@ -218,13 +257,38 @@ export function createOrchestrator({
     for (const [id, ac] of running) if (!agentId || id === agentId) ac.abort();
   }
 
-  function approve(taskId) {
+  // Approve = squash-merge the task's branch into the project's main branch.
+  async function approve(taskId) {
     const t = needTask(taskId);
     if (t.status !== "review") throw new HttpError(409, `task '${taskId}' is ${t.status}, not in review`);
-    setTask(t, { status: "approved" });
     const a = agents.get(t.agentId);
+    if (projects && t.worktree) {
+      const project = projects.get(t.projectId);
+      let res;
+      try {
+        res = await projects.merge(project, t, `${firstLine(t.title)} — ${a?.name ?? t.agentId} (Virtual Loft)`);
+      } catch (err) {
+        throw new HttpError(err.status ?? 500, errText(err)); // e.g. CEO has uncommitted changes: task stays in review
+      }
+      if (!res.ok) {
+        previews?.stop(t.id);
+        setTask(t, { status: "conflict", conflicts: res.conflicts });
+        const fix = a
+          ? assign(t.agentId,
+            `Your work on "${firstLine(t.title)}" conflicts with ${project.main} in: ${res.conflicts.join(", ")}.\n` +
+            `In your folder run: git merge ${project.main} — resolve every conflict (keep both changes where they make sense), ` +
+            `run the tests, then commit. Original task:\n${t.title}`,
+            null, t)
+          : null;
+        return { ...pub(t), retry: fix };
+      }
+      setTask(t, { status: "approved", merged: res.sha, worktree: null });
+    } else {
+      setTask(t, { status: "approved" });
+    }
+    previews?.stop(t.id);
     if (a && a.state === "done") setAgent(a, { state: "idle" });
-    return { ...t };
+    return pub(t);
   }
 
   function reject(taskId, feedback) {
@@ -232,19 +296,23 @@ export function createOrchestrator({
     if (t.status !== "review" && t.status !== "failed") {
       throw new HttpError(409, `task '${taskId}' is ${t.status}, nothing to reject`);
     }
+    previews?.stop(t.id);
     setTask(t, { status: "rejected" });
     if (!agents.has(t.agentId)) return null;
     const note = String(feedback ?? "").trim().slice(0, 2000) || "Not good enough yet, try again.";
     return assign(
       t.agentId,
       `${t.title}\n\nCEO feedback on your previous attempt: ${note}\nPrevious result:\n${t.result.slice(0, 2000)}`,
+      null,
+      t, // same worktree + branch: the agent improves its own work
     );
   }
 
-  async function goal(text) {
+  async function goal(text, projectId = null) {
     const g = cleanText(text, 4000, "goal");
     if (!agents.size) throw new HttpError(409, "no agents — spawn one first");
-    emit({ type: "goal", goal: g, status: "planning" });
+    if (projectId && projects) projects.get(projectId);
+    emit({ type: "goal", goal: g, status: "planning", projectId });
     let plan;
     try {
       const roster = [...agents.values()].map(({ id, name, role }) => ({ id, name, role }));
@@ -253,9 +321,14 @@ export function createOrchestrator({
       emit({ type: "goal", goal: g, status: "failed", error: errText(err) });
       throw err;
     }
-    const created = plan.filter((p) => agents.has(p.agentId)).map((p) => assign(p.agentId, p.title));
+    const created = plan.filter((p) => agents.has(p.agentId)).map((p) => assign(p.agentId, p.title, projectId));
     emit({ type: "goal", goal: g, status: "planned", taskIds: created.map((t) => t.id) });
     return created;
+  }
+
+  // Project list changed (added/created/removed): tell every client.
+  function projectsChanged() {
+    emit({ type: "projects", projects: projects ? projects.list() : [] });
   }
 
   // Party mode is shared: every connected headset gets the same moment.
@@ -277,10 +350,12 @@ export function createOrchestrator({
       writeTools: WRITE_TOOLS,
       roles: [...roles.values()],
       agents: [...agents.values()].map((a) => ({ ...a })),
-      tasks: [...tasks.values()].slice(-100).map((t) => ({ ...t })),
+      tasks: [...tasks.values()].slice(-100).map((t) => ({ ...t, worktree: undefined })),
+      projects: projects ? projects.list() : [],
+      templates: projects ? projects.templates : [],
     };
   }
 
   for (const d of defaults) spawn(d);
-  return { events, spawn, remove, assign, goal, approve, reject, stop, snapshot, saveRole, deleteRole, draft, setParty };
+  return { events, spawn, remove, assign, goal, approve, reject, stop, snapshot, saveRole, deleteRole, draft, setParty, projectsChanged };
 }

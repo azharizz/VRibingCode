@@ -23,13 +23,14 @@ public class LoftDesk : MonoBehaviour
     public LoftWorld world;
     public VoiceCommands voice;
     public LoftParty party;
+    public LoftPreviewScreen preview;
 
     [Header("Desktop walk")]
     public float walkSpeed = 2.5f;
     public float lookSpeed = 3f;
 
     [Serializable]
-    public class TaskView { public string id, agentId, title, status, last, result; }
+    public class TaskView { public string id, agentId, title, status, last, result, projectId, diffStat; public JObject raw; }
 
     public readonly Dictionary<string, TaskView> tasks = new Dictionary<string, TaskView>();
     public readonly List<string> eventLog = new List<string>(40);
@@ -42,6 +43,10 @@ public class LoftDesk : MonoBehaviour
     // Everything is free: any model id (typed), any saved role or an AI-written
     // one, any animal. Lists come from the server snapshot.
     public readonly List<JObject> roles = new List<JObject>();
+    // Projects (git repos the team works on). Goals/tasks go to the current one.
+    public readonly List<JObject> projects = new List<JObject>();
+    public string projectId;
+    string newProjectName = "";
     public List<string> skins = new List<string> { "fox", "owl", "cat", "bear", "rabbit", "penguin", "frog", "panda" };
     public List<string> writeTools = new List<string> { "write_file", "edit_file", "run_command" };
     public string defaultModel = "";
@@ -62,6 +67,9 @@ public class LoftDesk : MonoBehaviour
         if (world == null) world = gameObject.AddComponent<LoftWorld>(); // scenes built before themes existed
         if (party == null) party = FindFirstObjectByType<LoftParty>();
         if (party == null) party = gameObject.AddComponent<LoftParty>();
+        if (preview == null) preview = FindFirstObjectByType<LoftPreviewScreen>();
+        if (preview == null) preview = gameObject.AddComponent<LoftPreviewScreen>();
+        projectId = PlayerPrefs.GetString("loft.project", "");
         if (voice == null) voice = FindFirstObjectByType<VoiceCommands>();
         if (client != null) client.OnEvent += HandleEvent;
         if (voice != null) voice.OnCommand += HandleVoice;
@@ -85,6 +93,7 @@ public class LoftDesk : MonoBehaviour
                 if (e["skins"] is JArray sk) skins = sk.Select(x => (string)x).ToList();
                 if (e["writeTools"] is JArray wt) writeTools = wt.Select(x => (string)x).ToList();
                 SetRoles(e["roles"] as JArray);
+                SetProjects(e["projects"] as JArray);
                 if (party != null) party.SetParty((bool?)e["party"] ?? false); // join a party already going
                 var ids = new HashSet<string>();
                 foreach (var a in e["agents"] ?? new JArray()) { UpsertAgent((JObject)a); ids.Add((string)a["id"]); }
@@ -114,6 +123,9 @@ public class LoftDesk : MonoBehaviour
                 break;
             case "roles":
                 SetRoles(e["roles"] as JArray);
+                break;
+            case "projects":
+                SetProjects(e["projects"] as JArray);
                 break;
             case "party":
                 bool on = (bool?)e["on"] ?? false;
@@ -160,6 +172,9 @@ public class LoftDesk : MonoBehaviour
             status = (string)t["status"],
             last = (string)t["last"],
             result = (string)t["result"],
+            projectId = (string)t["projectId"],
+            diffStat = (string)t["diff"]?["stat"],
+            raw = t,
         };
         tasks[id] = v;
         if (log && (old == null || old.status != v.status))
@@ -170,13 +185,49 @@ public class LoftDesk : MonoBehaviour
             string mark = v.status switch
             {
                 "queued" => "QUEUED", "running" => "▶", "review" => "✓ REVIEW", "approved" => "★ APPROVED",
-                "rejected" => "↺ REDO", "failed" => "✗ FAILED", "stopped" => "■ STOPPED", _ => v.status,
+                "rejected" => "↺ REDO", "failed" => "✗ FAILED", "stopped" => "■ STOPPED", "conflict" => "⚠ CONFLICT", _ => v.status,
             };
+            if (v.status == "approved" && (string)t["merged"] != null) mark = $"★ MERGED {(string)t["merged"]} ·";
+            if (v.status == "conflict") mark += $" ({string.Join(", ", (t["conflicts"] as JArray)?.Select(x => (string)x) ?? new string[0])}) → fixing";
             Note($"{mark} {who}: {LoftUtil.Trunc(FirstLine(v.title), 36)}");
         }
         var skin = agents.Find(v.agentId)?.GetComponent<AgentSkin>();
         if (skin != null && v.status == "running") skin.SetLine(string.IsNullOrEmpty(v.last) ? FirstLine(v.title) : v.last);
         else if (skin != null && old?.status == "running") skin.SetLine(v.status == "review" ? "waiting for CEO review" : v.status);
+    }
+
+    void SetProjects(JArray list)
+    {
+        if (list == null) return;
+        projects.Clear();
+        foreach (var p in list) if (p is JObject o) projects.Add(o);
+        if (!projects.Any(p => (string)p["id"] == projectId) && projects.Count > 0) projectId = (string)projects[0]["id"];
+    }
+
+    public string ProjectName => (string)projects.FirstOrDefault(p => (string)p["id"] == projectId)?["name"] ?? projectId ?? "—";
+
+    public void CycleProject()
+    {
+        if (projects.Count == 0) return;
+        int i = projects.FindIndex(p => (string)p["id"] == projectId);
+        projectId = (string)projects[(i + 1) % projects.Count]["id"];
+        PlayerPrefs.SetString("loft.project", projectId);
+        Note($"Project → {ProjectName}");
+        RefreshViews();
+    }
+
+    public void CreateProject(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return;
+        Note($"Creating project {name.Trim()} …");
+        client.Then(client.CreateProject(name.Trim()), res =>
+        {
+            var id = (string)res?["project"]?["id"];
+            if (id == null) return;
+            projectId = id;
+            PlayerPrefs.SetString("loft.project", id);
+            Note($"Project {(string)res["project"]["name"]} ready — goals go here now");
+        });
     }
 
     static string RoleTitle(JObject a) => a["role"] is JObject ro ? (string)ro["title"] : (string)a["role"];
@@ -268,15 +319,15 @@ public class LoftDesk : MonoBehaviour
     public void Goal(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
-        Note($"CEO GOAL: {LoftUtil.Trunc(text, 40)}");
-        _ = client.Goal(text.Trim());
+        Note($"CEO GOAL ({ProjectName}): {LoftUtil.Trunc(text, 34)}");
+        _ = client.Goal(text.Trim(), string.IsNullOrEmpty(projectId) ? null : projectId);
     }
 
     public void Assign(string agentId, string title)
     {
         if (string.IsNullOrWhiteSpace(title)) return;
         if (string.IsNullOrEmpty(agentId) || agents.Find(agentId) == null) { Goal(title); return; }
-        _ = client.Assign(agentId, title.Trim());
+        _ = client.Assign(agentId, title.Trim(), string.IsNullOrEmpty(projectId) ? null : projectId);
     }
 
     public TaskView ReviewTask()
@@ -381,8 +432,10 @@ public class LoftDesk : MonoBehaviour
         SetBoard("kanban", KanbanText());
         SetBoard("log", string.Join("\n", eventLog.Skip(Math.Max(0, eventLog.Count - 6)).Select(s => LoftUtil.Trunc(s, 34))));
         var r = ReviewTask();
-        SetBoard("notes", r == null ? "Nothing to review yet."
-            : $"{AgentName(r.agentId)} — {r.status.ToUpperInvariant()}\n{LoftUtil.Wrap(r.result, 40, 7)}");
+        SetBoard("notes", r == null ? $"Nothing to review yet.\nProject: {ProjectName}"
+            : $"{AgentName(r.agentId)} — {r.status.ToUpperInvariant()} · {r.projectId}\n" +
+              $"{(string.IsNullOrEmpty(r.diffStat) ? "" : r.diffStat + "\n")}{LoftUtil.Wrap(r.result, 40, string.IsNullOrEmpty(r.diffStat) ? 7 : 6)}");
+        if (preview != null) preview.Show(r?.raw);
         var counts = agents.agents.Where(a => a != null).GroupBy(a => a.CurrentState).Select(g => $"{g.Key} {g.Count()}");
         var skinsNow = agents.agents.Where(a => a != null).Select(a => a.GetComponent<AgentSkin>()).ToList();
         double cost = skinsNow.Sum(k => k.costUsd ?? 0);
@@ -506,6 +559,19 @@ public class LoftDesk : MonoBehaviour
         overlayRect = new Rect(10, 10, 440, Screen.height - 20);
         GUILayout.BeginArea(overlayRect, GUI.skin.box);
         GUILayout.Label($"VIRTUAL LOFT — CEO desk   {(Connected ? "● live" : "○ offline")}   scene: {world?.Current?.name}");
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Project", GUILayout.Width(52));
+        if (projects.Count > 0)
+        {
+            int cur = projects.FindIndex(p => (string)p["id"] == projectId);
+            int pick = GUILayout.SelectionGrid(cur, projects.Select(p => (string)p["name"]).ToArray(), Mathf.Min(3, projects.Count));
+            if (pick != cur && pick >= 0) { projectId = (string)projects[pick]["id"]; PlayerPrefs.SetString("loft.project", projectId); }
+        }
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        newProjectName = GUILayout.TextField(newProjectName);
+        if (GUILayout.Button("+ New project", GUILayout.Width(110))) { CreateProject(newProjectName); newProjectName = ""; }
+        GUILayout.EndHorizontal();
         GUILayout.Label("WASD walk · right-drag look · click animal = select · 1/2/3 quick spawn · Tab next · T scene · P party · Y/N approve/reject · X stop", GUI.skin.box);
 
         input = GUILayout.TextArea(input, GUILayout.Height(44));
@@ -537,7 +603,12 @@ public class LoftDesk : MonoBehaviour
         if (review != null)
         {
             GUILayout.Label($"REVIEW — {AgentName(review.agentId)}: {LoftUtil.Trunc(FirstLine(review.title), 40)} [{review.status}]", GUI.skin.box);
+            if (!string.IsNullOrEmpty(review.diffStat))
+                GUILayout.Label($"{review.projectId}: {review.diffStat} — {string.Join(", ", (review.raw?["diff"]?["files"] as JArray)?.Select(x => (string)x).Take(6) ?? new string[0])}");
             GUILayout.Label(LoftUtil.Trunc(review.result, 400));
+            var pv = review.raw?["preview"] as JObject;
+            if ((string)pv?["status"] == "ready" && GUILayout.Button($"Open live preview ({(string)pv["url"]})")) Application.OpenURL((string)pv["url"]);
+            else if ((string)pv?["status"] == "loading") GUILayout.Label("Taking screenshots…");
             feedback = GUILayout.TextField(feedback);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Approve")) Approve();

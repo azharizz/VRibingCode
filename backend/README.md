@@ -21,9 +21,42 @@ the tools it was granted:
 | `read_file`, `list_files`, `search_files` | read the project |
 | `write_file`, `edit_file`, `run_command` ⚠ | change the project (AI-drafted roles flag these for the CEO) |
 | `fetch_url` | public http(s) pages only; local/private addresses are blocked |
+| `check_page` | open the project's page **from this task's worktree** in a real browser: status, title, console errors, text |
 
 Shell commands run without any `*KEY*/*TOKEN*/*SECRET*` variables in their
 environment, with a timeout, and are killed on STOP.
+
+**Projects & workspaces.** The team works on *projects* (git repos): register
+your existing repos, or let the loft create a new one from a starter.
+`WORKSPACE_DIR` becomes the first project automatically. **Every task runs in its
+own git worktree on its own branch** (`loft/<agent>/<task>`), so parallel agents
+never collide and `main` is untouched until you decide:
+
+| CEO | what happens in git |
+| --- | --- |
+| **approve** | squash-merge into the project's main branch: one clean commit per task, worktree removed |
+| **reject + feedback** | the same agent continues in the same worktree/branch |
+| conflict on approve | task marked `conflict`, the same agent gets "merge main and resolve" in its worktree |
+
+Approve refuses if you have uncommitted changes on main (it never touches your work).
+Agents never push; publishing stays with you.
+
+**Preview.** When a task with file changes reaches review, the loft runs the
+project's dev server **from that task's worktree** (or a built-in static server
+for plain HTML), and Playwright takes desktop + phone screenshots. They appear on
+the PREVIEW screen in VR, and the live URL stays up while the task is in review.
+Agents get `check_page` to open their own page in a real browser before saying "done".
+
+```bash
+npx playwright install chromium   # once, ~100 MB
+curl -XPOST localhost:4101/projects -d '{"name":"shop","path":"~/code/shop","dev":"npm run dev -- --port {port}","setup":"npm ci"}'
+curl -XPOST localhost:4101/projects/new -d '{"name":"Landing Site","template":"static"}'
+```
+
+Project fields: `dev` = dev-server command (`{port}` / `$PORT` filled in),
+`setup` = runs once per new worktree (default: link the main checkout's
+`node_modules` if present), `url` = preview URL template (default
+`http://127.0.0.1:{port}/`).
 
 **Flow:** CEO goal → the planner splits it by role → tasks queue per agent →
 agents run **in parallel** (one task at a time each) → every tool call streams
@@ -66,16 +99,19 @@ The server refuses non-loopback hosts without `LOFT_TOKEN`, because agents can r
 | `GET /state` | the snapshot |
 | `POST /agents {model?, roleId? \| role, name?, skin?}` | spawn (409 at 20) |
 | `DELETE /agents/:id` | remove (stops its work) |
-| `POST /goal {goal}` | split across the team |
-| `POST /tasks {agentId, title}` | give one agent a task |
+| `POST /goal {goal, projectId?}` | split across the team, in that project |
+| `POST /tasks {agentId, title, projectId?}` | give one agent a task |
 | `POST /tasks/:id/approve` · `/reject {feedback}` | CEO review |
 | `POST /stop {agentId?}` | stop one agent or all |
 | `GET /roles` · `POST /roles {title, instructions, tools}` · `DELETE /roles/:id` | role library (`data/roles.json`) |
 | `POST /roles/draft {description}` | AI-written role draft (`writes` lists the tools that change things) |
 | `POST /party {on}` | party mode on/off, broadcast to every headset (late joiners get it in the snapshot) |
+| `GET /projects` · `POST /projects {name, path, dev?, setup?, url?, init?}` · `POST /projects/new {name, template}` · `DELETE /projects/:id` | projects (unregister keeps the folder) |
+| `GET /previews/<task>-desktop.png` / `-mobile.png` | screenshots of a task in review |
 | `GET /loft/:room[/boards]` · `POST /loft` | board layout store |
 
 ## Limits (on purpose, for now)
 
 - Team state is in memory: restarting the server starts a fresh team (the role library is kept).
-- All agents share one workspace; give each its own git worktree if parallel builders collide.
+- Worktrees of rejected/failed/stopped tasks stay in `data/worktrees/` until the task is approved (reject reuses them).
+- Desktop-app preview (Electron via Playwright, native via window capture) is the next step.

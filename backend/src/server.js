@@ -23,6 +23,11 @@
 //   GET  /roles · POST /roles {title,instructions,tools} · DELETE /roles/:id
 //   POST /roles/draft {description} -> AI-written role for the CEO to review
 //   POST /party {on}              -> party mode on/off for every connected headset
+//   GET /projects · POST /projects {name,path,dev?,setup?,url?,kind?,init?} (register a repo)
+//   POST /projects/new {name, template: empty|static} · DELETE /projects/:id (unregister)
+//   GET /previews/<task>-desktop.png|-mobile.png -> screenshots of a task in review
+// Goals/tasks take projectId. Every task runs in its own git worktree; approve =
+// squash-merge into the project's main branch (agents never push).
 //   GET  /loft/:roomId[/boards], POST /loft -> board layout store
 
 import crypto from "node:crypto";
@@ -33,6 +38,8 @@ import { fileURLToPath } from "node:url";
 import { draftRole, planGoal, priceOf, runTask } from "./agents.js";
 import { blankLoft, loadLoft, saveLoft, validateLoft } from "./loftStore.js";
 import { createOrchestrator, HttpError } from "./orchestrator.js";
+import { createPreviews } from "./previews.js";
+import { createProjects } from "./projects.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const argPort = process.argv.indexOf("--port");
@@ -56,8 +63,19 @@ const savedRoles = (() => {
     return [];
   }
 })();
+const DATA = path.join(here, "../data");
+const PREVIEW_DIR = path.join(DATA, "previews");
+const projects = createProjects({
+  dataDir: DATA,
+  projectsDir: path.resolve(process.env.PROJECTS_DIR ?? path.join(here, "../projects")),
+  defaultPath: WORKSPACE, // WORKSPACE_DIR becomes the first project (git init if needed)
+});
+await projects.load();
+const previews = createPreviews({ dir: PREVIEW_DIR });
+for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => previews.close().finally(() => process.exit(0)));
+
 const loft = createOrchestrator({
-  runTask, planGoal, draftRole, priceOf, workspace: WORKSPACE, roles: savedRoles,
+  runTask, planGoal, draftRole, priceOf, workspace: WORKSPACE, roles: savedRoles, projects, previews,
   saveRoles: (list) => {
     fs.mkdirSync(path.dirname(ROLES_FILE), { recursive: true });
     fs.writeFileSync(ROLES_FILE, JSON.stringify(list, null, 2));
@@ -134,16 +152,38 @@ async function route(req, res) {
     return send(res, 200, { ok: true });
   }
   if (m === "POST" && p === "/tasks") {
-    const { agentId, title } = await readBody(req);
-    return send(res, 201, { ok: true, task: loft.assign(String(agentId ?? ""), title) });
+    const { agentId, title, projectId } = await readBody(req);
+    return send(res, 201, { ok: true, task: loft.assign(String(agentId ?? ""), title, projectId || null) });
   }
   if (m === "POST" && p === "/goal") {
-    const { goal } = await readBody(req);
-    return send(res, 201, { ok: true, tasks: await loft.goal(goal) });
+    const { goal, projectId } = await readBody(req);
+    return send(res, 201, { ok: true, tasks: await loft.goal(goal, projectId || null) });
+  }
+  if (m === "GET" && p === "/projects") return send(res, 200, { projects: projects.list(), templates: projects.templates });
+  if (m === "POST" && p === "/projects") {
+    const project = await projects.add(await readBody(req));
+    loft.projectsChanged();
+    return send(res, 201, { ok: true, project });
+  }
+  if (m === "POST" && p === "/projects/new") {
+    const project = await projects.create(await readBody(req));
+    loft.projectsChanged();
+    return send(res, 201, { ok: true, project });
+  }
+  if (m === "DELETE" && (g = p.match(/^\/projects\/([^/]+)$/))) {
+    await projects.remove(decodeURIComponent(g[1]));
+    loft.projectsChanged();
+    return send(res, 200, { ok: true });
+  }
+  if (m === "GET" && (g = p.match(/^\/previews\/([\w.-]+\.png)$/))) {
+    const file = path.join(PREVIEW_DIR, g[1]);
+    if (!fs.existsSync(file)) return send(res, 404, { ok: false, error: "no such preview" });
+    res.writeHead(200, { "Content-Type": "image/png", "Cache-Control": "no-store", ...CORS });
+    return fs.createReadStream(file).pipe(res);
   }
   if (m === "POST" && (g = p.match(/^\/tasks\/([^/]+)\/(approve|reject)$/))) {
     const id = decodeURIComponent(g[1]);
-    if (g[2] === "approve") return send(res, 200, { ok: true, task: loft.approve(id) });
+    if (g[2] === "approve") return send(res, 200, { ok: true, task: await loft.approve(id) });
     const { feedback } = await readBody(req);
     return send(res, 200, { ok: true, retry: loft.reject(id, feedback) });
   }

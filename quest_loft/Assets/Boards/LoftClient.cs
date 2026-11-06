@@ -154,10 +154,29 @@ public class LoftClient : MonoBehaviour
     public Task<JObject> Party(bool on) => Send(HttpMethod.Post, "/party", new JObject { ["on"] = on });
     public Task<JObject> RemoveAgent(string agentId) =>
         Send(HttpMethod.Delete, "/agents/" + Uri.EscapeDataString(agentId ?? ""), null);
-    public Task<JObject> Assign(string agentId, string title) =>
-        Send(HttpMethod.Post, "/tasks", Body("agentId", agentId, "title", title));
-    public Task<JObject> Goal(string goal) =>
-        Send(HttpMethod.Post, "/goal", Body("goal", goal));
+    public Task<JObject> Assign(string agentId, string title, string projectId = null) =>
+        Send(HttpMethod.Post, "/tasks", Body("agentId", agentId, "title", title, "projectId", projectId));
+    public Task<JObject> Goal(string goal, string projectId = null) =>
+        Send(HttpMethod.Post, "/goal", Body("goal", goal, "projectId", projectId));
+    public Task<JObject> CreateProject(string name, string template = "static") =>
+        Send(HttpMethod.Post, "/projects/new", Body("name", name, "template", template));
+
+    // Raw bytes (preview screenshots). null on failure.
+    public async Task<byte[]> GetBytes(string path)
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(1, timeoutSeconds)));
+            using var req = Request(HttpMethod.Get, path);
+            using var res = await http.SendAsync(req, cts.Token).ConfigureAwait(false);
+            return res.IsSuccessStatusCode ? await res.Content.ReadAsByteArrayAsync().ConfigureAwait(false) : null;
+        }
+        catch (Exception e) { Debug.LogWarning($"[LoftClient] GET {path} failed: {e.Message}"); return null; }
+    }
+
+    // Run onMain(bytes) on the main thread (Texture2D.LoadImage must be main-thread).
+    public void ThenBytes(Task<byte[]> task, Action<byte[]> onMain) =>
+        task.ContinueWith(t => mainThread.Enqueue(() => onMain(t.Status == TaskStatus.RanToCompletion ? t.Result : null)));
     public Task<JObject> Approve(string taskId) =>
         Send(HttpMethod.Post, $"/tasks/{Uri.EscapeDataString(taskId ?? "")}/approve", null);
     public Task<JObject> Reject(string taskId, string feedback) =>

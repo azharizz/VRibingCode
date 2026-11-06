@@ -26,13 +26,13 @@ export const PRESET_ROLES = [
   },
   {
     id: "builder", title: "Coder",
-    instructions: "Make the smallest working change in the workspace, run the relevant tests or build with run_command, and finish with: files changed, how you verified it, PASS or FAIL. Never delete work you were not asked to delete.",
-    tools: ["read_file", "list_files", "search_files", "write_file", "edit_file", "run_command"],
+    instructions: "Make the smallest working change in the workspace, run the relevant tests or build with run_command, check web pages with check_page, and finish with: files changed, how you verified it, PASS or FAIL. Never delete work you were not asked to delete. Do not commit or push: the loft does that when the CEO approves.",
+    tools: ["read_file", "list_files", "search_files", "write_file", "edit_file", "run_command", "check_page"],
   },
   {
     id: "keeper", title: "Reviewer",
-    instructions: "Review the workspace against the task and reply with a short checklist: done, missing, risky. Do not modify files.",
-    tools: ["read_file", "list_files", "search_files"],
+    instructions: "Review the workspace against the task and reply with a short checklist: done, missing, risky. Use check_page to look at web pages. Do not modify files.",
+    tools: ["read_file", "list_files", "search_files", "check_page"],
   },
 ];
 
@@ -57,13 +57,13 @@ const SYSTEM = (agent) =>
   `You work inside one project folder; all file paths are relative to it. Be concise.`;
 
 // One task for one agent. -> { text, usage: {requests, inputTokens, outputTokens} }
-export async function runTask({ agent, title, workspace, abortController, onProgress = () => {} }) {
+export async function runTask({ agent, title, workspace, abortController, onProgress = () => {}, checkPage = null }) {
   const signal = abortController?.signal;
   const a = new Agent({
     name: agent.name,
     instructions: SYSTEM(agent),
     model: new OpenAIChatCompletionsModel(llm(), agent.model),
-    tools: makeTools(workspace, agent.role.tools, { signal, onProgress }),
+    tools: makeTools(workspace, agent.role.tools, { signal, onProgress, checkPage }),
   });
   const result = await run(a, String(title), { maxTurns: Number(process.env.LOFT_MAX_TURNS ?? 40), signal });
   const u = result.state?._context?.usage ?? result.state?.usage ?? {};
@@ -123,7 +123,7 @@ export async function draftRole(description) {
     `Design one AI agent role for this need: "${description}"\n` +
       `Tools available (grant ONLY what the job needs; write/edit/run change the project):\n` +
       `read_file, list_files, search_files (read the project), write_file, edit_file (change files), ` +
-      `run_command (shell: tests, builds), fetch_url (read public web pages).\n` +
+      `run_command (shell: tests, builds), fetch_url (read public web pages), check_page (open the project's own page in a browser).\n` +
       `Reply with ONLY JSON: {"title":"2-3 words","instructions":"how it works and what its final answer must contain (max 80 words)","tools":["..."]}`,
   );
   return normalizeRole(firstJson(text, "{", "}"), description);

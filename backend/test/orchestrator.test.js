@@ -85,8 +85,8 @@ test("agents run in parallel, one task at a time each, then wait for review; usa
   assert.equal(agent.usage.inputTokens, 1000);
   assert.equal(agent.usage.costUsd, 0.002);
   assert.equal(r.calls.length, 3, "picked up its next task");
-  loft.approve(a.id);
-  assert.throws(() => loft.approve(a.id), /not in review/);
+  await loft.approve(a.id);
+  await assert.rejects(loft.approve(a.id), /not in review/);
 });
 
 test("reject re-queues with feedback; failures surface; stop aborts", async () => {
@@ -154,4 +154,70 @@ test("loft store: one card shape, roundtrip, no path traversal", async () => {
   const back = await loadLoft("kos", { localOnly: true, localDir: dir });
   assert.equal(back.version, 2);
   await assert.rejects(loadLoft("../../etc/passwd", { localOnly: true, localDir: dir }), /invalid roomId/);
+});
+
+// ---- real git worktrees + real previews, fake model (end-to-end, offline) ----
+import { existsSync } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
+import { createPreviews } from "../src/previews.js";
+import { createProjects, git } from "../src/projects.js";
+
+test("e2e: tasks in worktrees -> diff + preview in review -> approve merges, conflict -> fix task, reject keeps worktree", { timeout: 180_000 }, async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "loft-e2e-"));
+  const projects = createProjects({ dataDir: path.join(tmp, "data"), projectsDir: path.join(tmp, "p"), defaultPath: null });
+  const site = await projects.create({ name: "Site", template: "static" });
+  const previews = createPreviews({ dir: path.join(tmp, "shots") });
+  const seen = [];
+  // fake "model": each task writes the file named in its title into ITS workspace
+  const runTask = async ({ title, workspace, checkPage }) => {
+    seen.push(workspace);
+    if (/git merge main/.test(title)) { // conflict task: merge main, resolve, nothing else
+      await git(workspace, ["merge", "main"], { ok: true });
+      await writeFile(path.join(workspace, "index.html"), "<h1>merged</h1>");
+    } else {
+      const m = title.match(/^write (\S+) = (.+)$/m);
+      if (m) await writeFile(path.join(workspace, m[1]), m[2]);
+    }
+    const report = checkPage ? await checkPage("/") : "";
+    return { text: `done ${report.includes("HTTP 200") ? "(page ok)" : ""}`, usage: { requests: 1, inputTokens: 10, outputTokens: 5 } };
+  };
+  const loft = createOrchestrator({ runTask, planGoal: async () => [], projects, previews });
+  const [, fox, cat] = loft.snapshot().agents; // Builder, Keeper (Scout is [0])
+  const until = async (fn) => { for (let i = 0; i < 400 && !fn(); i++) await new Promise((r) => setTimeout(r, 50)); assert.ok(fn()); };
+  const task = (id) => loft.snapshot().tasks.find((t) => t.id === id);
+
+  const a = loft.assign(fox.id, "write index.html = <h1>Fox</h1>", site.id);
+  const b = loft.assign(cat.id, "write index.html = <h1>Cat</h1>", site.id);
+  await until(() => task(a.id).status === "review" && task(b.id).status === "review");
+  assert.notEqual(seen[0], seen[1], "parallel tasks, separate folders");
+  assert.equal(await readFile(path.join(site.path, "index.html"), "utf8").then((x) => x.includes("Fox")), false, "main untouched");
+  assert.deepEqual(task(a.id).diff.files, ["index.html"]);
+  assert.match(task(a.id).result, /page ok/, "agent's check_page saw its own page");
+  assert.equal(task(a.id).worktree, undefined, "server paths never leave the server");
+  await until(() => task(a.id).preview?.status === "ready");
+  assert.match(task(a.id).preview.desktop, /^\/previews\/t\d+-desktop\.png$/);
+
+  await loft.approve(a.id);
+  assert.equal(task(a.id).status, "approved");
+  assert.match(task(a.id).merged, /^[0-9a-f]{7}/);
+  assert.equal(await readFile(path.join(site.path, "index.html"), "utf8"), "<h1>Fox</h1>");
+
+  const res = await loft.approve(b.id); // same file -> conflict
+  assert.equal(task(b.id).status, "conflict");
+  assert.deepEqual(task(b.id).conflicts, ["index.html"]);
+  assert.equal(res.retry.agentId, cat.id, "the same agent gets the fix");
+  await until(() => task(res.retry.id).status === "review");
+  assert.equal(seen.at(-1), path.join(tmp, "data", "worktrees", "site", b.id), "fix runs in Cat's original worktree");
+  const fixed = await loft.approve(res.retry.id);
+  assert.equal(fixed.status, "approved", `fix approved (got ${fixed.status} ${JSON.stringify(fixed.conflicts ?? fixed.diff)})`);
+  assert.equal(await readFile(path.join(site.path, "index.html"), "utf8"), "<h1>merged</h1>");
+
+  const c = loft.assign(fox.id, "write about.html = v1", site.id);
+  await until(() => task(c.id).status === "review");
+  const retry = loft.reject(c.id, "make it v2");
+  await until(() => task(retry.id).status === "review");
+  assert.equal(seen.at(-1), seen.at(-2), "reject: retry continues in the same worktree");
+  assert.match(await git(site.path, ["log", "-1", "--format=%s"]), /\(Virtual Loft\)$/, "approvals are squash commits on main");
+  assert.ok(!existsSync(path.join(site.path, "about.html")), "rejected work never reached main");
+  await previews.close();
 });

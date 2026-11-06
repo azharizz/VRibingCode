@@ -19,7 +19,7 @@ public static class LoftBootstrap
 
         // Idempotent rebuild: drop everything this tool (or older versions) made.
         foreach (var name in new[] { "Loft", "Scout", "Builder", "Keeper", "MainWall", "Floor", "QuestPanel", "ThemeProps",
-            "Board_notes", "Board_kanban", "Board_calendar", "Board_log", "TelePad_0", "TelePad_1", "TelePad_2", "PartyMode" })
+            "Board_notes", "Board_kanban", "Board_calendar", "Board_log", "TelePad_0", "TelePad_1", "TelePad_2", "PartyMode", "PreviewScreen" })
         {
             GameObject old;
             while ((old = GameObject.Find(name)) != null) Object.DestroyImmediate(old);
@@ -37,6 +37,7 @@ public static class LoftBootstrap
         loft.AddComponent<Comfort>();
         var world = loft.AddComponent<LoftWorld>();
         loft.AddComponent<LoftParty>();
+        loft.AddComponent<LoftPreviewScreen>();
         loft.AddComponent<LoftDesk>();
         loft.AddComponent<LoftQuestPanel>();
 
@@ -52,9 +53,14 @@ public static class LoftBootstrap
             AssetDatabase.CreateAsset(glow, "Assets/Resources/LoftGlowKeep.mat");
         }
 
+        // Same for the preview screen's screenshots (Unlit/Texture).
+        if (AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/LoftUnlitKeep.mat") == null)
+            AssetDatabase.CreateAsset(new Material(Shader.Find("Unlit/Texture")), "Assets/Resources/LoftUnlitKeep.mat");
+
         world.Build();               // floor, wall, 4 boards, CameraRig
         world.ApplyTheme(world.defaultTheme);
         loft.GetComponent<LoftQuestPanel>().EnsureBuilt();
+        loft.GetComponent<LoftPreviewScreen>().EnsureBuilt();
 
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Loft.unity");
         Debug.Log("[LoftBootstrap] Saved Assets/Scenes/Loft.unity — start backend/ (npm run serve), then press Play.");

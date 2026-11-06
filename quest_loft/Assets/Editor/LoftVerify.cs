@@ -51,6 +51,8 @@ public static class LoftVerify
         agents.Clear();
         world.Build();
         desk.agents = agents; desk.world = world; desk.client = client; desk.voice = voice;
+        desk.preview = Object.FindFirstObjectByType<LoftPreviewScreen>();
+        if (desk.preview != null) { desk.preview.client = client; desk.preview.EnsureBuilt(); }
         voice.OnCommand += (id, words) => lastVoice = (id, words);
         panel.EnsureBuilt();
 
@@ -97,6 +99,21 @@ public static class LoftVerify
         desk.HandleEvent(new JObject { ["type"] = "agent", ["agent"] = Agent("builder-2", "builder", "fox", "done") });
         Check(builder.CurrentState == AgentState.Done, "review -> animal Done");
         Check(BoardText("notes").Contains("login.ts added"), "REVIEW board shows the result for the CEO");
+        // Review with a git diff + preview (shapes from backend orchestrator.js).
+        var withDiff = Task("t1", "builder-2", "add login page", "review", "", "PASS 3/3 — login.ts added");
+        withDiff["projectId"] = "landing-site";
+        withDiff["diff"] = new JObject { ["stat"] = "2 files changed, 40 insertions(+)", ["files"] = new JArray("login.html", "login.css") };
+        withDiff["preview"] = new JObject { ["status"] = "loading" };
+        desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = withDiff });
+        Check(BoardText("notes").Contains("2 files changed") && BoardText("notes").Contains("landing-site"), "REVIEW board shows project + git diff size");
+        var screen = Object.FindFirstObjectByType<LoftPreviewScreen>();
+        var screenText = (screen != null ? screen.GetComponentsInChildren<TextMesh>(true) : new TextMesh[0]).Concat(
+            GameObject.Find("PreviewScreen") != null ? GameObject.Find("PreviewScreen").GetComponentsInChildren<TextMesh>() : new TextMesh[0]).Select(t => t.text).ToList();
+        Check(screen != null && screenText.Any(t => t.Contains("Taking screenshots")) && screenText.Any(t => t.Contains("landing-site")),
+            "PREVIEW screen: shows project + 'taking screenshots' while the backend captures");
+        withDiff["preview"] = new JObject { ["status"] = "error", ["error"] = "preview server never answered" };
+        desk.HandleEvent(new JObject { ["type"] = "task", ["task"] = withDiff });
+        Check(GameObject.Find("PreviewScreen").GetComponentsInChildren<TextMesh>().Any(t => t.text.Contains("never answered")), "PREVIEW screen explains a failed preview");
         Check(desk.ReviewTask()?.id == "t1", "approve/reject target = task in review");
 
         // 4. Spawn up to 20, never more; layout stays distinct.
@@ -111,7 +128,13 @@ public static class LoftVerify
 
         // 5. Panel: 9 pointable buttons; pointing routes to actions.
         var root = GameObject.Find("QuestPanel");
-        Check(root != null && root.GetComponentsInChildren<Collider>().Length == 10, "VR console: 10 buttons with colliders incl. ★ PARTY (new-agent page hidden)");
+        Check(root != null && root.GetComponentsInChildren<Collider>().Length == 11, "VR console: 11 buttons with colliders incl. ★ PARTY, PROJECT ▶ (new-agent page hidden)");
+        // Projects: picker cycles, goals go to the current project.
+        desk.HandleEvent(new JObject { ["type"] = "projects", ["projects"] = new JArray(
+            new JObject { ["id"] = "workspace", ["name"] = "workspace" }, new JObject { ["id"] = "landing-site", ["name"] = "Landing Site" }) });
+        desk.projectId = "workspace";
+        panel.Click(root.transform.Find("Main/Btn_project/Face").gameObject);
+        Check(desk.projectId == "landing-site" && desk.ProjectName == "Landing Site", "PROJECT ▶ switches the team to the next project");
         // New-agent page: form state is shared with the desktop panel.
         desk.HandleEvent(new JObject { ["type"] = "roles", ["roles"] = new JArray(
             new JObject { ["id"] = "scout", ["title"] = "Researcher", ["tools"] = new JArray("read_file") },
