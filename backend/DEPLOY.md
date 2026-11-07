@@ -1,8 +1,40 @@
 # Deploying the backend (cloud notes)
 
-Nothing here has been deployed or tested in a cloud. The Dockerfile has not been
-built on this machine either (no Docker daemon was running), so treat the first
-build as the first test.
+## What is live
+
+Cloud Run service `loft-backend` (us-central1), deployed and tested with:
+
+```bash
+PROJECT=<id> ACCOUNT=<email> zsh backend/tools/deploy-gcp.sh
+```
+
+- **Keys** go from the repo-root `.env` into the service and are never printed. The
+  URL and headset token stay in the ignored `.env.cloud`. Never commit that file.
+- **`loft-runtime`** runs the service and holds no project roles, because agents run
+  shell commands in a project that also hosts other services. Keep it that way.
+- **`loft-build`** builds the image: its image repo, source bucket and logs only.
+- **Speech** is `STT_PROVIDER=google`: the service account, no key, about 1.3 s a clip.
+- **Public mode (`LOFT_PUBLIC=1`):** anyone with the APK is in one shared room with no login. Agents
+  get no shell, folders can't be opened, workspaces can't be removed, and the browser can't reach
+  private addresses. `POST /projects` also accepts `dev` and `setup` commands, so it must stay blocked.
+- **`LOFT_RESET_HOURS=6`:** the server exits clean when idle after 6 hours, and Cloud Run starts a fresh room.
+- **`LOFT_DAILY_TASKS=15`:** the counter lives in memory, so this is per room: 15 every 6 hours, about 60 a day.
+  Also set a limit on the AI key.
+- **Disk is in memory.** A restart resets to a fresh team and starter site, which is
+  what a judged demo wants, but real work there is not kept. One instance is always
+  on (`--min-instances 1`), so it costs money until you delete the service:
+  `gcloud run services delete loft-backend --region us-central1`.
+
+Mac app: `zsh backend/tools/use-cloud.sh on` points it at the cloud, `off` back at this machine.
+
+The app drops a silent event stream after 40 s and reconnects, so it survives the 6-hour reset. A redeploy
+is different: the old revision stays up for open connections and keeps pinging, so restart the app after one.
+
+Quest build with the cloud baked in: put `{"url":...,"token":...}` in
+`Assets/Resources/loft-server.json` of the build copy only, then run
+`LoftQuestBuild.BuildApk`. The APK then carries the token, so keep it out of git.
+
+The notes below were written before that deploy.
 
 ## What matters before picking a platform
 

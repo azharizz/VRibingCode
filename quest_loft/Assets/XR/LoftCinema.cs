@@ -103,7 +103,7 @@ namespace VirtualLoft.XR
             LoftButton.Make(panel, "c_back", new Vector3(0.285f, -0.04f, 0f), new Vector2(0.17f, 0.1f), "-10 s", LoftUi.Neutral, 0.03f, () => Seek(-10));
             playBtn = LoftButton.Make(panel, "c_play", new Vector3(0.095f, -0.04f, 0f), new Vector2(0.17f, 0.1f), "Pause", LoftUi.Neutral, 0.03f, TogglePlay);
             LoftButton.Make(panel, "c_fwd", new Vector3(-0.095f, -0.04f, 0f), new Vector2(0.17f, 0.1f), "+10 s", LoftUi.Neutral, 0.03f, () => Seek(10));
-            LoftButton.Make(panel, "c_exit", new Vector3(-0.285f, -0.04f, 0f), new Vector2(0.17f, 0.1f), "Exit (B)", LoftUi.Danger, 0.03f, Exit);
+            LoftButton.Make(panel, "c_exit", new Vector3(-0.285f, -0.04f, 0f), new Vector2(0.17f, 0.1f), LoftWords.Key("Exit", "B"), LoftUi.Danger, 0.03f, Exit);
             panel.gameObject.SetActive(false);
             SetLayer(panel);
         }

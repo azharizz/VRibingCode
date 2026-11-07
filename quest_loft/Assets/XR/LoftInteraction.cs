@@ -112,6 +112,7 @@ namespace VirtualLoft.XR
             move = Need(move);
             card.world = world;
             wrist.desk = desk; wrist.world = world; wrist.entry = entry; wrist.move = move;
+            wrist.turn = dir => comfort?.SnapTurn(dir, world.cam.transform);
             wrist.voiceStatus = VoiceStatus;
             wrist.say = Say;
             card.Build();
@@ -159,6 +160,7 @@ namespace VirtualLoft.XR
 
             if (cinema == null || !cinema.Active) move.Tick(input, world, comfort, dt);
             Point(dt);
+            ShowHands();
             Talk();
             ShowNextSuggestion();
             if (voice.Recording) card.SetLevel(voice.Level);
@@ -293,6 +295,35 @@ namespace VirtualLoft.XR
             return desk.overlayRect.Contains(gui);
         }
 
+        // Bare hands have no controller model: draw each tracked hand as a skeleton.
+        readonly LineRenderer[] fingers = new LineRenderer[10];
+        void ShowHands()
+        {
+            if (!LoftWords.Hands && fingers[0] == null) return;
+            for (int side = 0; side < 2; side++)
+            {
+                bool on = LoftWords.Hands && (side == 0 ? input.hasRay : input.hasLeftHand) && world.rig != null;
+                var c = (side == 0 ? input.triggerHeld : input.talkHeld) ? new Color(0.45f, 0.95f, 1f) : Color.white;
+                for (int f = 0; f < 5; f++)
+                {
+                    ref var line = ref fingers[side * 5 + f];
+                    if (line == null)
+                    {
+                        line = new GameObject("HandBone").AddComponent<LineRenderer>();
+                        line.transform.SetParent(transform, false);
+                        line.positionCount = 5;
+                        line.widthMultiplier = 0.009f;
+                        line.numCapVertices = 3;
+                        line.sharedMaterial = new Material(Shader.Find("Sprites/Default"));
+                    }
+                    line.enabled = on;
+                    if (!on) continue;
+                    line.startColor = line.endColor = c;
+                    for (int j = 0; j < 5; j++) line.SetPosition(j, world.rig.TransformPoint(HandDevices.Bones[side][f * 5 + j]));
+                }
+            }
+        }
+
         // Routes a pointed-at collider to the right action (public for tests / tools).
         public bool Click(GameObject go)
         {
@@ -392,7 +423,7 @@ namespace VirtualLoft.XR
                 talkIdea = card.IsSuggestion ? shownSuggestion : null;
                 if (card.IsSuggestion) { DeferSuggestion(); StartTalk(); }
                 else if (card.State == LoftCard.CardState.Proposal && !card.Risky) { talkConsumed = true; if (card.PressSend()) input.Haptic(0.5f, 0.05f); }
-                else if (card.State == LoftCard.CardState.Proposal) { talkConsumed = true; Say("Hold the trigger for this one. A can't confirm it."); }
+                else if (card.State == LoftCard.CardState.Proposal) { talkConsumed = true; Say(LoftWords.Hands ? "Hold a right-hand pinch for this one." : "Hold the trigger for this one. A can't confirm it."); }
                 else if (card.State == LoftCard.CardState.Thinking) talkConsumed = true;
                 else StartTalk();
             }
@@ -412,7 +443,7 @@ namespace VirtualLoft.XR
             if (desk == null || !desk.Connected) return "Voice: backend offline";
             if (voice.permission == MicPermission.Denied) return "Voice: microphone blocked";
             if (!voice.HasDevice) return "Voice: no microphone";
-            return "Voice: ready (hold A)";
+            return LoftWords.Hands ? "Voice: ready (left pinch)" : "Voice: ready (hold A)";
         }
 
         void StartTalk()
@@ -422,7 +453,7 @@ namespace VirtualLoft.XR
             voice.CheckPermission(true);
             var why = voice.Problem();
             if (why == null && !desk.Connected)
-                why = $"The backend is offline ({client?.serverUrl}). Start it, then hold A and try again.";
+                why = $"The backend is offline ({client?.serverUrl}). Start it, then try again.";
             if (why == null) why = voice.Begin();
             if (why != null) { card.ShowError(why); input.Haptic(0.6f, 0.1f); return; }
             Talking = true;
@@ -435,7 +466,7 @@ namespace VirtualLoft.XR
             Talking = false;
             var take = voice.End();
             input.Haptic(0.2f, 0.03f);
-            if (take.tap) { card.Hide(); desk?.Note("Hold A while you speak, release when done."); return; }
+            if (take.tap) { card.Hide(); desk?.Note($"{LoftWords.TalkCap} while you speak, release when done."); return; }
             if (take.problem != null) { card.ShowError(take.problem); return; }
             string target = talkAgentId == null ? null : AgentName(talkAgentId);
             card.ShowThinking(target);

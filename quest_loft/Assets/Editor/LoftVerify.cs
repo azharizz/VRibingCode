@@ -455,6 +455,46 @@ public static class LoftVerify
         Check(ptr.released == 1 && !ptr.hover, "IPointerTarget: OnRelease on trigger up, hover cleared");
         Check(desk.selectedAgentId == null, "IPointerTarget swallowed the click (no agent select)");
         Object.DestroyImmediate(tgo);
+        // A stream that goes silent counts as dead, so the app reconnects by itself.
+        Check(LoftClient.NextLine(new SilentReader(), 0.05f).Result == null, "a silent event stream is given up on");
+        Check(LoftClient.NextLine(new System.IO.StringReader("data: x"), 1f).Result == "data: x", "a live event stream still reads");
+
+        // Bare hands: every control the app needs, with no controller.
+        var hg = new HandGestures(); var hi = new FakeInput();
+        var rigT = world.rig;
+        HandFrame H(float pinch = 0f, float grasp = 0f, bool tracked = true) => new HandFrame { tracked = tracked, pinch = pinch, grasp = grasp, aimRot = Quaternion.identity, gripRot = Quaternion.identity };
+        void Hands(HandFrame r, HandFrame l) { hi.Frame(); hg.Apply(hi, r, l, rigT); }
+        Hands(H(), H());
+        Check(hi.hasRay && hi.hasLeftHand && !hi.triggerHeld, "open hands point, and click nothing");
+        Hands(H(0.9f), H());
+        Check(hi.triggerDown && hi.triggerHeld, "right pinch clicks");
+        Hands(H(0.6f), H());
+        Check(hi.triggerHeld && !hi.triggerUp, "a trembling pinch stays one click");
+        Hands(H(0.3f), H());
+        Check(hi.triggerUp && !hi.triggerHeld, "opening the pinch releases");
+        Hands(H(0.9f), H());
+        Hands(H(tracked: false), H());
+        Check(hi.triggerUp && !hi.hasRay, "losing the hand lets go, nothing stays held");
+        Hands(H(), H(0.9f));
+        Check(hi.talkDown && hi.talkHeld && hi.wristHeld && !hi.triggerHeld, "left pinch talks, and never clicks");
+        Hands(H(), H());
+        Check(hi.talkUp, "opening the left pinch stops talking");
+        Hands(H(), H(0.9f, 0.9f));
+        Check(hi.cancelDown && !hi.talkHeld, "a left fist cancels and is not read as a pinch");
+        Hands(H(), H());
+        Hands(H(0.9f, 0.9f), H());
+        Check(hi.aimTeleport && !hi.triggerHeld, "a right fist aims a teleport and does not click");
+        Hands(H(), H());
+        Check(hi.teleportRelease && !hi.aimTeleport, "opening the fist teleports");
+        Check(HandDevices.Bones[0].Length == 25 && !HandDevices.Read(Vector3.zero, Quaternion.identity, out _, out _), "reading hands is safe with no hands around");
+        Check(Mathf.Approximately(HandDevices.Closed(0.01f, 0.015f, 0.05f), 1f) && Mathf.Approximately(HandDevices.Closed(0.08f, 0.015f, 0.05f), 0f), "touching fingers read as closed, spread fingers as open");
+        LoftWords.Hands = true;
+        Check(LoftWords.Key("SEND", "A") == "SEND" && LoftWords.TalkCap.Contains("left hand"), "hand mode never mentions buttons");
+        inter.wrist.SetOpen(true, true);
+        Check(inter.wrist.Root.GetComponentsInChildren<LoftButton>(true).Any(bt => bt.id == "turn_l"), "hands can turn from the menu");
+        inter.wrist.SetOpen(false);
+        LoftWords.Hands = false;
+
         // The laser keyboard: typed with the trigger, including the shift key, then OK.
         LoftTextEntry.ForceWorld = true;
         string typedOut = null;
@@ -694,6 +734,12 @@ public static class LoftVerify
     }
 
     // Tiny in-process backend: records every request, answers the voice contract.
+    class SilentReader : System.IO.StringReader
+    {
+        public SilentReader() : base("") { }
+        public override System.Threading.Tasks.Task<string> ReadLineAsync() => new System.Threading.Tasks.TaskCompletionSource<string>().Task;
+    }
+
     class FakeServer : System.IDisposable
     {
         public class Req

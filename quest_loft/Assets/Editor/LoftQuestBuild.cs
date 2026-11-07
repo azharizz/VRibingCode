@@ -25,6 +25,22 @@ public static class LoftQuestBuild
 {
     const string SettingsDir = "Assets/XR/Settings";
 
+    // Joint tracking for bare hands, on the Mac player (Simulator) and on Quest.
+    public static void EnableHands()
+    {
+        foreach (var g in new[] { BuildTargetGroup.Standalone, BuildTargetGroup.Android })
+        {
+            FeatureHelpers.RefreshFeatures(g);
+            var s = OpenXRSettings.GetSettingsForBuildTargetGroup(g);
+            var hands = s.GetFeature<UnityEngine.XR.Hands.OpenXR.HandTracking>();
+            if (hands == null) { Debug.LogError($"[Quest] Hand tracking feature not found for {g}."); continue; }
+            hands.enabled = true;
+            EditorUtility.SetDirty(s);
+            Debug.Log($"[Quest] Hand tracking ENABLED for {g}.");
+        }
+        AssetDatabase.SaveAssets();
+    }
+
     public static void ConfigureQuest()
     {
         EnsureFolder("Assets/XR");
@@ -74,6 +90,9 @@ public static class LoftQuestBuild
             var mq = oxSettings.GetFeature<MetaQuestFeature>();
             if (mq == null) Debug.LogWarning("[Quest] MetaQuestFeature not discovered — loader-only build.");
             else { mq.enabled = true; Debug.Log("[Quest] MetaQuestFeature ENABLED."); }
+            var hands = oxSettings.GetFeature<UnityEngine.XR.OpenXR.Features.Interactions.HandInteractionProfile>();
+            if (hands == null) Debug.LogWarning("[Quest] Hand Interaction profile not discovered.");
+            else { hands.enabled = true; Debug.Log("[Quest] Hand Interaction profile ENABLED."); }
             var touch = oxSettings.GetFeature<UnityEngine.XR.OpenXR.Features.Interactions.MetaQuestTouchPlusControllerProfile>();
             if (touch == null) Debug.LogWarning("[Quest] Touch Plus profile not discovered.");
             else { touch.enabled = true; Debug.Log("[Quest] Touch Plus interaction profile ENABLED."); }

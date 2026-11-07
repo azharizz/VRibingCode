@@ -69,10 +69,10 @@ namespace VirtualLoft.XR
         {
             if (permission == MicPermission.Denied)
                 return Application.platform == RuntimePlatform.Android
-                    ? "Microphone is blocked. Allow it in Quest Settings > Apps > Permissions, then hold A again."
+                    ? "Microphone is blocked. Allow it in Quest Settings > Apps > Permissions, then try again."
                     : "Microphone is blocked. Allow Unity/Loft in System Settings > Privacy > Microphone.";
-            if (permission == MicPermission.Asking) return "Allow the microphone in the popup, or in System Settings > Privacy > Microphone, then hold A again.";
-            if (permission == MicPermission.Unknown) return "Microphone permission not asked yet. Hold A again.";
+            if (permission == MicPermission.Asking) return "Allow the microphone in the popup, or in System Settings > Privacy > Microphone, then try again.";
+            if (permission == MicPermission.Unknown) return "Microphone permission not asked yet. Try again.";
             if (!HasDevice) return "No microphone found.";
             return null;
         }

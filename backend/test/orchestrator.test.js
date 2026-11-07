@@ -162,6 +162,14 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createPreviews } from "../src/previews.js";
 import { createProjects, git } from "../src/projects.js";
 
+test("the daily task limit stops a public demo from running up the bill", () => {
+  const loft = make({ maxDailyTasks: 2 });
+  const id = loft.snapshot().agents[0].id;
+  loft.assign(id, "one");
+  loft.assign(id, "two");
+  assert.throws(() => loft.assign(id, "three"), /task limit/);
+});
+
 test("auto-approve: off by default, only new work merges, a failed merge waits for a person, survives restart", async () => {
   let saved = null;
   const merged = [];

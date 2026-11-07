@@ -67,7 +67,7 @@ namespace VirtualLoft.XR
             Begin(CardState.Listening, "LISTENING" + (string.IsNullOrEmpty(target) ? "" : "  >  " + target), false);
             heard.text = "";
             body.text = "Speak now...";
-            hint.text = "Release A when you are done.";
+            hint.text = LoftWords.Release;
             Buttons(false, false, false, false);
             ShowLevel(true);
         }
@@ -79,7 +79,7 @@ namespace VirtualLoft.XR
             Begin(CardState.Thinking, "THINKING", false);
             heard.text = "";
             body.text = "Working out what you meant" + (string.IsNullOrEmpty(target) ? "" : " for " + target) + "...";
-            hint.text = "B cancels.";
+            hint.text = LoftWords.Cancel + " cancels.";
             Buttons(false, true, false, false);
             cancel.MoveTo(new Vector3(0f, BtnY, 0.016f));
             ShowLevel(false);
@@ -90,7 +90,7 @@ namespace VirtualLoft.XR
             Begin(CardState.Proposal, risky ? "CONFIRM  (changes things)" : "SEND THIS?", risky);
             heard.text = string.IsNullOrWhiteSpace(transcript) ? "" : "You said: \"" + LoftUtil.Trunc(transcript, 110) + "\"";
             body.text = string.IsNullOrWhiteSpace(summary) ? "(no summary)" : LoftUtil.Trunc(summary, 140);
-            hint.text = risky ? "Hold the trigger to confirm (T in the Simulator). A will not confirm this." : "A or trigger sends. B cancels.";
+            hint.text = risky ? LoftWords.Confirm : LoftWords.Hands ? "Pinch to send. A left fist cancels." : "A or trigger sends. B cancels.";
             ShowLevel(false);
             if (risky)
             {
@@ -111,11 +111,11 @@ namespace VirtualLoft.XR
             IsSuggestion = true;
             heard.text = string.IsNullOrWhiteSpace(reason) ? "" : LoftUtil.Trunc(reason, 120);
             body.text = LoftUtil.Trunc(title, 140);
-            hint.text = "Point at ACCEPT and pull the trigger to queue it. B dismisses.";
+            hint.text = $"Point at ACCEPT and {LoftWords.Click} to queue it. {LoftWords.Cancel} dismisses.";
             ShowLevel(false);
             Buttons(true, true, false, false);
             send.SetText("ACCEPT");
-            cancel.SetText("DISMISS   (B)");
+            cancel.SetText(LoftWords.Key("DISMISS", "B"));
             cancel.MoveTo(new Vector3(-0.21f, BtnY, 0.016f));
         }
 
@@ -135,7 +135,7 @@ namespace VirtualLoft.XR
             Begin(CardState.Error, "PROBLEM", false);
             heard.text = string.IsNullOrWhiteSpace(transcript) ? "" : "You said: \"" + LoftUtil.Trunc(transcript, 110) + "\"";
             body.text = LoftUtil.Trunc(message, 180);
-            hint.text = "Hold A to say it again.";
+            hint.text = LoftWords.TalkCap + " to say it again.";
             Buttons(false, false, false, true);
             ShowLevel(false);
             hideAt = Time.unscaledTime + 12f;
@@ -155,8 +155,8 @@ namespace VirtualLoft.XR
             State = s;
             Risky = risky;
             IsSuggestion = false;
-            send.SetText("SEND   (A)");
-            cancel.SetText("CANCEL   (B)");
+            send.SetText(LoftWords.Key("SEND", "A"));
+            cancel.SetText(LoftWords.Key("CANCEL", "B"));
             hideAt = 0f;
             level = 0f;
             title.text = heading;

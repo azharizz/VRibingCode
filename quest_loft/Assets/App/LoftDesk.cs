@@ -241,7 +241,7 @@ public class LoftDesk : MonoBehaviour
         client.Then(client.AddProject(path.Trim()), res =>
         {
             var id = (string)res?["project"]?["id"];
-            if (id == null) { interaction?.card.ShowError("Couldn't open that folder. It must exist and be the top of a git repo."); return; }
+            if (id == null) { interaction?.card.ShowError(client.LastError); return; }
             projectId = id;
             PlayerPrefs.SetString("loft.project", id);
             interaction?.card.ShowResult($"Workspace {(string)res["project"]["name"]} is ready.");

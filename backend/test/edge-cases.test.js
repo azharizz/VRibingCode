@@ -103,6 +103,14 @@ test("the same folder twice is the same workspace, however it is written", async
   assert.equal(projects.list().length, 1);
 });
 
+test("a hosted demo's first workspace already has a site", async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), "loft-seed-"));
+  const projects = createProjects({ dataDir: path.join(tmp, "d"), projectsDir: path.join(tmp, "p"), defaultPath: path.join(tmp, "ws"), seedSite: true });
+  const [p] = await projects.load();
+  assert.equal((await projects.summary(p)).site, true);
+  assert.match(await git(p.path, ["ls-files"]), /index\.html/, "committed, so agents' worktrees have it");
+});
+
 test("file names stay readable", async () => {
   const { done } = await agent(null, "echo x > 'café menu.txt'");
   assert.deepEqual(done.files, ["café menu.txt"]);

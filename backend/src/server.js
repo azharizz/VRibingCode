@@ -48,10 +48,10 @@ import { createBoards, createNotes, jsonFile } from "./stores.js";
 import { createStt, MAX_AUDIO } from "./stt.js";
 import { createVoice } from "./voice.js";
 import { blankLoft, loadLoft, saveLoft, validateLoft } from "./loftStore.js";
-import { createOrchestrator, HttpError } from "./orchestrator.js";
+import { createOrchestrator, HttpError, resetDue } from "./orchestrator.js";
 import { readFile, taskDiff, tree } from "./files.js";
 import { createCinema } from "./cinema.js";
-import { createPreviewSessions } from "./preview-sessions.js";
+import { createPreviewSessions, isPrivate, toUrl } from "./preview-sessions.js";
 import { createPreviews } from "./previews.js";
 import { createProjects } from "./projects.js";
 
@@ -61,6 +61,8 @@ const PORT = Number(argPort > -1 ? process.argv[argPort + 1] : (process.env.PORT
 const HOST = process.env.HOST ?? "127.0.0.1";
 const TOKEN = process.env.LOFT_TOKEN ?? "";
 const WORKSPACE = path.resolve(process.env.WORKSPACE_DIR ?? path.join(here, "../workspace"));
+const PUBLIC = process.env.LOFT_PUBLIC === "1"; // strangers hold the token: nothing may run commands or reach inside
+const RESET_HOURS = Number(process.env.LOFT_RESET_HOURS ?? 0);
 const MAX_BODY = 1_000_000; // JSON; audio has its own limit (MAX_AUDIO, 10 MB)
 
 if (!["127.0.0.1", "localhost", "::1"].includes(HOST) && !TOKEN) {
@@ -88,6 +90,7 @@ const projects = createProjects({
   dataDir: DATA,
   projectsDir: path.resolve(process.env.PROJECTS_DIR ?? path.join(here, "../projects")),
   defaultPath: WORKSPACE, // WORKSPACE_DIR becomes the first project (git init if needed)
+  seedSite: process.env.LOFT_SEED_SITE === "1",
 });
 await projects.load();
 const previews = createPreviews({ dir: PREVIEW_DIR });
@@ -119,7 +122,7 @@ async function peekFiles(projectId, text) {
 
 const loft = createOrchestrator({
   runTask, planGoal, draftRole, priceOf, workspace: WORKSPACE, roles: savedRoles, projects, previews,
-  chat: chatReply, suggest: suggestNext, describe: plainSummary, getNotes: () => notes.list(), peek: peekFiles, state: stateFile.read(), saveState: (st) => stateFile.write(st),
+  chat: chatReply, suggest: suggestNext, maxDailyTasks: Number(process.env.LOFT_DAILY_TASKS ?? 0), describe: plainSummary, getNotes: () => notes.list(), peek: peekFiles, state: stateFile.read(), saveState: (st) => stateFile.write(st),
   saveRoles: (list) => {
     fs.mkdirSync(path.dirname(ROLES_FILE), { recursive: true });
     fs.writeFileSync(ROLES_FILE, JSON.stringify(list, null, 2));
@@ -284,8 +287,11 @@ async function route(req, res) {
       const project = projects.get(b.projectId ? String(b.projectId) : undefined); // main, everything merged so far
       const start = (await projects.entry(project)) ?? "";
       target = { url: new URL(start, (await previews.serve(`main:${project.id}`, project, project.path)).url).href, lockOrigin: true };
-    } else if (typeof b.url === "string") target = { url: b.url };
-    else throw new HttpError(400, "send taskId, latest or url");
+    } else if (typeof b.url === "string") {
+      if (PUBLIC && (await isPrivate(new URL(toUrl(b.url))))) throw new HttpError(403, "that address is blocked");
+      target = { url: b.url };
+    }
+    if (!target) throw new HttpError(400, "send taskId, latest or url");
     return send(res, 201, { ok: true, ...(await sessions.open({ ...target, width: b.width, height: b.height })) });
   }
   if (m === "POST" && p === "/cinema") return send(res, 202, await cinema.prepare((await readBody(req)).url));
@@ -305,6 +311,7 @@ async function route(req, res) {
   if (m === "GET" && (g = p.match(/^\/projects\/([^/]+)\/summary$/))) return send(res, 200, await projects.summary(projects.get(decodeURIComponent(g[1]))));
   if (m === "GET" && p === "/projects") return send(res, 200, { projects: projects.list(), templates: projects.templates });
   if (m === "POST" && p === "/projects") {
+    if (PUBLIC) throw new HttpError(403, "Opening folders is off on the public demo. Run your own backend to use your own projects.");
     const project = await projects.add(await readBody(req));
     loft.projectsChanged();
     return send(res, 201, { ok: true, project });
@@ -315,6 +322,7 @@ async function route(req, res) {
     return send(res, 201, { ok: true, project });
   }
   if (m === "DELETE" && (g = p.match(/^\/projects\/([^/]+)$/))) {
+    if (PUBLIC) throw new HttpError(403, "Workspaces can't be removed on the public demo.");
     await projects.remove(decodeURIComponent(g[1]));
     loft.projectsChanged();
     return send(res, 200, { ok: true });
@@ -376,6 +384,12 @@ async function route(req, res) {
   }
   return send(res, 404, { ok: false, error: `no route ${m} ${p}` });
 }
+
+// Exit clean: the host starts a fresh instance, and in-memory disk means a fresh room.
+if (RESET_HOURS > 0) setInterval(() => {
+  const busy = loft.snapshot().agents.some((a) => a.state === "working");
+  if (resetDue({ uptimeHours: process.uptime() / 3600, hours: RESET_HOURS, busy })) process.exit(0);
+}, Math.min(60_000, RESET_HOURS * 1_800_000)).unref();
 
 const server = http.createServer((req, res) =>
   route(req, res).catch((err) => {

@@ -85,14 +85,21 @@ public partial class LoftClient : MonoBehaviour
     {
         try
         {
+            // Hosted builds carry this file, added at build time and never committed.
+            var baked = Resources.Load<TextAsset>("loft-server");
+            if (baked != null) Use(JObject.Parse(baked.text));
             var p = Path.Combine(Application.persistentDataPath, "loft-server.json");
             if (!File.Exists(p)) return;
-            var o = JObject.Parse(File.ReadAllText(p));
-            serverUrl = (string)o["url"] ?? serverUrl;
-            token = (string)o["token"] ?? token;
+            Use(JObject.Parse(File.ReadAllText(p)));
             Debug.Log($"[LoftClient] server from loft-server.json: {serverUrl}");
         }
         catch (Exception e) { Debug.LogWarning($"[LoftClient] loft-server.json ignored: {e.Message}"); }
+    }
+
+    void Use(JObject o)
+    {
+        serverUrl = (string)o["url"] ?? serverUrl;
+        token = (string)o["token"] ?? token;
     }
 
     // ---- live events (SSE) ----
@@ -111,6 +118,15 @@ public partial class LoftClient : MonoBehaviour
         connected = false;
     }
 
+    // The server pings every 15 s. Silence means a dead stream: when a host replaces the server
+    // it can leave the old connection open forever, and the app would look online but hear nothing.
+    public const float SilenceSeconds = 40f;
+    public static async Task<string> NextLine(TextReader reader, float seconds)
+    {
+        var read = reader.ReadLineAsync();
+        return await Task.WhenAny(read, Task.Delay(TimeSpan.FromSeconds(seconds))).ConfigureAwait(false) == read ? await read.ConfigureAwait(false) : null;
+    }
+
     async Task EventLoop(CancellationToken ct)
     {
         int backoff = 1;
@@ -127,7 +143,7 @@ public partial class LoftClient : MonoBehaviour
                 connected = true;
                 backoff = 1;
                 string line;
-                while (!ct.IsCancellationRequested && (line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                while (!ct.IsCancellationRequested && (line = await NextLine(reader, SilenceSeconds).ConfigureAwait(false)) != null)
                 {
                     if (!line.StartsWith("data: ")) continue; // ": ping" keep-alives, blank separators
                     try { inbox.Enqueue(JObject.Parse(line.Substring(6))); }

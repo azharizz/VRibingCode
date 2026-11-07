@@ -369,7 +369,7 @@ namespace VirtualLoft.Panels
             PanelKit.Box(c, ax + nw / 2f - 40f, ay + nh / 2f - 90f, 80f, 12f, PT.Text2, -1f, "PlusH");
             PanelKit.Box(c, ax + nw / 2f - 6f, ay + nh / 2f - 124f, 12f, 80f, PT.Text2, -1f, "PlusV");
             PanelKit.Text(c, "New note", ax, ay + nh / 2f - 20f, nw, 70f, PT.Body, PT.Text2, true, TextAlignmentOptions.Center);
-            PanelKit.Text(c, older > 0 ? $"+{older} older" : "or hold A and say \"note: ...\"", ax + 24f, ay + nh / 2f + 50f, nw - 48f, 60f, PT.Meta, PT.Muted, false, TextAlignmentOptions.Center);
+            PanelKit.Text(c, older > 0 ? $"+{older} older" : $"or {VirtualLoft.XR.LoftWords.Talk} and say \"note: ...\"", ax + 24f, ay + nh / 2f + 50f, nw - 48f, 60f, PT.Meta, PT.Muted, false, TextAlignmentOptions.Center);
             b.Click(ax, ay, nw, nh, LoftPanels.AddNote);
         }
 
@@ -540,7 +540,7 @@ namespace VirtualLoft.Panels
             }
             bool failed = !string.IsNullOrEmpty(b.previewError);
             PanelKit.Text(c, failed ? "Could not open that" : "Where to?", x + 60f, py + ph / 2f - 150f, iw - 120f, 90f, PT.H1, PT.Text, true, TextAlignmentOptions.Center);
-            PanelKit.Text(c, failed ? b.previewError : "Hold A and say \"open youtube.com\", or click the address bar.", x + 120f, py + ph / 2f - 50f, iw - 240f, 170f, PT.Body, PT.Text2, false, TextAlignmentOptions.Top, 2);
+            PanelKit.Text(c, failed ? b.previewError : VirtualLoft.XR.LoftWords.TalkCap + " and say \"open youtube.com\", or click the address bar.", x + 120f, py + ph / 2f - 50f, iw - 240f, 170f, PT.Body, PT.Text2, false, TextAlignmentOptions.Top, 2);
         }
     }
 }

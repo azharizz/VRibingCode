@@ -179,7 +179,9 @@ export function makeTools(workspace, names, { signal, onProgress = () => {}, che
     if (!checkPage) return "check_page is not available for this project (no preview configured).";
     return checkPage(String(p || "/"));
   };
-  return names.filter((n) => SCHEMAS[n]).map((name) => {
+  // A public server: strangers steer the agents, so no agent gets a shell, whatever its role says.
+  const allowed = names.filter((n) => SCHEMAS[n] && !(n === "run_command" && process.env.LOFT_PUBLIC === "1"));
+  return allowed.map((name) => {
     const [description, properties, required] = SCHEMAS[name];
     return tool({
       name,

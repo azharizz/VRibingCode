@@ -40,10 +40,13 @@ const blankUsage = () => ({ requests: 0, inputTokens: 0, outputTokens: 0, costUs
 
 // chat({agent, history, text, context}) -> reply string; suggest({agent, task}) -> {title, reason} | null.
 // state = what saveState() last got (team, tasks, chat memory, suggestions): restored on start.
+// A public room restarts fresh every few hours, but never in the middle of someone's task.
+export const resetDue = ({ uptimeHours, hours, busy }) => hours > 0 && uptimeHours >= hours && !busy;
+
 export function createOrchestrator({
   runTask, planGoal, draftRole = null, priceOf = async () => null, workspace, projects = null, previews = null,
   maxAgents = MAX_AGENTS, defaults = DEFAULT_AGENTS, roles: savedRoles = [], saveRoles = () => {},
-  chat = null, suggest = null, describe = null, getNotes = () => [], peek = async () => "", state = null, saveState = null, saveDelayMs = 400,
+  maxDailyTasks = 0, chat = null, suggest = null, describe = null, getNotes = () => [], peek = async () => "", state = null, saveState = null, saveDelayMs = 400,
 }) {
   const events = new EventEmitter();
   events.setMaxListeners(100); // one listener per connected headset/viewer
@@ -58,6 +61,7 @@ export function createOrchestrator({
   let saveTimer = null;
   let autoApprove = state?.autoApprove === true;
   let merging = Promise.resolve();
+  let spent = 0, spentDay = "";
   const PERSISTED = new Set(["agent", "agent.removed", "task", "say", "suggestion", "suggestion.closed", "autoApprove"]);
 
   function exportState() {
@@ -181,6 +185,12 @@ export function createOrchestrator({
   function assign(agentId, title, projectId = null, carry = null) {
     const a = needAgent(agentId);
     if (projectId && projects) projects.get(projectId); // 404 early on a bad project
+    if (maxDailyTasks) { // a public demo token must not be able to run up the AI bill
+      const today = new Date().toDateString();
+      if (today !== spentDay) { spentDay = today; spent = 0; }
+      if (spent >= maxDailyTasks) throw new HttpError(429, "the task limit for this demo is used up, try again later");
+      spent++;
+    }
     const t = {
       id: `t${++seq}`,
       agentId,

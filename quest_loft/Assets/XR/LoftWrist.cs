@@ -24,6 +24,7 @@ namespace VirtualLoft.XR
         public Page page = Page.Main;
         public bool IsOpen { get; private set; }
         public bool pinned;                      // opened by X/M: stays until toggled/B
+        public Action<int> turn;                 // no stick on bare hands: the menu turns you
         public bool suppressed;                  // the CEO is talking: stay closed
 
         public const float W = 0.42f;
@@ -104,7 +105,7 @@ namespace VirtualLoft.XR
         string Sig()
         {
             if (desk == null) return "";
-            return string.Join("|", LoftWorld.ThemeIds()) + "#" + (world != null && world.Current != null ? world.Current.id : "") + "#" +
+            return LoftWords.Hands + string.Join("|", LoftWorld.ThemeIds()) + "#" + (world != null && world.Current != null ? world.Current.id : "") + "#" +
                    string.Join(",", desk.projects.Select(p => (string)p["id"])) + "#" + desk.projectId + "#" + page + "#" +
                    (desk.formDraft != null) + "#" + desk.FormSummary() + "#" + voiceStatus() + "#" + (desk.selectedAgentId ?? "") + "#" + (move != null && move.SmoothWalk) + "#" + LoftBridge.HasPanels;
         }
@@ -180,19 +181,22 @@ namespace VirtualLoft.XR
                 ("ws_new", "NEW WORKSPACE...", LoftUi.Neutral, () => Ask("New workspace name", "", t => desk.CreateProject(t)), 0f, false));
 
             Header("NEW AGENT");
-            Note("Point at nothing, hold A and say:\n\"add a designer, make it a panda\"", new Color(0.8f, 0.86f, 0.95f), 0.019f, 2);
+            Note($"Point at nothing, {LoftWords.Talk} and say:\n\"add a designer, make it a panda\"", new Color(0.8f, 0.86f, 0.95f), 0.019f, 2);
             Row(("keys", "KEYBOARD...", LoftUi.Neutral, () => { page = Page.Keys; Rebuild(); }, 0f, false));
 
             Header("BOARDS AND MOVING");
             bool walk = move != null && move.SmoothWalk;
             Row(("boards", "OPEN BOARDS...", LoftUi.Neutral, () => { page = Page.Boards; Rebuild(); }, 0f, false),
                 ("walk", walk ? "SMOOTH WALK: ON" : "SMOOTH WALK: OFF", LoftUi.Neutral, () => { if (move != null) { move.SmoothWalk = !move.SmoothWalk; Rebuild(); } }, 0f, walk));
-            Note("Teleport: push the right stick forward, let go to go.", new Color(0.8f, 0.86f, 0.95f), 0.019f, 1);
+            Note(LoftWords.Teleport, new Color(0.8f, 0.86f, 0.95f), 0.019f, 1);
+            if (LoftWords.Hands)
+                Row(("turn_l", "TURN LEFT", LoftUi.Neutral, () => turn?.Invoke(-1), 0f, false),
+                    ("turn_r", "TURN RIGHT", LoftUi.Neutral, () => turn?.Invoke(1), 0f, false));
 
             y -= 0.03f; // clear gap: dangerous actions live apart from the rest
             var rule = LoftUi.Quad(content, "Rule", new Vector3(0f, y, 0f), new Vector2(W, 0.003f), LoftUi.Danger, 0.002f);
             y -= 0.012f;
-            Header("DANGER  (hold the trigger)");
+            Header($"DANGER  ({LoftWords.HoldClick})");
             Row(("stop", "STOP ALL", LoftUi.Danger, () => { desk.Stop(); say("Stopped everyone."); }, 1.0f, false),
                 ("exit", "EXIT", LoftUi.Danger, () => desk.ExitApp(), 1.5f, false));
         }

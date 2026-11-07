@@ -63,7 +63,7 @@ const STARTERS = {
   },
 };
 
-export function createProjects({ dataDir, projectsDir, defaultPath }) {
+export function createProjects({ dataDir, projectsDir, defaultPath, seedSite = false }) {
   const file = path.join(dataDir, "projects.json");
   const wtRoot = path.join(dataDir, "worktrees");
   let projects = new Map();
@@ -103,6 +103,10 @@ export function createProjects({ dataDir, projectsDir, defaultPath }) {
       projects = new Map();
     }
     if (defaultPath && ![...projects.values()].some((p) => path.resolve(p.path) === path.resolve(defaultPath))) {
+      if (seedSite && !(await exists(path.join(defaultPath, "index.html")))) { // a hosted demo has a site from the first second
+        await fs.mkdir(defaultPath, { recursive: true });
+        for (const [f, body] of Object.entries(STARTERS.static)) await fs.writeFile(path.join(defaultPath, f), body.replaceAll("{name}", "Virtual Loft"));
+      }
       await add({ name: "workspace", path: defaultPath, init: true, kind: "static" });
     } else if (defaultPath) {
       await ensureRepo(defaultPath, true); // registered by an older version: may still sit inside another repo

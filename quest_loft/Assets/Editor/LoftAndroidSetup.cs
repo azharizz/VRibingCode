@@ -8,6 +8,7 @@
 // hand-edited manifest has to be kept in sync. Settings are applied once on
 // editor load and are idempotent.
 using System.IO;
+using System.Linq;
 using System.Xml;
 using UnityEditor;
 using UnityEditor.Android;
@@ -58,8 +59,19 @@ public static class LoftAndroidSetup
         Add("uses-permission", "android.permission.RECORD_AUDIO");
         Add("uses-permission", "android.permission.INTERNET");
         Add("uses-feature", "android.hardware.microphone", "false");
+        Add("uses-permission", "com.oculus.permission.HAND_TRACKING");
+        Add("uses-feature", "oculus.software.handtracking", "false");
 
         var app = root["application"];
+        if (app != null) foreach (var (key, value) in new[] { ("com.oculus.handtracking.frequency", "HIGH"), ("com.oculus.handtracking.version", "V2.0") })
+        {
+            if (app.ChildNodes.OfType<XmlElement>().Any(e => e.Name == "meta-data" && e.GetAttribute("name", AndroidNs) == key)) continue;
+            var meta = doc.CreateElement("meta-data");
+            meta.SetAttribute("name", AndroidNs, key);
+            meta.SetAttribute("value", AndroidNs, value);
+            app.AppendChild(meta);
+            changed = true;
+        }
         if (app != null && app.GetAttribute("usesCleartextTraffic", AndroidNs) != "true")
         {
             app.SetAttribute("usesCleartextTraffic", AndroidNs, "true");

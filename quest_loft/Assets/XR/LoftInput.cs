@@ -2,6 +2,7 @@
 // LoftInteraction reads ONLY this, so the headset and the desktop rig run the
 // exact same pointing / talk / card / wrist code.
 //   XrInput      right controller ray + trigger, A talk, B cancel, X wrist, stick turn
+//   Bare hands   fill the same fields through XrInput (see LoftHands.cs)
 //   DesktopInput mouse aims, click = trigger, hold V = A, Esc/C = B, Q/E = turn, M = wrist
 // Plain UnityEngine.XR + legacy Input Manager: no extra SDK.
 
@@ -81,10 +82,16 @@ namespace VirtualLoft.XR
         SnapGate gate;
         public const float AimStart = 0.7f, AimEnd = 0.3f;
 
+        readonly HandGestures hands = new HandGestures();
+
         public override void Poll(LoftWorld world)
         {
             ClearEdges();
             var rig = world != null ? world.rig : null;
+            var cam = world != null && world.cam != null ? world.cam.transform : null;
+            HandFrame rightHand = default, leftHand = default;
+            LoftWords.Hands = cam != null && rig != null && HandDevices.Read(cam.localPosition, cam.localRotation, out rightHand, out leftHand);
+            if (LoftWords.Hands) { hands.Apply(this, rightHand, leftHand, rig); return; }
             var right = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
             var left = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
             hasRay = false;

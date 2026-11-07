@@ -1,6 +1,7 @@
 // VIRTUAL LOFT — speech-to-text, pluggable by env (moving to the cloud = config only).
 //   STT_PROVIDER=local   whisper.cpp on this machine (free, private). See tools/setup-stt.sh.
 //                        WHISPER_BIN (default data/stt/bin/whisper-cli, else whisper-cli on PATH), STT_MODEL_PATH (default data/stt/ggml-small.bin)
+//   STT_PROVIDER=google  Google Speech-to-Text with the Cloud Run service account (no key, no server)
 //   STT_PROVIDER=openai  any OpenAI-compatible POST {STT_BASE_URL}/audio/transcriptions
 //                        STT_BASE_URL, STT_API_KEY, STT_MODEL (e.g. whisper-1)
 // Optional for both: STT_LANGUAGE (default "auto": mixed English/Indonesian gets a fair chance).
@@ -90,6 +91,27 @@ async function runOpenAi({ baseUrl, apiKey, model, language, prompt, wav, fetchF
   return String(j.text ?? "");
 }
 
+async function runGoogle({ prompt, wav, fetchFn }) {
+  const meta = await fetchFn("http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token", { headers: { "Metadata-Flavor": "Google" } });
+  if (!meta.ok) throw new SttError(503, `no Google credentials (${meta.status}): STT_PROVIDER=google needs to run on GCP`);
+  const { access_token: token } = await meta.json();
+  const phrases = String(prompt).split(/[.,]\s*/).map((s) => s.trim()).filter(Boolean).slice(0, 200);
+  const res = await fetchFn("https://speech.googleapis.com/v1p1beta1/speech:recognize", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      config: {
+        encoding: "LINEAR16", sampleRateHertz: 16000, languageCode: "en-US", alternativeLanguageCodes: ["id-ID"],
+        enableAutomaticPunctuation: true, speechContexts: phrases.length ? [{ phrases }] : [],
+      },
+      audio: { content: wav.toString("base64") },
+    }),
+  });
+  if (!res.ok) throw new SttError(502, `Google speech answered ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const j = await res.json().catch(() => ({}));
+  return (j.results ?? []).map((r) => r.alternatives?.[0]?.transcript ?? "").join(" ");
+}
+
 function saveSample(dir, wav, text) {
   fs.mkdirSync(dir, { recursive: true });
   const name = new Date().toISOString().replace(/[:.]/g, "-");
@@ -101,7 +123,7 @@ function saveSample(dir, wav, text) {
 export function createStt({ env = process.env, spawnFn = spawn, fetchFn = fetch } = {}) {
   const provider = (env.STT_PROVIDER || "local").toLowerCase();
   const language = env.STT_LANGUAGE || "auto";
-  if (!["local", "openai"].includes(provider)) throw new Error(`STT_PROVIDER must be local or openai (got '${provider}')`);
+  if (!["local", "openai", "google"].includes(provider)) throw new Error(`STT_PROVIDER must be local, openai or google (got '${provider}')`);
 
   // Returns { text, ms, seconds }. `hint` = vocabulary that biases spelling (names, code words).
   async function transcribe(wav, { hint = "" } = {}) {
@@ -115,6 +137,8 @@ export function createStt({ env = process.env, spawnFn = spawn, fetchFn = fetch 
         modelPath: env.STT_MODEL_PATH || path.join(here, "../data/stt/ggml-small.bin"), // beat large-v3-turbo on speed and accuracy in tools/stt-compare
         language, prompt: hint, wav, spawnFn,
       });
+    } else if (provider === "google") {
+      raw = await runGoogle({ prompt: hint, wav, fetchFn });
     } else {
       const missing = ["STT_BASE_URL", "STT_API_KEY", "STT_MODEL"].filter((k) => !env[k]);
       if (missing.length) throw new SttError(503, `STT_PROVIDER=openai needs ${missing.join(", ")}`);

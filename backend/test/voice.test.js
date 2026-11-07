@@ -122,7 +122,7 @@ test("inspectWav + silence + transcript cleanup", async () => {
   const stt = createStt({ env: { STT_PROVIDER: "local" }, spawnFn: () => assert.fail("silence must not reach whisper") });
   assert.equal((await stt.transcribe(wav(1, { amp: 0 }))).text, "");
   assert.equal(cleanTranscript(" [BLANK_AUDIO] (music) hello  there "), "hello there");
-  assert.throws(() => createStt({ env: { STT_PROVIDER: "carrier-pigeon" } }), /local or openai/);
+  assert.throws(() => createStt({ env: { STT_PROVIDER: "carrier-pigeon" } }), /local, openai or google/);
 });
 
 function fakeSpawn(out, code = 0) {
@@ -206,4 +206,25 @@ test("browse: opens right away and needs an address", async () => {
   const ctx = { agents: [], roles: [], projects: [], review: [] };
   assert.equal(normalizeIntent({ action: "browse", url: "youtube.com" }, ctx).action, "browse");
   assert.equal(normalizeIntent({ action: "browse" }, ctx).action, "none");
+});
+
+test("google speech: uses the service account, sends both languages and the vocabulary", async () => {
+  const calls = [];
+  const fetchFn = async (url, o) => {
+    calls.push({ url, o });
+    if (url.includes("metadata")) return { ok: true, json: async () => ({ access_token: "tok" }) };
+    return { ok: true, json: async () => ({ results: [{ alternatives: [{ transcript: "open the" }] }, { alternatives: [{ transcript: "menu" }] }] }) };
+  };
+  const stt = createStt({ env: { STT_PROVIDER: "google" }, fetchFn });
+  const r = await stt.transcribe(wav(1), { hint: "Virtual Loft, Scout, Keeper" });
+  assert.equal(r.text, "open the menu");
+  const body = JSON.parse(calls[1].o.body);
+  assert.equal(calls[1].o.headers.Authorization, "Bearer tok");
+  assert.deepEqual(body.config.alternativeLanguageCodes, ["id-ID"]);
+  assert.deepEqual(body.config.speechContexts[0].phrases, ["Virtual Loft", "Scout", "Keeper"]);
+});
+
+test("google speech: a refusal is reported, not swallowed", async () => {
+  const fetchFn = async (url) => (url.includes("metadata") ? { ok: true, json: async () => ({ access_token: "t" }) } : { ok: false, status: 403, text: async () => "denied" });
+  await assert.rejects(createStt({ env: { STT_PROVIDER: "google" }, fetchFn }).transcribe(wav(1)), /403/);
 });

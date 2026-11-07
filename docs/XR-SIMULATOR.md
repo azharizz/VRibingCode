@@ -28,3 +28,21 @@ Also verified: the trigger (T) clicks web pages, and B (N) leaves 360 video.
 Not verified yet: A sending a card, teleport, board drag and resize, pressing the Watch button with the trigger (the voice path uses the same code), and video sound (played, but nobody has listened yet). Mouse clicks do not act as the trigger.
 
 Careful: "Enable hand tracking" turns on the webcam. Leave it off unless you want that.
+
+## Bare hands
+
+Set Left and Right input to **Hand**. Hands draw as white skeletons and the app switches
+to hand controls by itself, with no restart. Back to **Controller** works the same way.
+
+| Gesture | Does | In the Simulator |
+|---|---|---|
+| Right pinch | Click, hold, drag | Left mouse button |
+| Left pinch held | Talk | Left mouse button (needs the left hand on) |
+| Quick left pinch | Menu | Quick left click |
+| Left fist | Cancel | Key 4 (grab pose), left hand |
+| Right fist, then open | Teleport | Key 4, then 1 |
+
+"Use same input for both sides" pinches both hands at once, so one click also talks.
+Turn it off and set Left to None to test clicking alone. In this mode the hand moves
+with the head, so turn the head to aim. Keys 1 to 4 did not change the pose when tried.
+Fist gestures are only proven by `LoftVerify`, not live.
