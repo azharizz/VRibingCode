@@ -59,6 +59,8 @@ namespace VirtualLoft.XR
         // True on the frame quality should drop.
         public bool Step(float dt)
         {
+            // A long gap is a pause (headset off, a system dialog), not a slow frame: start the window over.
+            if (dt > 0.25f) { spent = 0f; frames = 0; return false; }
             age += dt; spent += dt; frames++;
             if (spent < Window) return false;
             Fps = frames / spent; spent = 0f; frames = 0;

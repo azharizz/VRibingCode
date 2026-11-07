@@ -491,6 +491,11 @@ public static class LoftVerify
         bool dropped = false;
         for (int i = 0; i < 400; i++) dropped |= gov.Step(1f / 30f);
         Check(dropped && gov.Low, "sustained low frames lower quality");
+        gov = new FrameGovernor();
+        for (int i = 0; i < 1500; i++) gov.Step(1f / 72f);
+        gov.Step(40f); // the headset came off, or a system dialog paused the app
+        for (int i = 0; i < 800; i++) gov.Step(1f / 72f);
+        Check(!gov.Low && gov.Fps > 60f, "a pause is not a slow frame");
         Check(!LoftDoctor.ShouldWarnOffline(5f, false) && LoftDoctor.ShouldWarnOffline(25f, false) && !LoftDoctor.ShouldWarnOffline(25f, true), "offline warns after a while, and only once");
         int before = LoftLog.Exceptions;
         LoftLog.Add("[XR] routine", "", LogType.Error);

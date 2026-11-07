@@ -179,3 +179,6 @@ backend/data/
 # animal generator output (renders, .blend)
 animalgen/out/
 audiogen/out/
+
+# Built into hosted APKs at build time: holds the server token, never commit
+quest_loft/Assets/Resources/loft-server.json*
