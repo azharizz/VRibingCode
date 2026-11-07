@@ -459,6 +459,47 @@ public static class LoftVerify
         Check(LoftClient.NextLine(new SilentReader(), 0.05f).Result == null, "a silent event stream is given up on");
         Check(LoftClient.NextLine(new System.IO.StringReader("data: x"), 1f).Result == "data: x", "a live event stream still reads");
 
+        // The beach's weather: one mood drives sky, light, water, rain and lanterns together.
+        Check(LoftWeather.Moods.Length == 4 && LoftWeather.Find("storm") != null && LoftWeather.Find("snow") == null, "four moods");
+        Check(LoftWeather.Moods.All(m => Resources.Load<Cubemap>("Sky/" + m.sky) != null), "every mood has its sky");
+        Check(new[] { "LoftPano", "LoftOcean", "LoftRain" }.All(n => Resources.Load<Shader>("Shaders/" + n) != null), "sky, ocean and rain shaders ship in Resources");
+        var mid = LoftWeather.Mood.Lerp(LoftWeather.Find("day"), LoftWeather.Find("storm"), 0.5f);
+        Check(mid.rain > 0.4f && mid.rain < 0.6f && mid.exposure < LoftWeather.Find("day").exposure, "a change of weather blends");
+        Check(LoftWeather.Find("storm").rain > 0f && LoftWeather.Find("day").rain == 0f && LoftWeather.Find("night").lantern > LoftWeather.Find("day").lantern, "storms rain, and lanterns matter more in the dark");
+        Check(LoftWeather.Dry(new Vector3(0f, 1f, 8f)) && !LoftWeather.Dry(new Vector3(0f, 1f, -6f)), "rain stops at the roof");
+        Check(Resources.Load<Texture2D>("Detail/wood_grain") != null && LoftWeather.Find("storm").foamLight < LoftWeather.Find("day").foamLight && LoftWeather.Find("storm").wind > LoftWeather.Find("day").wind, "storms dim the foam and raise the wind");
+        Check(LoftWeather.Find("night").warm > LoftWeather.Find("storm").warm && LoftWeather.Find("storm").warm > LoftWeather.Find("day").warm, "the darker the world, the warmer the cabana");
+        // Every scene gets the treatment, each with its own moods.
+        foreach (var scene in new[] { "beach", "scenery", "city", "galaxy" })
+        {
+            var place = LoftWeather.PlaceFor(scene);
+            Check(place != null && place.moods.Contains(place.start) && place.moods.All(id => LoftWeather.Find(id) != null && Resources.Load<Cubemap>("Sky/" + LoftWeather.Find(id).sky) != null), $"{scene} has its moods and skies");
+            Check(LoadThemeJson(scene).Contains("\"panorama\": true"), $"{scene} uses a photographic sky");
+        }
+        Check(LoftWeather.PlaceFor("galaxy").moods.Length == 1 && LoftWeather.Find("space").rain == 0f, "no weather in space");
+        Check(LoftWeather.PlaceFor("city").start == "sunset", "the penthouse keeps its dusk");
+        Check(LoftWeather.PlaceFor("party") == null, "the party keeps its own look");
+        Check(LoftIntent.Route(Resp("weather", false, false, new JObject { ["mood"] = "storm" })) == IntentRoute.Immediate, "weather acts at once");
+
+        // The doctor: what we can't see on a headset we don't have.
+        var gov = new FrameGovernor();
+        for (int i = 0; i < 700; i++) gov.Step(1f / 72f);
+        Check(!gov.Low, "72 fps keeps full quality");
+        gov = new FrameGovernor();
+        for (int i = 0; i < 200; i++) gov.Step(1f / 30f);
+        Check(!gov.Low, "a slow startup isn't punished");
+        bool dropped = false;
+        for (int i = 0; i < 400; i++) dropped |= gov.Step(1f / 30f);
+        Check(dropped && gov.Low, "sustained low frames lower quality");
+        Check(!LoftDoctor.ShouldWarnOffline(5f, false) && LoftDoctor.ShouldWarnOffline(25f, false) && !LoftDoctor.ShouldWarnOffline(25f, true), "offline warns after a while, and only once");
+        int before = LoftLog.Exceptions;
+        LoftLog.Add("[XR] routine", "", LogType.Error);
+        Check(LoftLog.NextUnsent() == null, "known noise isn't reported");
+        LoftLog.Add("boom", "at Foo()", LogType.Exception);
+        Check(LoftLog.Exceptions == before + 1 && LoftLog.NextUnsent()?.Contains("boom") == true, "an exception is counted and queued for the server");
+        for (int i = 0; i < LoftLog.Keep + 50; i++) LoftLog.Add("line", "", LogType.Log);
+        Check(LoftLog.Recent().Length == LoftLog.Keep, "the log stays a fixed size");
+
         // Bare hands: every control the app needs, with no controller.
         var hg = new HandGestures(); var hi = new FakeInput();
         var rigT = world.rig;
@@ -734,6 +775,8 @@ public static class LoftVerify
     }
 
     // Tiny in-process backend: records every request, answers the voice contract.
+    static string LoadThemeJson(string id) => Resources.Load<TextAsset>("Themes/" + id).text;
+
     class SilentReader : System.IO.StringReader
     {
         public SilentReader() : base("") { }

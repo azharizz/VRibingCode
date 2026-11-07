@@ -86,8 +86,10 @@ public static class CitySc
         x.Mesh(m, "Shell", x.Lit());
         x.Mesh(ceil, "Ceiling", x.Unlit(null, 0.9f));
         x.Mesh(bld, "Towers", x.Lit());
-        x.Mesh(win, "Windows", x.Unlit(null, 1.25f, 0, 0.22f));
-        x.Mesh(glow, "Glow", x.Unlit(null, 1.4f));
+        x.windows = x.Unlit(null, 1.25f, 0, 0.22f);
+        x.Mesh(win, "Windows", x.windows);
+        x.glow = x.Unlit(null, 1.4f);
+        x.Mesh(glow, "Glow", x.glow);
         var beacon = new Mk(55);
         beacon.Box(new Vector3(tw.x, 452f, tw.z), new Vector3(5f, 5f, 5f), new Color(1f, 0.2f, 0.2f, 0.37f), 0f);
         x.Mesh(beacon, "Beacon", x.Unlit(null, 2f, 0, 0.9f));

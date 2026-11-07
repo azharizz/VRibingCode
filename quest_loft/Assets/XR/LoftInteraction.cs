@@ -35,6 +35,8 @@ namespace VirtualLoft.XR
 
         LoftDesk desk;
         LoftWorld world;
+        public LoftDesk Desk => desk;
+        public LoftWorld World => world;
         Comfort comfort;
         LoftClient client;
         readonly XrInput xr = new XrInput();
@@ -112,6 +114,8 @@ namespace VirtualLoft.XR
             move = Need(move);
             card.world = world;
             wrist.desk = desk; wrist.world = world; wrist.entry = entry; wrist.move = move;
+            var doctor = Need<LoftDoctor>(null);
+            doctor.interaction = this; doctor.client = client;
             wrist.turn = dir => comfort?.SnapTurn(dir, world.cam.transform);
             wrist.voiceStatus = VoiceStatus;
             wrist.say = Say;

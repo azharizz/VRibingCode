@@ -6,10 +6,11 @@ import { MAX_AGENTS, MODEL_ID_RE, SKINS } from "./agents.js";
 import { HttpError } from "./orchestrator.js";
 import { WRITE_TOOLS } from "./tools.js";
 
+const MOODS = { day: "day", sunny: "day", morning: "day", siang: "day", cerah: "day", sunset: "sunset", dusk: "sunset", senja: "sunset", storm: "storm", stormy: "storm", rain: "storm", rainy: "storm", hujan: "storm", badai: "storm", night: "night", malam: "night" };
 export const SCENES = ["beach", "scenery", "city", "galaxy", "party", "loft", "meadow", "night"];
 const RISKY = new Set(["approve", "reject", "remove"]);
-const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "browse", "preview", "menu", "note", "watch", "none"]); // needsConfirm false
-export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "autoApprove", "menu", "note", "ask", "browse", "preview", "watch", "selectNext", "chat", "board", "none"];
+const IMMEDIATE = new Set(["scene", "party", "selectNext", "chat", "board", "browse", "preview", "menu", "note", "weather", "watch", "none"]); // needsConfirm false
+export const ACTIONS = ["goal", "task", "spawn", "remove", "scene", "approve", "reject", "stop", "party", "project", "autoApprove", "menu", "note", "weather", "ask", "browse", "preview", "watch", "selectNext", "chat", "board", "none"];
 export const BOARD_TYPES = ["kanban", "review", "log", "preview", "notes", "project", "files", "diff"];
 
 // Spoken code words -> characters ("slash health" -> "/health", "index dot js" -> "index.js").
@@ -135,6 +136,10 @@ export function normalizeIntent(raw, ctx) {
       return { action: "preview" };
     case "menu":
       return { action: "menu" };
+    case "weather": {
+      const mood = MOODS[norm(o.mood ?? o.weather)];
+      return mood ? { action, mood } : none("I can do day, sunset, storm or night.");
+    }
     case "note": {
       const text = clip(o.text ?? o.note, 2000);
       return text ? { action, text } : none("What should I note?");
@@ -184,6 +189,7 @@ export function summarize(i, ctx) {
     browse: () => `Open ${i.url}`,
     preview: () => "Show the latest work",
     menu: () => "Open the menu",
+    weather: () => `Change the weather to ${i.mood}`,
     note: () => `Note: ${q(i.text)}`,
     watch: () => "Watch this video in VR",
     board: () => (i.type === "all" ? "Close all boards" : `${i.op === "open" ? "Open" : "Close"} the ${i.type} board`),
@@ -215,6 +221,7 @@ export function buildPrompt(ctx, text, scene) {
     `- board {op:"open"|"close",type}: show or hide a panel in the room. type is one of ${BOARD_TYPES.join(", ")} (close also takes "all"). Hints: workspace card=project, tasks/kanban=kanban, "what's waiting"=review, activity=log, website/screen=preview, notes, folders=files, changes=diff.\n` +
     `- browse {url}: open a website, video or web search in the room's browser ("open google.com", "search for VR videos", "buka youtube"). url is the address, or the search words. This is the CEO browsing, not work for an agent.\n` +
     `- autoApprove {on:true|false}: finished work merges by itself, or stops doing so ("turn on auto approve", "matikan auto approve").\n` +
+    `- weather {mood}: change the beach to day, sunset, storm or night ("make it stormy", "make it rain", "hujan", "sunset please"). Not a scene.\n` +
     `- note {text}: save a sticky note ("note: fix the footer", "remember to call the client", "catat ..."). text is only the note itself.\n` +
     `- ask {text}: a question about the project or its files, with no agent named ("what's in index.html?", "what does our site do?"). Keep their words.\n` +
     `- menu: open the CEO's own menu in front of them ("open the menu", "buka menu").\n` +

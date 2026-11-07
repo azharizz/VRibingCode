@@ -1,6 +1,7 @@
 {
   "name": "Beach Cabana",
   "scene": "beach",
+  "panorama": true,
   "audio": "beach_waves_loop",
   "board": "#10202E",
   "sky": { "zenith": "#2C78C8", "mid": "#6FB4E8", "horizon": "#FFDDB0", "sunColor": "#FFE0A8", "sunAz": 4, "sunEl": 12, "sunSize": 0.05, "glow": 0.7 },

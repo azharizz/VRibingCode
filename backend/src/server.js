@@ -24,6 +24,7 @@
 //   POST /roles/draft {description} -> AI-written role for the CEO to review
 //   POST /voice?agentId=&projectId=&scene=  raw 16 kHz mono WAV (max 10 MB) -> {transcript,summary,needsConfirm,risky,intent}
 //   POST /voice/text {text,agentId?,projectId?,scene?}  same, no audio (STT_PROVIDER=local|openai, see src/stt.js)
+//   POST /client-log {kind,text}  -> a headset's status or error, into the server logs
 //   POST /party {on}              -> party mode on/off for every connected headset
 //   POST /auto-approve {on}       -> finished work merges without the CEO (off by default)
 //   GET /projects · POST /projects {name,path,dev?,setup?,url?,kind?,init?} (register a repo)
@@ -63,6 +64,7 @@ const TOKEN = process.env.LOFT_TOKEN ?? "";
 const WORKSPACE = path.resolve(process.env.WORKSPACE_DIR ?? path.join(here, "../workspace"));
 const PUBLIC = process.env.LOFT_PUBLIC === "1"; // strangers hold the token: nothing may run commands or reach inside
 const RESET_HOURS = Number(process.env.LOFT_RESET_HOURS ?? 0);
+let clientLogs = 0, clientLogAt = 0; // headsets report here: we can't see them any other way
 const MAX_BODY = 1_000_000; // JSON; audio has its own limit (MAX_AUDIO, 10 MB)
 
 if (!["127.0.0.1", "localhost", "::1"].includes(HOST) && !TOKEN) {
@@ -244,6 +246,14 @@ async function route(req, res) {
   if (m === "PUT" && p === "/boards") {
     const b = await readBody(req);
     return send(res, 200, boards.put(url.searchParams.get("scene"), Array.isArray(b) ? b : b.boards));
+  }
+  if (m === "POST" && p === "/client-log") {
+    const now = Date.now();
+    if (now - clientLogAt > 60_000) { clientLogAt = now; clientLogs = 0; }
+    if (++clientLogs > 60) throw new HttpError(429, "too many reports");
+    const b = await readBody(req);
+    console.log(JSON.stringify({ loftClient: String(b.kind ?? "log").slice(0, 24), text: String(b.text ?? "").slice(0, 4000) }));
+    return send(res, 200, { ok: true });
   }
   if (m === "GET" && p === "/notes") return send(res, 200, { notes: notes.list() });
   if (m === "POST" && p === "/notes") return send(res, 201, { ok: true, note: notes.create(await readBody(req)) });

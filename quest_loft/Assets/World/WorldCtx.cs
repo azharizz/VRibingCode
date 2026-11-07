@@ -8,7 +8,8 @@ public class WorldCtx
     public readonly GameObject root;
     public readonly Theme theme;
     public readonly WorldLife life;
-    public Material sky, water; // set by LoftWorld, read by the scenes
+    public Material sky, water, glow, leaf, islands, windows; // set by LoftWorld and the scenes
+    public readonly List<Material> foam = new List<Material>();
     readonly List<Object> owned = new List<Object>();
     static Shader lit, unlit, skySh, waterSh;
 
@@ -65,8 +66,9 @@ public class WorldCtx
         return m;
     }
 
-    public Material Sky() => sky = Own(new Material(skySh) { name = "w_sky" });
-    public Material Water() => water = Own(new Material(waterSh) { name = "w_water" });
+    public Material Sky(bool panorama = false) => sky = Own(new Material(panorama ? Resources.Load<Shader>("Shaders/LoftPano") : skySh) { name = "w_sky" });
+    public Material Water(bool panorama = false) => water = Own(new Material(panorama ? Resources.Load<Shader>("Shaders/LoftOcean") : waterSh) { name = "w_water" });
+    public T Keep<T>(T o) where T : Object => Own(o);
 
     public GameObject Mesh(Mk mk, string name, Material mat, Transform parent = null, Vector3 pos = default)
     {

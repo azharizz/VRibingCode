@@ -189,6 +189,14 @@ test("note saves right away; ask goes to the researcher unless someone is pointe
   assert.equal(normalizeIntent({ action: "ask", text: "hi" }, ctx({ pointed: "keeper-3" })).agentId, "keeper-3");
 });
 
+test("weather: words people say become one of four moods, right away", () => {
+  for (const [said, mood] of [["storm", "storm"], ["rain", "storm"], ["hujan", "storm"], ["sunset", "sunset"], ["senja", "sunset"], ["night", "night"], ["malam", "night"], ["sunny", "day"], ["day", "day"]]) {
+    assert.deepEqual(normalizeIntent({ action: "weather", mood: said }, ctx()), { action: "weather", mood }, said);
+  }
+  assert.equal(normalizeIntent({ action: "weather", mood: "snow" }, ctx()).action, "none");
+  assert.match(summarize({ action: "weather", mood: "storm" }, ctx()), /storm/i);
+});
+
 test("menu: opens right away", () => {
   assert.equal(normalizeIntent({ action: "menu" }, ctx()).action, "menu");
   assert.equal(summarize({ action: "menu" }, ctx()), "Open the menu");

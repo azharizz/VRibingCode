@@ -176,6 +176,7 @@ public partial class LoftClient : MonoBehaviour
     public Task<JObject> DraftRole(string description) =>
         Send(HttpMethod.Post, "/roles/draft", Body("description", description));
     public Task<JObject> SaveRole(JObject role) => Send(HttpMethod.Post, "/roles", role);
+    public Task<JObject> ClientLog(string kind, string text) => Send(HttpMethod.Post, "/client-log", new JObject { ["kind"] = kind, ["text"] = text }, true);
     public Task<JObject> Party(bool on) => Send(HttpMethod.Post, "/party", new JObject { ["on"] = on });
     public Task<JObject> AutoApprove(bool on) => Send(HttpMethod.Post, "/auto-approve", new JObject { ["on"] = on });
     public Task<JObject> RemoveAgent(string agentId) =>

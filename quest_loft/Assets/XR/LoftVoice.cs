@@ -39,6 +39,9 @@ namespace VirtualLoft.XR
         }
 
         // ---- permission -------------------------------------------------------
+        // A headset asks once at launch: the first thing anyone does is speak.
+        void Start() { if (Application.platform == RuntimePlatform.Android) CheckPermission(true); }
+
         public bool HasDevice => Microphone.devices != null && Microphone.devices.Length > 0;
 
         // Refreshes `permission` from the OS and, when still unknown, asks.
@@ -71,7 +74,10 @@ namespace VirtualLoft.XR
                 return Application.platform == RuntimePlatform.Android
                     ? "Microphone is blocked. Allow it in Quest Settings > Apps > Permissions, then try again."
                     : "Microphone is blocked. Allow Unity/Loft in System Settings > Privacy > Microphone.";
-            if (permission == MicPermission.Asking) return "Allow the microphone in the popup, or in System Settings > Privacy > Microphone, then try again.";
+            if (permission == MicPermission.Asking)
+                return Application.platform == RuntimePlatform.Android
+                    ? "Allow the microphone in the popup, then try again."
+                    : "Allow the microphone in the popup, or in System Settings > Privacy > Microphone, then try again.";
             if (permission == MicPermission.Unknown) return "Microphone permission not asked yet. Try again.";
             if (!HasDevice) return "No microphone found.";
             return null;

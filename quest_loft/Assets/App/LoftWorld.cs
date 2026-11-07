@@ -29,6 +29,7 @@ using UnityEngine;
 [Serializable] public class Theme
 {
     public string id, name, scene, board = "#14202E", accent = "#FFD27A", audio;
+    public bool panorama;   // a photographic sky with weather, instead of the drawn one
     public ThemeSky sky = new ThemeSky();
     public ThemeAmbient ambient = new ThemeAmbient();
     public ThemeLight light = new ThemeLight();
@@ -64,6 +65,8 @@ public class LoftWorld : MonoBehaviour
     public int SceneTriangles => ctx != null ? ctx.Triangles : 0;
 
     Light sun;
+    public LoftWeather weather;
+    float moodK, baseExposure = 1f;
     AudioSource ambience;
     WorldCtx ctx;
     Material fadeMat;
@@ -76,7 +79,9 @@ public class LoftWorld : MonoBehaviour
     void Awake()
     {
         Build();
-        ApplyTheme(Resolve(PlayerPrefs.GetString("loft.theme", defaultTheme)));
+        var args = Environment.GetCommandLineArgs(); // -loftTheme city: for checking a look without the menu
+        int at = Array.IndexOf(args, "-loftTheme");
+        ApplyTheme(Resolve(at >= 0 && at + 1 < args.Length ? args[at + 1] : PlayerPrefs.GetString("loft.theme", defaultTheme)));
     }
 
     void OnDestroy()
@@ -200,8 +205,8 @@ public class LoftWorld : MonoBehaviour
         GameObject stale;
         while ((stale = GameObject.Find("ThemeProps")) != null) { stale.SetActive(false); LoftUtil.Kill(stale); }
         ctx = new WorldCtx(t);
-        var skyM = ctx.Sky();
-        var waterM = ctx.Water();
+        var skyM = ctx.Sky(t.panorama);
+        var waterM = ctx.Water(t.panorama);
         ConfigureSky(skyM, waterM, t);
         switch (t.scene ?? t.id)
         {
@@ -221,8 +226,10 @@ public class LoftWorld : MonoBehaviour
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
         RenderSettings.fog = t.fog != null;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
+        baseExposure = t.sky.exposure;
         SetMood(0f);
-
+        if (weather == null) weather = GetComponent<LoftWeather>() ?? gameObject.AddComponent<LoftWeather>();
+        weather.Bind(this, ctx, t.panorama);
 
         // Ambient audio (optional clip at Resources/Audio/<audio>).
         if (ambience == null) ambience = GetComponent<AudioSource>();
@@ -271,6 +278,7 @@ public class LoftWorld : MonoBehaviour
     public void SetMood(float k, Color? tint = null)
     {
         if (Current == null) return;
+        moodK = k;
         var dark = tint ?? new Color(0.14f, 0.05f, 0.22f);
         RenderSettings.ambientSkyColor = Color.Lerp(ambSky, dark * 1.4f, k);
         RenderSettings.ambientEquatorColor = Color.Lerp(ambEq, dark, k);
@@ -279,8 +287,16 @@ public class LoftWorld : MonoBehaviour
         RenderSettings.fogDensity = fogDen;
         sun.color = sunCol;
         sun.intensity = Mathf.Lerp(sunInt, 0.1f, k);
-        float ex = Mathf.Lerp(Current.sky.exposure, 0.12f, k);
+        float ex = Mathf.Lerp(baseExposure, 0.12f, k);
         if (ctx != null && ctx.sky != null) { ctx.sky.SetFloat("_Exposure", ex); ctx.water.SetFloat("_Exposure", ex); }
+    }
+
+    // The weather's light, kept under any party dimming.
+    public void SetBase(Color sky, Color eq, Color gnd, Color sunColor, float sunIntensity, Quaternion sunRot, Color fog, float density, float exposure)
+    {
+        ambSky = sky; ambEq = eq; ambGnd = gnd; sunCol = sunColor; sunInt = sunIntensity; fogCol = fog; fogDen = density; baseExposure = exposure;
+        sun.transform.rotation = sunRot;
+        SetMood(moodK);
     }
 
     public string NextTheme()

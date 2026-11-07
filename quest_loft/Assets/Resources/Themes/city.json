@@ -1,6 +1,7 @@
 {
   "name": "Dusk Penthouse",
   "scene": "city",
+  "panorama": true,
   "audio": "loft_ambient_focus_rain_loop",
   "board": "#12142A",
   "sky": { "zenith": "#1B1B4B", "mid": "#6B3F7E", "horizon": "#F6896A", "below": "#3A2A4A", "sunColor": "#FF9D5C", "sunAz": 24, "sunEl": 3, "sunSize": 0.06, "glow": 1.1 },

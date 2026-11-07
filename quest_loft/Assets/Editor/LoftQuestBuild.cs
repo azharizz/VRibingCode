@@ -188,7 +188,11 @@ public static class LoftQuestBuild
             target = BuildTarget.Android,
             options = BuildOptions.None,
         };
+        // The name a person sees on the headset. Only this build: the Mac app's data folder follows productName.
+        string name = PlayerSettings.productName;
+        PlayerSettings.productName = "Virtual Loft";
         var report = BuildPipeline.BuildPlayer(opts);
+        PlayerSettings.productName = name;
         Debug.Log($"[BUILD] FocusLoft.apk: {report.summary.result} in {report.summary.totalTime.TotalSeconds:F0}s");
         EditorApplication.Exit(report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded ? 0 : 1);
     }

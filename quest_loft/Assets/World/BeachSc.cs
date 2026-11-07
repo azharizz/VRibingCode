@@ -144,8 +144,10 @@ public static class BeachSc
 
         // ---------- mesh out ----------
         var shell = x.Mesh(m, "Shell", x.Lit());
-        x.Mesh(glow, "Glow", x.Unlit(null, night ? 1.6f : 1.1f));
-        x.Mesh(leaf, "Palms", x.Lit(0.34f, 1.3f));
+        x.glow = x.Unlit(null, night ? 1.6f : 1.1f);
+        x.Mesh(glow, "Glow", x.glow);
+        x.leaf = x.Lit(0.34f, 1.3f);
+        x.Mesh(leaf, "Palms", x.leaf);
 
         Water(x);
         Distant(x, night);
@@ -319,7 +321,8 @@ public static class BeachSc
         land.Blob(new Vector3(-60f, -2f, -440f), new Vector3(70f, 22f, 40f), H("#2E6B57"), H("#7DB36A"), 3, 8, 0.15f);
         land.Blob(new Vector3(260f, -4f, -620f), new Vector3(180f, 55f, 70f), H("#3B6E5F"), H("#6FA48B"), 4, 9, 0.2f);
         for (int i = 0; i < 7; i++) Palm2(land, new Vector3(-190f + i * 14f, 20f + (i % 3) * 3f, -420f + (i % 2) * 10f), 9f);
-        x.Mesh(land, "Islands", x.Lit());
+        x.islands = x.Lit();
+        x.Mesh(land, "Islands", x.islands);
 
         var boat = new Mk(22);
         boat.Box(new Vector3(0, 0.6f, 0), new Vector3(1.6f, 0.9f, 5.4f), H("#F3EDE0"), 0.02f);
@@ -345,7 +348,7 @@ public static class BeachSc
     static void Life(WorldCtx x, bool night)
     {
         // clouds: two layers drifting at different speeds
-        for (int layer = 0; layer < 2; layer++)
+        for (int layer = 0; layer < (x.theme.panorama ? 0 : 2); layer++) // a photographic sky has its own
         {
             var cm = new Mk(40 + layer);
             var top = night ? H("#6C6F9A") : (layer == 0 ? H("#FFFFFF") : H("#FFF3E4"));
@@ -386,7 +389,9 @@ public static class BeachSc
                 var a = new Vector3(sx, 0, z0 + zz); var b = new Vector3(sx + 3f, 0, z0 + Mathf.Sin((sx + 3f) * 0.18f + i) * 0.35f);
                 strip.Quad2(a, b, b + Vector3.back * w, a + Vector3.back * w, f0, new Color(1, 1, 1, 0.1f));
             }
-            var foam = x.Mesh(strip, "Foam" + i, x.Unlit(new Color(1, 1, 1, 0.8f), night ? 0.3f : 1f, 1, 0f, 0f, 2450 + i)).transform;
+            var foamMat = x.Unlit(new Color(1, 1, 1, 0.8f), night ? 0.3f : 1f, 1, 0f, 0f, 2450 + i);
+            x.foam.Add(foamMat);
+            var foam = x.Mesh(strip, "Foam" + i, foamMat).transform;
             int ii = i;
             x.life.Add((t, dt) => { if (foam != null) foam.position = new Vector3(0, WATER_Y + 0.045f, -0.9f - Mathf.Sin(t * 0.5f + ii * 1.3f) * 0.5f - ii * 0.7f); });
         }

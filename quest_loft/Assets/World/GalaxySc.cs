@@ -45,7 +45,8 @@ public static class GalaxySc
         SceneKit.Seat(m, new[] { H("#222850"), H("#4C6BFF"), H("#222850") });
         SceneKit.Furniture(m, glow, new SceneKit.Style { wood = H("#1C2244"), wood2 = H("#12162B"), fabric = H("#3A4A9A"), fabric2 = H("#222A58"), metal = H("#8E9BC9"), accent = H("#7FD4FF"), plant = H("#4C7BE0"), screen = H("#7FD4FF"), pot = H("#222850"), holo = true });
         x.Mesh(m, "Shell", x.Lit());
-        x.Mesh(glow, "Glow", x.Unlit(null, 1.5f));
+        x.glow = x.Unlit(null, 1.5f);
+        x.Mesh(glow, "Glow", x.glow);
 
         // planet with rings + moon, shading baked toward a star at the viewer's left
         var pm = new Mk(73);

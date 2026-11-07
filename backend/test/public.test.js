@@ -29,7 +29,7 @@ async function server(env = {}) {
     await new Promise((r) => setTimeout(r, 50));
   }
   const call = (m, p, body) => fetch(`${base}${p}`, { method: m, headers: { "content-type": "application/json", Authorization: `Bearer ${TOKEN}` }, body: body && JSON.stringify(body) });
-  return { c, call };
+  return { c, call, base };
 }
 let s;
 before(async () => { s = await server(); });
@@ -57,6 +57,16 @@ test("public: the browser can't open anything inside the server", async () => {
   for (const url of ["http://127.0.0.1:4101/state", "http://localhost:8080", "http://10.0.0.1", "http://169.254.169.254/", "http://metadata.google.internal/"]) {
     assert.equal((await s.call("POST", "/preview/sessions", { url })).status, 403, url);
   }
+});
+
+test("client log: a headset can report, and the log can't be flooded or overfilled", async () => {
+  assert.equal((await s.call("POST", "/client-log", { kind: "startup", text: "Quest 3, Vulkan" })).status, 200);
+  assert.equal((await s.call("POST", "/client-log", { text: "x".repeat(9000) })).status, 200, "long text is cut, not refused");
+  let refused = 0;
+  for (let i = 0; i < 80; i++) if ((await s.call("POST", "/client-log", { text: "spam" })).status === 429) refused++;
+  assert.ok(refused > 0, "flooding stops");
+  const open = await fetch(s.base + "/client-log", { method: "POST", body: "{}" });
+  assert.equal(open.status, 401, "still needs the token");
 });
 
 test("reset: due after the time, never while an agent is working", () => {

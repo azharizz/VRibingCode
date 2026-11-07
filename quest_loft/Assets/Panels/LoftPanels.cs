@@ -210,7 +210,7 @@ public class LoftPanels : MonoBehaviour
         tick += Time.unscaledDeltaTime;
         if (tick >= 0.5f) { tick = 0f; Pull(); }
         foreach (var b in boards) if (b.builtVersion != state.version && InView(b)) b.Refresh();
-        if (Time.unscaledTime - lastFrame >= 0.08f) { lastFrame = Time.unscaledTime; PullFrames(); } // one request in flight per board
+        if (Time.unscaledTime - lastFrame >= (VirtualLoft.XR.LoftDoctor.LowQuality ? 0.25f : 0.08f)) { lastFrame = Time.unscaledTime; PullFrames(); } // one request in flight per board
         if (Time.unscaledTime - lastInfo >= 1f) { lastInfo = Time.unscaledTime; PullAddresses(); }
     }
 

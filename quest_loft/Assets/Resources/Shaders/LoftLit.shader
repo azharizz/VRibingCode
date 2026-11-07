@@ -27,9 +27,14 @@ Shader "Loft/World/Lit"
 
             fixed4 _Tint, _Emit;
             float _SwayAmp, _SwaySpeed;
+            // Set globally by the weather; all zero in every other scene.
+            float4 _LoftRoof;       // x min, x max, z min, z max
+            float _LoftRoofY, _LoftRoofTop, _LoftDetailAmt;
+            fixed4 _LoftWarm;       // the lanterns' light under the roof
+            sampler2D _LoftDetail;
 
             struct appdata { float4 vertex : POSITION; float3 normal : NORMAL; fixed4 color : COLOR; UNITY_VERTEX_INPUT_INSTANCE_ID };
-            struct v2f { float4 pos : SV_POSITION; fixed3 col : TEXCOORD0; UNITY_FOG_COORDS(1) UNITY_VERTEX_OUTPUT_STEREO };
+            struct v2f { float4 pos : SV_POSITION; fixed3 amb : TEXCOORD0; fixed3 sun : TEXCOORD1; float3 wp : TEXCOORD2; float3 nrm : TEXCOORD3; fixed3 alb : TEXCOORD4; UNITY_FOG_COORDS(5) UNITY_VERTEX_OUTPUT_STEREO };
 
             v2f vert(appdata v)
             {
@@ -58,14 +63,40 @@ Shader "Loft/World/Lit"
                 alb = GammaToLinearSpace(alb);
                 #endif
                 alb *= _Tint.rgb;
-                o.col = alb * (amb + _LightColor0.rgb * ndl) + _Emit.rgb;
+                o.amb = alb * amb + _Emit.rgb;
+                o.sun = alb * _LightColor0.rgb * ndl;
+                o.wp = wp; o.nrm = n; o.alb = alb;
                 UNITY_TRANSFER_FOG(o, o.pos);
                 return o;
             }
 
             fixed4 frag(v2f i) : SV_Target
             {
-                fixed4 c = fixed4(i.col, 1);
+                float3 amb = i.amb, sun = i.sun;
+                if (_LoftRoofY > 0.0)
+                {
+                    // Where the sun's line through this point meets the roof: an exact shadow, no shadow map.
+                    float3 l = _WorldSpaceLightPos0.xyz;
+                    float2 h = i.wp.xz + l.xz * ((_LoftRoofY - i.wp.y) / max(l.y, 0.06));
+                    float2 inside = smoothstep(-0.25, 0.25, h - _LoftRoof.xz) * smoothstep(-0.25, 0.25, _LoftRoof.yw - h);
+                    float under = step(i.wp.y, _LoftRoofY - 0.05);
+                    sun *= 1.0 - inside.x * inside.y * under;
+                    float2 o = smoothstep(-1.5, 1.5, i.wp.xz - _LoftRoof.xz) * smoothstep(-1.5, 1.5, _LoftRoof.yw - i.wp.xz);
+                    float room = o.x * o.y * step(i.wp.y, _LoftRoofTop); // up to the ridge: the roof's underside is in the room
+                    amb *= 1.0 - 0.3 * o.x * o.y * under; // less sky reaches under a roof
+                    amb += i.alb * _LoftWarm.rgb * room * (0.55 + 0.45 * saturate(i.nrm.y * 0.5 + 0.5));
+                }
+                float3 col = amb + sun;
+                if (_LoftDetailAmt > 0.0)
+                {
+                    float3 a = abs(normalize(i.nrm));
+                    float2 uv = a.y > a.x && a.y > a.z ? i.wp.xz * float2(0.16, 0.55) : a.x > a.z ? i.wp.zy * float2(0.55, 0.16) : i.wp.xy * float2(0.55, 0.16);
+                    float sand = step(i.wp.y, -0.06) * step(0.5, a.y);
+                    float g = tex2D(_LoftDetail, uv + sand * uv * 5.0).g;
+                    float close = saturate(1.4 - length(i.wp - _WorldSpaceCameraPos) / 30.0); // never on far mountains or towers
+                    col *= lerp(1.0, clamp(g * 2.6, 0.55, 1.3), _LoftDetailAmt * close * (1.0 - sand * 0.65));
+                }
+                fixed4 c = fixed4(col, 1);
                 UNITY_APPLY_FOG(i.fogCoord, c);
                 return c;
             }

@@ -144,6 +144,7 @@ public static class SceneKit
     // Soft cloud banks drifting at two speeds (two draw calls).
     public static void Clouds(WorldCtx x, Color top, Color bottom, int n, float y0, float y1, float scaleLo, float scaleHi, float d0 = 380f, float d1 = 700f, float spread = 0.6f)
     {
+        if (x.theme.panorama) return; // a photographic sky has its own
         for (int layer = 0; layer < 2; layer++)
         {
             var cm = new Mk(40 + layer);

@@ -95,6 +95,8 @@ namespace VirtualLoft.XR
         };
         public static readonly Vector3[][] Bones = { new Vector3[Chain.Length], new Vector3[Chain.Length] }; // right, left; tracking space
 
+        static readonly XRHandJointID[] CurlTips = { XRHandJointID.MiddleTip, XRHandJointID.RingTip, XRHandJointID.LittleTip };
+
         // Gesture strength from distances in metres: 1 = fully closed.
         public static float Closed(float metres, float closed, float open) => Mathf.Clamp01((open - metres) / (open - closed));
 
@@ -114,7 +116,7 @@ namespace VirtualLoft.XR
             f.gripPos = palm.position; f.gripRot = palm.rotation;
             f.pinch = Closed(Vector3.Distance(thumb.position, index.position), 0.015f, 0.05f);
             float curl = 0f; int n = 0;
-            foreach (var tip in new[] { XRHandJointID.MiddleTip, XRHandJointID.RingTip, XRHandJointID.LittleTip })
+            foreach (var tip in CurlTips)
                 if (Joint(hand, tip, out var t)) { curl += Vector3.Distance(t.position, palm.position); n++; }
             f.grasp = n > 0 ? Closed(curl / n, 0.045f, 0.095f) : 0f;
             // A hand aims best from the shoulder through the knuckles: steady, and it reaches across the room.

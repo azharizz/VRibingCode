@@ -169,6 +169,9 @@ namespace VirtualLoft.XR
                 Row(row);
             }
 
+            if (world != null && world.weather != null && world.weather.Choices.Length > 0)
+                Row(world.weather.Choices.Select(id => ("mood_" + id, Cap(id), LoftUi.Neutral, (Action)(() => world.weather.Set(id)), 0f, world.weather.Current == id)).ToArray());
+
             Header("WORKSPACE");
             if (desk.projects.Count == 0) Note("No workspaces yet (backend offline?)", new Color(0.7f, 0.76f, 0.86f));
             foreach (var p in desk.projects.Take(5))

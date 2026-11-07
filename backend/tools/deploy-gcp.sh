@@ -8,6 +8,9 @@ PROJECT=${PROJECT:?set PROJECT}; ACCOUNT=${ACCOUNT:?set ACCOUNT}
 REGION=${REGION:-us-central1}; SERVICE=${SERVICE:-loft-backend}
 SA=loft-runtime@$PROJECT.iam.gserviceaccount.com
 for f in src/*.js; do node --check "$f"; done  # never ship a server that can't start
+# Under load --test-force-exit can end the run early, so "no failures" alone proves nothing.
+RUN=$(npm test 2>&1); PASSED=$(echo "$RUN" | awk '/^# pass/{print $3}'); FAILED=$(echo "$RUN" | awk '/^# fail/{print $3}')
+[ "$FAILED" = 0 ] && [ "${PASSED:-0}" -ge 99 ] || { echo "tests: $PASSED passed, $FAILED failed. Not deploying."; exit 1; }
 g() { gcloud --project "$PROJECT" --account "$ACCOUNT" --quiet "$@"; }
 
 g services enable speech.googleapis.com

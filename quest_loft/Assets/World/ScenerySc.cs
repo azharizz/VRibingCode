@@ -82,7 +82,8 @@ public static class ScenerySc
         var ter = new Mk(34);
         ter.Grid(-130f, 130f, 22f, -90f, 52, 44, Terrain, TerrainColor);
         ter.Grid(-1100f, 1100f, -90f, -1500f, 110, 78, Terrain, TerrainColor);
-        x.Mesh(ter, "Terrain", x.Lit());
+        x.islands = x.Lit();
+        x.Mesh(ter, "Terrain", x.islands);
 
         // pines on the near slope + big framing pines
         for (int i = 0; i < 70; i++)
@@ -96,8 +97,10 @@ public static class ScenerySc
         foreach (var (px, pz, h) in new[] { (-15.5f, -1f, 11f), (16f, -1.5f, 12f), (-20f, -8f, 13f), (21f, -9f, 13f), (-17f, 8f, 12f), (17.5f, 8f, 12f) })
             SceneKit.Pine(trees, new Vector3(px, Terrain(px, pz) - 0.2f, pz), h, H("#1F4A33"), H("#43854F"));
         x.Mesh(m, "Shell", x.Lit());
-        x.Mesh(glow, "Glow", x.Unlit(null, 1.3f));
-        x.Mesh(trees, "Pines", x.Lit(0.28f, 1.1f));
+        x.glow = x.Unlit(null, 1.3f);
+        x.Mesh(glow, "Glow", x.glow);
+        x.leaf = x.Lit(0.28f, 1.1f);
+        x.Mesh(trees, "Pines", x.leaf);
 
         // lake
         var lake = new Mk(35);

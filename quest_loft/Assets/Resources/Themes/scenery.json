@@ -1,6 +1,7 @@
 {
   "name": "Mountain Lodge",
   "scene": "scenery",
+  "panorama": true,
   "audio": "loft_ambient_meadow_birds_loop",
   "board": "#16231C",
   "sky": { "zenith": "#3F7CC0", "mid": "#8AC0E8", "horizon": "#F2E3C8", "sunColor": "#FFF0C8", "sunAz": -24, "sunEl": 22, "sunSize": 0.05, "glow": 0.6 },

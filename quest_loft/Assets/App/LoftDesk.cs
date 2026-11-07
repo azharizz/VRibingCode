@@ -542,6 +542,8 @@ public class LoftDesk : MonoBehaviour
                 Report(client.AutoApprove(on), "Auto-approve could not be changed.");
                 return Ok(on ? "Turning auto-approve on." : "Turning auto-approve off.");
             }
+            case "weather":
+                return world != null && world.weather != null && world.weather.Set(S("mood")) ? Ok($"Changing to {S("mood")}.") : Fail("There's no weather out here.");
             case "note":
                 if (S("text") == null) return Fail("What should I note?");
                 Report(client.AddNote(S("text")), "That note was not saved.", "Noted.");
